@@ -1,0 +1,38 @@
+.inputs {
+  display: flex;
+  flex-direction: column;
+  max-width: 800px;
+  padding: 24px;
+  gap: 14px;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-end;
+  padding: 8px 12px;
+  gap: 8px;
+}
+.row-item {
+  margin-bottom: 0;
+  min-width: 600px;
+}
+.row-item label {
+  width: 20px;
+}
+.delete-row {
+  align-self: flex-end;
+}
+
+button.add-row {
+  width: 600px;
+  margin: 0 20px;
+}
+
+.form .row button,
+.form .add-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
