@@ -6,6 +6,7 @@ import theme from "./assets/theme.json";
 import { Route } from "wouter";
 import Editor from "./pages/Editor";
 import Home from "./pages/Home";
+import Settings from "./pages/Settings";
 
 export interface Prompt {
   id: string;
@@ -22,6 +23,7 @@ export interface AppState {
 }
 export interface AppContextValue extends AppState {
   setAppState: React.Dispatch<AppState | ((prev: AppState) => AppState)>;
+  mergeAppState: (tomerge: Partial<AppState>) => void;
 }
 
 export const DEFAULT_STATE = {
@@ -31,6 +33,7 @@ export const DEFAULT_STATE = {
 export const AppContext = React.createContext({
   ...DEFAULT_STATE,
   setAppState: () => null,
+  mergeAppState: () => null,
 } as AppContextValue);
 
 export const useAppState = () => useContext(AppContext);
@@ -79,12 +82,16 @@ const App = () => {
     console.log("prompts state", appState.prompts);
   };
 
+  const mergeAppState: AppContextValue["mergeAppState"] = (partial) => {
+    setAppState((prev) => ({ ...prev, ...partial }));
+  };
   return (
     <ConfigProvider theme={theme}>
-      <AppContext.Provider value={{ ...appState, setAppState }}>
+      <AppContext.Provider value={{ ...appState, setAppState, mergeAppState }}>
         <main>
           <Route path="/prompts/:id/edit" component={Editor} />
           <Route path="/" component={Home} />
+          <Route path="/settings" component={Settings} />
         </main>
       </AppContext.Provider>
     </ConfigProvider>
