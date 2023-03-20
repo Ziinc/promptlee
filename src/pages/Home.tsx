@@ -45,7 +45,7 @@ const Home: React.FC = () => {
 
   return (
     <MainLayout>
-      <div className="flex flex-col gap-10 container mx-auto py-6">
+      <div className="flex flex-col gap-10 container mx-auto">
         {!app.apiKey && (
           <Alert
             message={
