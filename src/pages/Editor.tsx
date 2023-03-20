@@ -20,6 +20,7 @@ import {
   Minus,
   MoreHorizontal,
   Plus,
+  Save,
 } from "lucide-react";
 import { Prompt, useAppState } from "../App";
 import MainLayout from "../layouts/MainLayout";
@@ -48,7 +49,10 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
       const newPrompts = [...unchanged, newPrompt];
       return { ...prev, prompts: newPrompts };
     });
-    notification.success({ message: "Saved!", placement: "bottomRight" });
+    notification.success({
+      message: "Saved progress!",
+      placement: "bottomRight",
+    });
   };
 
   const handleDelete = async () => {
@@ -121,6 +125,18 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
             </Button>
           </div>
           <div className="flex gap-2">
+            <Button
+              type="primary"
+              onClick={() => {
+                const values = form.getFieldsValue();
+                console.log(values);
+                handleSave(values);
+              }}
+              className="flex justify-center items-center"
+              icon={<Save size={14} className="mr-1" />}
+            >
+              Save
+            </Button>
             <Tooltip title="Edit more details">
               <Button
                 icon={<MoreHorizontal size={14} />}
@@ -194,7 +210,7 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
                     block
                     onClick={() => add()}
                     className="flex items-center justify-center"
-                    icon={<Plus size={14} className="mr-1"/>}
+                    icon={<Plus size={14} className="mr-1" />}
                   >
                     Add a message
                   </Button>
@@ -205,21 +221,8 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
 
           <Form.Item wrapperCol={{ span: 24 }}>
             <div className="flex flex-row gap-4 p-4">
-              <Link to="/">
-                <Button type="default">Cancel</Button>
-              </Link>
               <Button type="default" htmlType="submit">
                 Run
-              </Button>
-              <Button
-                type="primary"
-                onClick={() => {
-                  const values = form.getFieldsValue();
-                  console.log(values);
-                  handleSave(values);
-                }}
-              >
-                Save
               </Button>
             </div>
           </Form.Item>
