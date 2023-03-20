@@ -53,14 +53,13 @@ const Home: React.FC = () => {
           </Button>
         </section>
 
-        <div className="flex flex-row flex-wrap gap-6">
+        <div className="flex flex-row flex-wrap  justify-start gap-3">
           {app.prompts.map((prompt) => (
             <Card
-              className="border-2 border-gray-300"
+              className="border-2 border-gray-300 w-[24%]"
               key={prompt.id}
               size="small"
               title={prompt.name}
-              style={{ width: 300 }}
               extra={
                 <Tooltip title="View more actions">
                   <Dropdown
@@ -109,7 +108,7 @@ const Home: React.FC = () => {
             </Card>
           ))}
         </div>
-        <span>Total: {prompt.length}</span>
+        <span className="ml-auto">{prompt.length} prompts</span>
       </div>
     </MainLayout>
   );
