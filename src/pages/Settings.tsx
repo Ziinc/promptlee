@@ -12,9 +12,16 @@ const Settings: React.FC = () => {
     setEditing(false);
     app.mergeAppState({ apiKey: attrs.apiKey });
   };
+  const handleClearApiKey = () => {
+    const cfm = confirm(
+      "Are you sure that you want to clear your locally cached API key? This cannot be undone."
+    );
+    if (!cfm) return;
+    app.mergeAppState({ apiKey: "" });
+  };
   return (
     <MainLayout>
-      <div className="flex flex-col gap-10 container mx-auto py-6">
+      <div className="flex flex-col gap-10">
         <h2>Settings</h2>
 
         <Form onFinish={handleSave} form={form}>
@@ -34,7 +41,7 @@ const Settings: React.FC = () => {
               )
             }
           >
-            <Descriptions.Item label="API Key">
+            <Descriptions.Item label="API Key" className="w-32">
               {editing ? (
                 <Form.Item
                   name="apiKey"
@@ -53,7 +60,18 @@ const Settings: React.FC = () => {
                   <Input type="password" defaultValue={app.apiKey} />
                 </Form.Item>
               ) : (
-                <>{app.apiKey ? "********" : "Not set"}</>
+                <>
+                  {app.apiKey ? (
+                    <div className="flex flex-row justify-start gap-4 items-center">
+                      <span>********</span>{" "}
+                      <Button type="text" danger onClick={handleClearApiKey}>
+                        Clear
+                      </Button>
+                    </div>
+                  ) : (
+                    "Not set"
+                  )}
+                </>
               )}
             </Descriptions.Item>
           </Descriptions>

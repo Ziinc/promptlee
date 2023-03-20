@@ -1,10 +1,19 @@
 import Navbar from "./Navbar";
 
-type Props = React.PropsWithChildren<{}>;
-const MainLayout: React.FC<Props> = ({ children }) => (
+type Props = React.PropsWithChildren<{
+  variant: "centered";
+}>;
+const MainLayout: React.FC<Props> = ({ children, variant = "centered" }) => (
   <div className="bg-slate-100 h-full min-h-screen">
     <Navbar />
-    {children}
+    <div
+      className={[
+        "py-6",
+        variant === "centered" ? " container mx-auto max-w-[900px]" : "",
+      ].join(" ")}
+    >
+      {children}
+    </div>
   </div>
 );
 export default MainLayout;

@@ -6,11 +6,12 @@ import {
   Popover,
   Tooltip,
   Menu,
+  Alert,
 } from "antd";
 import "antd/dist/reset.css";
 import { Edit2, MoreVertical, Trash2 } from "lucide-react";
 import React from "react";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useAppState } from "../App";
 import MainLayout from "../layouts/MainLayout";
 const Home: React.FC = () => {
@@ -45,6 +46,24 @@ const Home: React.FC = () => {
   return (
     <MainLayout>
       <div className="flex flex-col gap-10 container mx-auto py-6">
+        {!app.apiKey && (
+          <Alert
+            message={
+              <span>
+                <strong>No API Key Set.</strong> An OpenAI API key is required
+                for PromptPro to work correctly.
+              </span>
+            }
+            action={
+              <Link to="/settings">
+                <Button>Configure</Button>
+              </Link>
+            }
+            type="warning"
+            showIcon
+          />
+        )}
+
         <section className="flex flex-row justify-between">
           <h2>Prompts</h2>
 
@@ -108,7 +127,7 @@ const Home: React.FC = () => {
             </Card>
           ))}
         </div>
-        <span className="ml-auto">{prompt.length} prompts</span>
+        <span className="ml-auto text-xs">{app.prompts.length} prompts</span>
       </div>
     </MainLayout>
   );
