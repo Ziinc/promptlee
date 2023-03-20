@@ -59,7 +59,6 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
     <div>
       {/* chat edit area */}
       <Form
-        className={styles.form}
         name="prompt-editor"
         form={form}
         initialValues={prompt}
@@ -142,7 +141,7 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
           </Form.List>
 
           <Form.Item wrapperCol={{ span: 24 }}>
-            <Space className={styles.actions}>
+            <div className="flex flex-row gap-4 p-4">
               <Button danger type="default" onClick={handleDelete}>
                 Delete
               </Button>
@@ -163,7 +162,7 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
               >
                 Save
               </Button>
-            </Space>
+            </div>
           </Form.Item>
         </div>
 

@@ -49,13 +49,14 @@ const Home: React.FC = () => {
           <h2>Prompts</h2>
 
           <Button type="primary" onClick={createPrompt}>
-            New
+            Create Prompt
           </Button>
         </section>
 
         <div className="flex flex-row flex-wrap gap-6">
           {app.prompts.map((prompt) => (
             <Card
+              className="border-2 border-gray-300"
               key={prompt.id}
               size="small"
               title={prompt.name}
@@ -84,19 +85,6 @@ const Home: React.FC = () => {
                   </Dropdown>
                 </Tooltip>
               }
-              actions={[
-                <div className="flex flex-row justify-end gap-4 px-4 cursor-default">
-                  <Tooltip title="Edit prompt">
-                    <Button
-                      type="default"
-                      onClick={() => navigate(`/prompts/${prompt.id}/edit`)}
-                      icon={<Edit2 size={12} className="mr-1" />}
-                    >
-                      Edit
-                    </Button>
-                  </Tooltip>
-                </div>,
-              ]}
             >
               {prompt.description ? (
                 <Popover title={prompt.description} overlayClassName="max-w-sm">
@@ -107,6 +95,17 @@ const Home: React.FC = () => {
               ) : (
                 <span className="italic">No description</span>
               )}
+              <div className="flex flex-row justify-end gap-4 px-4 cursor-default">
+                <Tooltip title="Edit prompt">
+                  <Button
+                    type="default"
+                    onClick={() => navigate(`/prompts/${prompt.id}/edit`)}
+                    icon={<Edit2 size={12} className="mr-1" />}
+                  >
+                    Edit
+                  </Button>
+                </Tooltip>
+              </div>
             </Card>
           ))}
         </div>
