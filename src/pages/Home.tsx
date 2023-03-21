@@ -88,7 +88,7 @@ const Home: React.FC = () => {
                         {
                           label: "Delete prompt",
                           onClick: () => deletePrompt(prompt.id),
-                          icon: <Trash2 size={12} />,
+                          icon: <Trash2 size={14} />,
                           danger: true,
                           key: "delete",
                         },
@@ -98,7 +98,8 @@ const Home: React.FC = () => {
                     <Button
                       danger
                       type="ghost"
-                      icon={<MoreVertical size={12} />}
+                      size="small"
+                      icon={<MoreVertical size={14}/>}
                     />
                   </Dropdown>
                 </Tooltip>
