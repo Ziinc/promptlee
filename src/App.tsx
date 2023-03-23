@@ -16,6 +16,10 @@ export interface Prompt {
   created: string;
   updated: string;
 }
+export interface Message {
+  content: string;
+  role: "user" | "system" | "assistant";
+}
 
 export interface AppState {
   prompts: Prompt[];

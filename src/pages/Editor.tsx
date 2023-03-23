@@ -10,6 +10,9 @@ import {
   Row,
   Drawer,
   FormProps,
+  Select,
+  Dropdown,
+  Divider,
 } from "antd";
 import "antd/dist/reset.css";
 import React, { useState } from "react";
@@ -19,6 +22,7 @@ import {
   ArrowLeft,
   Minus,
   MoreHorizontal,
+  MoreVertical,
   Plus,
   Save,
 } from "lucide-react";
@@ -90,7 +94,7 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
     }
   };
   return (
-    <MainLayout>
+    <MainLayout variant="wide" contentClassName="h-full">
       <Form
         name="prompt-editor"
         form={form}
@@ -98,10 +102,10 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
         onFinish={handleRun}
         onFinishFailed={console.log}
         autoComplete="off"
-        labelCol={{ span: 4 }}
         onFieldsChange={handleFieldsChange}
+        className="min-h-full"
       >
-        <div className="flex flex-row justify-between pb-3 border-b-2 border-gray-200">
+        <div className="flex flex-row justify-between pb-3 border-b-2 border-gray-200 px-4">
           <div className="flex gap-4 items-center">
             <Link
               to="/"
@@ -171,76 +175,98 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
             </div>
           </Drawer>
         </div>
-        <div className="w-1/2">
-          <Typography.Title level={4}>Messages</Typography.Title>
-          <Form.List name="messages">
-            {(fields, { add, remove }, { errors }) => (
-              <>
-                {fields.map((field, index) => (
-                  <Row>
-                    <Col key={field.key} span={23}>
-                      <Form.Item
-                        label={index + 1}
-                        name={[index]}
-                        labelCol={{ span: 1 }}
-                      >
-                        <Input.TextArea rows={4} />
+
+        <div className="flex flex-row h-full">
+          {/* messages panel */}
+          <div className="w-1/2 py-2 px-4 ">
+            <Typography.Title level={4}>Messages</Typography.Title>
+            <Form.List name="messages">
+              {(fields, { add, remove }, { errors }) => (
+                <div className="flex flex-col gap-2">
+                  {fields.map((field, index) => (
+                    <div key={field.key} className="flex flex-row gap-2">
+                      <Form.Item name={[index, "role"]} noStyle>
+                        <Select
+                          size="small"
+                          defaultValue="user"
+                          className="w-1/6"
+                          options={[
+                            { value: "system", label: "System" },
+                            { value: "user", label: "User" },
+                            { value: "assistant", label: "Assistant" },
+                          ]}
+                        />
                       </Form.Item>
-                    </Col>
-                    <Col
-                      span={1}
-                      className="flex flex-col justify-start items-center gap-4"
-                    >
-                      {fields.length > 1 && (
-                        <Tooltip title="Remove this message">
-                          <Button
-                            size="small"
-                            danger
-                            icon={<Minus size={12} />}
-                            onClick={() => remove(field.name)}
-                          />
+                      <div className="relative w-full">
+                        <Form.Item name={[index, "content"]} noStyle>
+                          <Input.TextArea rows={4} className="pr-6 w-full" />
+                        </Form.Item>
+
+                        <Tooltip
+                          title="More message actions"
+                          className="absolute right-1 top-1"
+                        >
+                          <Dropdown
+                            menu={{
+                              items: [
+                                {
+                                  label: "Remove message",
+                                  onClick: () => remove(field.name),
+                                  icon: <Minus size={14} />,
+                                  danger: true,
+                                  disabled: index === 0,
+                                  key: "remove",
+                                },
+                              ],
+                            }}
+                          >
+                            <Button
+                              type="ghost"
+                              size="small"
+                              icon={<MoreVertical size={14} />}
+                            />
+                          </Dropdown>
                         </Tooltip>
-                      )}
-                    </Col>
-                  </Row>
-                ))}
-                <Col span={23} offset={1}>
+                      </div>
+                    </div>
+                  ))}
                   <Button
                     type="dashed"
                     block
                     onClick={() => add()}
-                    className="flex items-center justify-center"
+                    className="flex items-center justify-center w-full"
                     icon={<Plus size={14} className="mr-1" />}
                   >
                     Add a message
                   </Button>
-                </Col>
-              </>
-            )}
-          </Form.List>
+                </div>
+              )}
+            </Form.List>
 
-          <Form.Item wrapperCol={{ span: 24 }}>
-            <div className="flex flex-row gap-4 p-4">
-              <Button type="default" htmlType="submit">
-                Run
-              </Button>
-            </div>
-          </Form.Item>
-        </div>
+            <Form.Item noStyle>
+              <div className="flex flex-row gap-4 p-4">
+                <Button type="default" htmlType="submit">
+                  Run
+                </Button>
+              </div>
+            </Form.Item>
+          </div>
 
-        <div>
-          <Form
-            form={paramsForm}
-            onFinish={console.log}
-            onFinishFailed={console.log}
-            autoComplete="off"
-          >
-            {promptParameters.map((name) => (
-              <Form.Item name={name}>
-                <Input type="text" />
-              </Form.Item>
-            ))}
-          </Form>
+          <Divider type="vertical" className="flex-grow h-full" />
+          <div className="w-1/2 py-2 px-4">
+            <Form
+              form={paramsForm}
+              onFinish={console.log}
+              onFinishFailed={console.log}
+              autoComplete="off"
+            >
+              {promptParameters.map((name) => (
+                <Form.Item name={name}>
+                  <Input type="text" />
+                </Form.Item>
+              ))}
+            </Form>
+          </div>
         </div>
       </Form>
 
