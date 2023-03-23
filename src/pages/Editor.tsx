@@ -28,22 +28,29 @@ import {
 } from "lucide-react";
 import { Prompt, useAppState } from "../App";
 import MainLayout from "../layouts/MainLayout";
+import {
+  ChatCompletionResponseMessage,
+  CreateChatCompletionResponse,
+} from "openai";
+import useChat from "../hooks/useChat";
 
 const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
   const [location, navigate] = useLocation();
   const [form] = Form.useForm();
   const [paramsForm] = Form.useForm();
-  const [results, setResults] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
   const app = useAppState();
   const prompt = app.prompts.find((p) => p.id === params.id);
   const [toggleDesc, setToggleDesc] = useState(false);
   const showDesc = !!prompt?.description || toggleDesc;
   const [promptParameters, setPromptParameters] = useState<string[]>([]);
+  const { result, getResponse, clearResult } = useChat();
   if (!prompt) return null;
   const handleRun = async () => {
-    const values = paramsForm.getFieldsValue();
-    console.log("do test run with values: ", values);
+    const promptFields = form.getFieldsValue();
+    const params = paramsForm.getFieldsValue();
+    console.log("do test run with values: ", prompt, params);
+    await getResponse(promptFields);
   };
 
   const handleSave = (attrs: Partial<Prompt>) => {
@@ -72,6 +79,18 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
     notification.success({ message: "Deleted!", placement: "bottomRight" });
   };
 
+  const handleAddToContext = (message: ChatCompletionResponseMessage) => {
+    const values = form.getFieldsValue();
+    form.setFieldsValue({
+      messages: [
+        ...values.messages,
+        {
+          role: message?.role,
+          content: message?.content,
+        },
+      ],
+    });
+  };
   // const messagesValus: string[] = form.getFieldValue("messages") || [];
   // const promptParams = messagesValus.join(" ").matchAll(/\@(\S+)/g);
   // console.log("promptParams", promptParams);
@@ -105,6 +124,7 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
         onFieldsChange={handleFieldsChange}
         className="min-h-full"
       >
+        <Form.Item hideen name="id" />
         <div className="flex flex-row justify-between pb-3 border-b-2 border-gray-200 px-4">
           <div className="flex gap-4 items-center">
             <Link
@@ -185,7 +205,12 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
                 <div className="flex flex-col gap-2">
                   {fields.map((field, index) => (
                     <div key={field.key} className="flex flex-row gap-2">
-                      <Form.Item name={[index, "role"]} noStyle>
+                      <Form.Item
+                        {...field}
+                        name={[field.name, "role"]}
+                        noStyle
+                        initialValue="user"
+                      >
                         <Select
                           size="small"
                           defaultValue="user"
@@ -198,7 +223,11 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
                         />
                       </Form.Item>
                       <div className="relative w-full">
-                        <Form.Item name={[index, "content"]} noStyle>
+                        <Form.Item
+                          {...field}
+                          name={[field.name, "content"]}
+                          noStyle
+                        >
                           <Input.TextArea rows={4} className="pr-6 w-full" />
                         </Form.Item>
 
@@ -266,12 +295,66 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
                 </Form.Item>
               ))}
             </Form>
+
+            {/* results pane */}
+            {result && (
+              <div>
+                <div>
+                  Total tokens used: {result.usage?.total_tokens}{" "}
+                  <span>
+                    ({result.usage?.prompt_tokens} prompt,{" "}
+                    {result.usage?.completion_tokens} completion)
+                  </span>
+                  {result.usage?.total_tokens && (
+                    <div>
+                      Estimated cost per run:{" "}
+                      {(result.usage?.total_tokens * 0.002) / 1000}
+                      <span>$0.002 /1k tokens</span>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  {result.choices.map((choice) => (
+                    <div className="flex flex-col">
+                      <div className="flex flex-row gap-4">
+                        <strong>{choice.message?.role}</strong>
+                        <Button
+                          onClick={() => handleAddToContext(choice.message!)}
+                        >
+                          Add to context
+                        </Button>
+                      </div>
+                      <p>{choice.message?.content}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <h3>History</h3>
+            {app.runHistory
+              .filter((item) => item.prompt_id == prompt.id)
+              .map((item) => (
+                <div>
+                  {item.outputs.apiResponse.choices.map((choice) => (
+                    <div className="flex flex-col">
+                      <div className="flex flex-row gap-4">
+                        <strong>{choice.message?.role}</strong>
+                        <Button
+                          onClick={() => handleAddToContext(choice.message!)}
+                        >
+                          Add to context
+                        </Button>
+                      </div>
+                      <p>{choice.message?.content}</p>
+                    </div>
+                  ))}
+                </div>
+              ))}
           </div>
         </div>
       </Form>
-
-      {/* results pane */}
-      {results && <div>{JSON.stringify(results, null, 2)}</div>}
     </MainLayout>
   );
 };

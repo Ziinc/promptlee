@@ -7,12 +7,13 @@ import { Route } from "wouter";
 import Editor from "./pages/Editor";
 import Home from "./pages/Home";
 import Settings from "./pages/Settings";
+import {  CreateChatCompletionResponse } from "openai";
 
 export interface Prompt {
   id: string;
   name: string;
   description?: string;
-  messages: string[];
+  messages: Message[];
   created: string;
   updated: string;
 }
@@ -21,8 +22,19 @@ export interface Message {
   role: "user" | "system" | "assistant";
 }
 
+export interface RunHistoryItem {
+  id: string;
+  prompt_id: string;
+  inputs: {
+    messages: Prompt["messages"];
+  };
+  outputs: {
+    apiResponse: CreateChatCompletionResponse;
+  };
+}
 export interface AppState {
   prompts: Prompt[];
+  runHistory: RunHistoryItem[];
   apiKey: string;
 }
 export interface AppContextValue extends AppState {
@@ -32,6 +44,7 @@ export interface AppContextValue extends AppState {
 
 export const DEFAULT_STATE = {
   prompts: [],
+  runHistory: [],
   apiKey: "",
 };
 export const AppContext = React.createContext({

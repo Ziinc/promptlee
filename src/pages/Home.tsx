@@ -24,7 +24,7 @@ const Home: React.FC = () => {
     const prompt = {
       id,
       name: "Untitled",
-      messages: [""],
+      messages: [{ role: "user" as const, content: "" }],
       created: now,
       updated: now,
     };
@@ -99,7 +99,7 @@ const Home: React.FC = () => {
                       danger
                       type="ghost"
                       size="small"
-                      icon={<MoreVertical size={14}/>}
+                      icon={<MoreVertical size={14} />}
                     />
                   </Dropdown>
                 </Tooltip>
