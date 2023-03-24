@@ -5,7 +5,6 @@ import {
   notification,
   Popover,
   Tooltip,
-  Menu,
   Alert,
   Modal,
   Spin,
@@ -16,11 +15,10 @@ import {
   Edit2,
   MoreVertical,
   Play,
-  RefreshCcw,
   RefreshCw,
   Trash2,
 } from "lucide-react";
-import React, { useState } from "react";
+import React from "react";
 import { Link, useLocation } from "wouter";
 import { Prompt, useAppState } from "../App";
 import PromptResult from "../components/PromptResult";
