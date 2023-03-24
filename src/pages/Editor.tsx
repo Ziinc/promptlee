@@ -16,9 +16,11 @@ import {
   Tabs,
   List,
   Tag,
+  Collapse,
+  Empty,
 } from "antd";
 import "antd/dist/reset.css";
-import React, { ComponentProps, useState } from "react";
+import React, { ComponentProps, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
 import {
   ArrowBigLeft,
@@ -39,27 +41,34 @@ import {
 } from "openai";
 import useChat from "../hooks/useChat";
 import PromptResult from "../components/PromptResult";
+import { resolveTextParams } from "../utils";
 
 const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
   const [location, navigate] = useLocation();
   const [form] = Form.useForm();
+
   const [paramsForm] = Form.useForm();
   const [showDetails, setShowDetails] = useState(false);
   const app = useAppState();
   const prompt = app.prompts.find((p) => p.id === params.id);
   const [toggleDesc, setToggleDesc] = useState(false);
   const showDesc = !!prompt?.description || toggleDesc;
-  const [promptParameters, setPromptParameters] = useState<string[]>([]);
   const { result, getResponse, clearResult } = useChat();
-  if (!prompt) return null;
+
   const handleRun = async () => {
     const promptFields = form.getFieldsValue();
     const params = paramsForm.getFieldsValue();
+
     console.log("do test run with values: ", prompt, params);
-    await getResponse(promptFields);
+    const resolvedmessages = prompt?.messages.map((message) => ({
+      ...message,
+      content: resolveTextParams(message.content, params),
+    }));
+    await getResponse({ ...promptFields, messages: resolvedmessages });
   };
 
   const handleSave = (attrs: Partial<Prompt>) => {
+    if (!prompt) return;
     const newPrompt = { ...prompt, ...attrs };
     app.setAppState((prev) => {
       const unchanged = prev.prompts.filter((p) => p.id !== newPrompt.id);
@@ -101,33 +110,51 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
   // const promptParams = messagesValus.join(" ").matchAll(/\@(\S+)/g);
   // console.log("promptParams", promptParams);
 
-  const handleFieldsChange: FormProps["onFieldsChange"] = ([field], fields) => {
-    console.log("fields", fields);
-    const messageFields = fields.filter(
-      (f) => typeof (f.name as any)[1] === "number"
-    );
-    const messagesValus: string[] = messageFields
-      .map((f) => f.value)
-      .filter((v) => v);
-    console.log("messagesValus", messagesValus);
-    const promptParams = [...messagesValus.join(" ").matchAll(/\@(\S+)/g)];
-    console.log("promptParams", promptParams);
-    const paramNames = promptParams.flatMap(([_match, paramName]) => paramName);
-    console.log("paramNames", paramNames);
-    if (paramNames !== promptParameters) {
-      setPromptParameters(paramNames);
-    }
-  };
+  // const handleFieldsChange: FormProps["onFieldsChange"] = ([field], fields) => {
+  //   console.log("fields", fields);
+  //   const messageFields = fields.filter(
+  //     (f) => typeof (f.name as any)[1] === "number"
+  //   );
+  //   const messagesValus: string[] = messageFields
+  //     .map((f) => f.value)
+  //     .filter((v) => v);
+  //   console.log("messagesValus", messagesValus);
+  //   parseMessages(messagesValus);
+  // };
+  // const parseMessages = (messages: string[]) => {
+  //   console.log("promptParams", promptParams);
+  //   const paramNames = promptParams.flatMap(([_match, paramName]) => paramName);
+  //   console.log("paramNames", paramNames);
+  //   if (paramNames !== promptParameters) {
+  //     setPromptParameters();
+  //   }
+  // };
+
+  const inputMessages: Prompt["messages"] =
+    Form.useWatch("messages", form) || [];
+
+  const parsedParamNames = inputMessages.flatMap((message) => {
+    if (!message.content) return [];
+    const promptParams = [...message.content.matchAll(/\@(\S+)/g)];
+    return promptParams.flatMap(([_match, paramName]) => paramName);
+  });
+  const promptParameters = [...new Set(parsedParamNames)];
+  const paramValues = Form.useWatch([], paramsForm) || {};
+
+  console.log("resolve", inputMessages, paramValues);
+
+  if (!prompt) return null;
+
   return (
     <MainLayout variant="wide" contentClassName="h-full">
       <Form
         name="prompt-editor"
         form={form}
         initialValues={prompt}
+        onValuesChange={console.log}
         onFinish={handleRun}
         onFinishFailed={console.log}
         autoComplete="off"
-        onFieldsChange={handleFieldsChange}
         className="min-h-full relative"
       >
         <Form.Item hidden name="id" />
@@ -279,44 +306,88 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
           </div>
 
           <div className="w-1/2 py-2 px-4">
-            <Form
-              form={paramsForm}
-              onFinish={console.log}
-              onFinishFailed={console.log}
-              autoComplete="off"
-            >
-              {promptParameters.map((name) => (
-                <Form.Item name={name}>
-                  <Input type="text" />
-                </Form.Item>
-              ))}
-            </Form>
-
             <Tabs
-              className="w-fit"
+              className="w-full"
               defaultActiveKey="test"
               items={[
                 {
                   label: "Test",
                   key: "test",
                   children: (
-                    <>
+                    <div className="flex flex-col gap-4 w-full">
                       <div className="flex flex-row gap-2">
                         <Button type="default" htmlType="submit">
                           Run
                         </Button>
                       </div>
-                      {result && (
-                        <div>
-                          <PromptResultWithActions
-                            onAddToContext={() =>
-                              handleAddToContext(result.choices[0].message!)
-                            }
-                            result={result}
-                          />
-                        </div>
-                      )}
-                    </>
+
+                      <Collapse
+                        defaultActiveKey={["1", "3"]}
+                        ghost
+                        collapsible="icon"
+                      >
+                        <Collapse.Panel
+                          header={
+                            <span>
+                              Parameters{" "}
+                              <span className="text-xs ml-4">
+                                {promptParameters.length} detected
+                              </span>
+                            </span>
+                          }
+                          key="1"
+                        >
+                          {promptParameters.length === 0 && (
+                            <p className="text-sm">
+                              No prompt parameters detected. Use the{" "}
+                              <code>@</code> symbol to specify a new paramter in
+                              a message.
+                            </p>
+                          )}
+                          {promptParameters.length > 0 && (
+                            <Form
+                              size="small"
+                              form={paramsForm}
+                              onFinish={console.log}
+                              onFinishFailed={console.log}
+                              autoComplete="off"
+                              colon={false}
+                              labelAlign="left"
+                              labelWrap
+                              labelCol={{ span: 8 }}
+                            >
+                              {promptParameters.map((name) => (
+                                <Form.Item name={name} label={name}>
+                                  <Input type="text" />
+                                </Form.Item>
+                              ))}
+                            </Form>
+                          )}
+                        </Collapse.Panel>
+                        <Collapse.Panel header="Input" key="2">
+                          {inputMessages.map((message) => (
+                            <p>
+                              {resolveTextParams(message.content, paramValues)}
+                            </p>
+                          ))}
+                        </Collapse.Panel>
+                        <Collapse.Panel header="Output" key="3">
+                          {!result && (
+                            <Empty description="No test response yet." />
+                          )}
+                          {result && (
+                            <div>
+                              <PromptResultWithActions
+                                onAddToContext={() =>
+                                  handleAddToContext(result.choices[0].message!)
+                                }
+                                result={result}
+                              />
+                            </div>
+                          )}
+                        </Collapse.Panel>
+                      </Collapse>
+                    </div>
                   ),
                 },
                 {
