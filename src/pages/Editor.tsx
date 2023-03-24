@@ -124,7 +124,7 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
         onFieldsChange={handleFieldsChange}
         className="min-h-full"
       >
-        <Form.Item hideen name="id" />
+        <Form.Item hidden name="id" />
         <div className="flex flex-row justify-between pb-3 border-b-2 border-gray-200 px-4">
           <div className="flex gap-4 items-center">
             <Link
