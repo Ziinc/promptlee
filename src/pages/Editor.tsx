@@ -208,13 +208,12 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
                       <Form.Item
                         {...field}
                         name={[field.name, "role"]}
-                        noStyle
                         initialValue="user"
+                        className="w-1/6"
                       >
                         <Select
                           size="small"
                           defaultValue="user"
-                          className="w-1/6"
                           options={[
                             { value: "system", label: "System" },
                             { value: "user", label: "User" },
@@ -320,6 +319,7 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
                       <div className="flex flex-row gap-4">
                         <strong>{choice.message?.role}</strong>
                         <Button
+                          size="small"
                           onClick={() => handleAddToContext(choice.message!)}
                         >
                           Add to context
@@ -342,6 +342,7 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
                       <div className="flex flex-row gap-4">
                         <strong>{choice.message?.role}</strong>
                         <Button
+                          size="small"
                           onClick={() => handleAddToContext(choice.message!)}
                         >
                           Add to context
