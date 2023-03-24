@@ -13,8 +13,8 @@ const MainLayout: React.FC<Props> = ({
     <Navbar />
     <div
       className={[
-        "py-3 flex-grow",
-        variant === "centered" ? " container mx-auto max-w-[900px]" : "",
+        "flex-grow",
+        variant === "centered" ? "py-3 container mx-auto max-w-[900px]" : "",
         contentClassName,
       ].join(" ")}
     >

@@ -13,13 +13,18 @@ import {
   Select,
   Dropdown,
   Divider,
+  Tabs,
+  List,
+  Tag,
 } from "antd";
 import "antd/dist/reset.css";
-import React, { useState } from "react";
+import React, { ComponentProps, useState } from "react";
 import { Link, useLocation } from "wouter";
 import {
   ArrowBigLeft,
   ArrowLeft,
+  Copy,
+  ListPlus,
   Minus,
   MoreHorizontal,
   MoreVertical,
@@ -33,6 +38,7 @@ import {
   CreateChatCompletionResponse,
 } from "openai";
 import useChat from "../hooks/useChat";
+import PromptResult from "../components/PromptResult";
 
 const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
   const [location, navigate] = useLocation();
@@ -122,10 +128,10 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
         onFinishFailed={console.log}
         autoComplete="off"
         onFieldsChange={handleFieldsChange}
-        className="min-h-full"
+        className="min-h-full relative"
       >
         <Form.Item hidden name="id" />
-        <div className="flex flex-row justify-between pb-3 border-b-2 border-gray-200 px-4">
+        <div className="sticky top-0 z-10 flex flex-row justify-between p-3 border-b-2 border-gray-200 px-4 bg-slate-100">
           <div className="flex gap-4 items-center">
             <Link
               to="/"
@@ -270,17 +276,8 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
                 </div>
               )}
             </Form.List>
-
-            <Form.Item noStyle>
-              <div className="flex flex-row gap-4 p-4">
-                <Button type="default" htmlType="submit">
-                  Run
-                </Button>
-              </div>
-            </Form.Item>
           </div>
 
-          <Divider type="vertical" className="flex-grow h-full" />
           <div className="w-1/2 py-2 px-4">
             <Form
               form={paramsForm}
@@ -295,68 +292,101 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
               ))}
             </Form>
 
-            {/* results pane */}
-            {result && (
-              <div>
-                <div>
-                  Total tokens used: {result.usage?.total_tokens}{" "}
-                  <span>
-                    ({result.usage?.prompt_tokens} prompt,{" "}
-                    {result.usage?.completion_tokens} completion)
-                  </span>
-                  {result.usage?.total_tokens && (
-                    <div>
-                      Estimated cost per run:{" "}
-                      {(result.usage?.total_tokens * 0.002) / 1000}
-                      <span>$0.002 /1k tokens</span>
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  {result.choices.map((choice) => (
-                    <div className="flex flex-col">
-                      <div className="flex flex-row gap-4">
-                        <strong>{choice.message?.role}</strong>
-                        <Button
-                          size="small"
-                          onClick={() => handleAddToContext(choice.message!)}
-                        >
-                          Add to context
+            <Tabs
+              className="w-fit"
+              defaultActiveKey="test"
+              items={[
+                {
+                  label: "Test",
+                  key: "test",
+                  children: (
+                    <>
+                      <div className="flex flex-row gap-2">
+                        <Button type="default" htmlType="submit">
+                          Run
                         </Button>
                       </div>
-                      <p>{choice.message?.content}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <h3>History</h3>
-            {app.runHistory
-              .filter((item) => item.prompt_id == prompt.id)
-              .map((item) => (
-                <div>
-                  {item.outputs.apiResponse.choices.map((choice) => (
-                    <div className="flex flex-col">
-                      <div className="flex flex-row gap-4">
-                        <strong>{choice.message?.role}</strong>
-                        <Button
-                          size="small"
-                          onClick={() => handleAddToContext(choice.message!)}
-                        >
-                          Add to context
-                        </Button>
-                      </div>
-                      <p>{choice.message?.content}</p>
-                    </div>
-                  ))}
-                </div>
-              ))}
+                      {result && (
+                        <div>
+                          <PromptResultWithActions
+                            onAddToContext={() =>
+                              handleAddToContext(result.choices[0].message!)
+                            }
+                            result={result}
+                          />
+                        </div>
+                      )}
+                    </>
+                  ),
+                },
+                {
+                  label: "History",
+                  key: "history",
+                  children: (
+                    <List
+                      pagination={{ align: "end", defaultPageSize: 8 }}
+                      dataSource={app.runHistory.filter(
+                        (item) => item.prompt_id == prompt.id
+                      )}
+                      renderItem={(item) => (
+                        <List.Item className="!p-4">
+                          <PromptResultWithActions
+                            onAddToContext={() =>
+                              handleAddToContext(
+                                item.outputs.apiResponse.choices[0].message!
+                              )
+                            }
+                            result={item.outputs.apiResponse}
+                          />
+                        </List.Item>
+                      )}
+                    />
+                  ),
+                },
+              ]}
+            />
           </div>
         </div>
       </Form>
     </MainLayout>
   );
 };
+
+const PromptResultWithActions = ({
+  result,
+  onAddToContext,
+}: {
+  result: ComponentProps<typeof PromptResult>["result"];
+  onAddToContext: () => void;
+}) => (
+  <div>
+    <div className="flex flex-row justify-start gap-2">
+      <div className="flex flex-col gap-2">
+        <Tooltip title="Add to context">
+          <Button
+            size="small"
+            className="flex flex-row justify-center items-center"
+            onClick={onAddToContext}
+            icon={<ListPlus size={14} />}
+          ></Button>
+        </Tooltip>
+        <Tooltip title="Copy to clipboard">
+          <Button
+            size="small"
+            className="flex flex-row justify-center items-center"
+            onClick={() => {
+              if (!navigator.clipboard || !result.choices[0].message) return;
+              navigator.clipboard.writeText(
+                result.choices[0].message?.content!
+              );
+            }}
+            icon={<Copy size={14} />}
+          ></Button>
+        </Tooltip>
+      </div>
+      <PromptResult result={result} />
+    </div>
+  </div>
+);
+
 export default Editor;
