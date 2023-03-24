@@ -7,17 +7,34 @@ import {
   Tooltip,
   Menu,
   Alert,
+  Modal,
+  Spin,
 } from "antd";
 import "antd/dist/reset.css";
-import { Edit2, MoreVertical, Trash2 } from "lucide-react";
-import React from "react";
+import {
+  Copy,
+  Edit2,
+  MoreVertical,
+  Play,
+  RefreshCcw,
+  RefreshCw,
+  Trash2,
+} from "lucide-react";
+import React, { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { useAppState } from "../App";
+import { Prompt, useAppState } from "../App";
+import PromptResult from "../components/PromptResult";
+import useChat from "../hooks/useChat";
 import MainLayout from "../layouts/MainLayout";
 const Home: React.FC = () => {
   const [location, navigate] = useLocation();
   const app = useAppState();
-
+  const {
+    result,
+    getResponse,
+    clearResult,
+    isLoading: IsChatLoading,
+  } = useChat();
   const createPrompt = async () => {
     const id = crypto.randomUUID();
     const now = new Date().toISOString();
@@ -42,9 +59,46 @@ const Home: React.FC = () => {
     }));
     notification.success({ message: "Deleted!", placement: "bottomRight" });
   };
+  const handleRun = async (prompt: Prompt) => {
+    await getResponse(prompt);
+  };
 
+  const handleCopyToClipboard = async () => {
+    if (!result) return;
+    const text = result.choices[0].message?.content;
+    await navigator.clipboard.writeText(text || "");
+    notification.info({ message: "Copied to clipboard" });
+  };
   return (
     <MainLayout>
+      <Modal
+        title="Run prompt"
+        open={!!result || IsChatLoading}
+        onCancel={clearResult}
+        okText="Copy"
+        okButtonProps={{
+          hidden: !result,
+          icon: <Copy size={14} className="mr-1" />,
+        }}
+        onOk={handleCopyToClipboard}
+        cancelText="Close"
+      >
+        {IsChatLoading && (
+          <div className="h-64 w-full flex flex-row justify-center items-center">
+            <Spin
+              className="mx-auto"
+              size="large"
+              tip="Loading..."
+              indicator={<RefreshCw className="animate-spin" />}
+            />
+          </div>
+        )}
+        {result && (
+          <div>
+            <PromptResult result={result} />
+          </div>
+        )}
+      </Modal>
       <div className="flex flex-col gap-10 container mx-auto">
         {!app.apiKey && (
           <Alert
@@ -114,14 +168,25 @@ const Home: React.FC = () => {
               ) : (
                 <span className="italic">No description</span>
               )}
-              <div className="flex flex-row justify-end gap-4 px-4 cursor-default">
+              <div className="flex flex-row justify-between w-full pt-2 gap-3 cursor-default">
                 <Tooltip title="Edit prompt">
                   <Button
                     type="default"
+                    block
                     onClick={() => navigate(`/prompts/${prompt.id}/edit`)}
                     icon={<Edit2 size={12} className="mr-1" />}
                   >
                     Edit
+                  </Button>
+                </Tooltip>
+                <Tooltip title="Run prompt">
+                  <Button
+                    block
+                    type="primary"
+                    onClick={() => handleRun(prompt)}
+                    icon={<Play size={12} className="mr-1" />}
+                  >
+                    Run
                   </Button>
                 </Tooltip>
               </div>
