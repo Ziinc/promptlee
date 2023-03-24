@@ -8,31 +8,44 @@ import {
   Alert,
   Modal,
   Spin,
+  Form,
+  Input,
+  Divider,
 } from "antd";
 import "antd/dist/reset.css";
 import {
   Copy,
+  Divide,
   Edit2,
   MoreVertical,
   Play,
   RefreshCw,
   Trash2,
 } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Prompt, useAppState } from "../App";
+import LoadingSpinner from "../components/LoadingSpinner";
 import PromptResult from "../components/PromptResult";
 import useChat from "../hooks/useChat";
 import MainLayout from "../layouts/MainLayout";
+import { extractPromptParameters, resolvePrompt } from "../utils";
 const Home: React.FC = () => {
+  const [paramsForm] = Form.useForm();
   const [location, navigate] = useLocation();
   const app = useAppState();
+  const [runStep, setRunStep] = useState<"params" | "preview" | "result">(
+    "params"
+  );
   const {
     result,
     getResponse,
     clearResult,
     isLoading: IsChatLoading,
   } = useChat();
+
+  const [selectedId, setSelectedId] = useState("");
+  const selectedPrompt = app.prompts.find((prompt) => prompt.id === selectedId);
   const createPrompt = async () => {
     const id = crypto.randomUUID();
     const now = new Date().toISOString();
@@ -58,43 +71,97 @@ const Home: React.FC = () => {
     notification.success({ message: "Deleted!", placement: "bottomRight" });
   };
   const handleRun = async (prompt: Prompt) => {
-    await getResponse(prompt);
+    setSelectedId(prompt.id);
+    paramsForm.resetFields();
+    setRunStep("params");
+  };
+  const handleCancelRun = () => {
+    setSelectedId("");
+    clearResult();
+  };
+  const handleRunInputsNext = async () => {
+    if (!selectedPrompt) return;
+    const params = paramsForm.getFieldsValue() || {};
+    const resolvedPrompt = resolvePrompt(selectedPrompt, params);
+    getResponse(resolvedPrompt);
+    setRunStep("result");
   };
 
   const handleCopyToClipboard = async () => {
     if (!result) return;
     const text = result.choices[0].message?.content;
     await navigator.clipboard.writeText(text || "");
-    notification.info({ message: "Copied to clipboard" });
+    notification.info({
+      message: "Copied to clipboard",
+      placement: "bottomRight",
+    });
   };
+  const promptParameters = selectedPrompt
+    ? extractPromptParameters(selectedPrompt)
+    : [];
+  const paramValues = Form.useWatch([], paramsForm) || {};
+
+  const resolvedMessages = selectedPrompt
+    ? resolvePrompt(selectedPrompt, paramValues).messages
+    : [];
   return (
     <MainLayout>
       <Modal
-        title="Run prompt"
-        open={!!result || IsChatLoading}
-        onCancel={clearResult}
-        okText="Copy"
+        title={`Run ${selectedPrompt?.name || ""}`}
+        open={!!selectedId}
+        onCancel={handleCancelRun}
+        okText={runStep === "params" ? "Go" : "Copy"}
         okButtonProps={{
-          hidden: !result,
-          icon: <Copy size={14} className="mr-1" />,
+          hidden: runStep === "result" && !result,
+          icon:
+            runStep === "result" ? (
+              <Copy size={14} className="mr-1" />
+            ) : (
+              <Play size={14} className="mr-1" />
+            ),
         }}
-        onOk={handleCopyToClipboard}
+        onOk={
+          runStep === "params" ? handleRunInputsNext : handleCopyToClipboard
+        }
         cancelText="Close"
       >
-        {IsChatLoading && (
-          <div className="h-64 w-full flex flex-row justify-center items-center">
-            <Spin
-              className="mx-auto"
-              size="large"
-              tip="Loading..."
-              indicator={<RefreshCw className="animate-spin" />}
-            />
+        {runStep === "params" && (
+          <div className="flex flex-col gap-4">
+            <Form
+              size="small"
+              form={paramsForm}
+              onFinish={console.log}
+              onFinishFailed={console.log}
+              autoComplete="off"
+              colon={false}
+              labelAlign="right"
+              labelWrap
+              labelCol={{ span: 6 }}
+              className="pt-4"
+            >
+              {promptParameters.map((name) => (
+                <Form.Item name={name} label={name} initialValue="">
+                  <Input type="text" />
+                </Form.Item>
+              ))}
+            </Form>
+
+            <Divider className="my-0" />
+            {resolvedMessages.map((message) => (
+              <p>{message.content}</p>
+            ))}
           </div>
         )}
-        {result && (
-          <div>
-            <PromptResult result={result} />
-          </div>
+
+        {runStep === "result" && (
+          <>
+            {IsChatLoading && <LoadingSpinner />}
+            {result && (
+              <div>
+                <PromptResult result={result} />
+              </div>
+            )}
+          </>
         )}
       </Modal>
       <div className="flex flex-col gap-10 container mx-auto">

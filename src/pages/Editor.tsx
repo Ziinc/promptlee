@@ -18,6 +18,8 @@ import {
   Tag,
   Collapse,
   Empty,
+  Card,
+  Alert,
 } from "antd";
 import "antd/dist/reset.css";
 import React, { ComponentProps, useEffect, useRef, useState } from "react";
@@ -30,6 +32,7 @@ import {
   Minus,
   MoreHorizontal,
   MoreVertical,
+  Play,
   Plus,
   Save,
 } from "lucide-react";
@@ -42,6 +45,7 @@ import {
 import useChat from "../hooks/useChat";
 import PromptResult from "../components/PromptResult";
 import { resolveTextParams } from "../utils";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
   const [location, navigate] = useLocation();
@@ -53,7 +57,12 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
   const prompt = app.prompts.find((p) => p.id === params.id);
   const [toggleDesc, setToggleDesc] = useState(false);
   const showDesc = !!prompt?.description || toggleDesc;
-  const { result, getResponse, clearResult } = useChat();
+  const {
+    result,
+    getResponse,
+    clearResult,
+    isLoading: isChatLoading,
+  } = useChat();
 
   const handleRun = async () => {
     const promptFields = form.getFieldsValue();
@@ -106,42 +115,26 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
       ],
     });
   };
-  // const messagesValus: string[] = form.getFieldValue("messages") || [];
-  // const promptParams = messagesValus.join(" ").matchAll(/\@(\S+)/g);
-  // console.log("promptParams", promptParams);
-
-  // const handleFieldsChange: FormProps["onFieldsChange"] = ([field], fields) => {
-  //   console.log("fields", fields);
-  //   const messageFields = fields.filter(
-  //     (f) => typeof (f.name as any)[1] === "number"
-  //   );
-  //   const messagesValus: string[] = messageFields
-  //     .map((f) => f.value)
-  //     .filter((v) => v);
-  //   console.log("messagesValus", messagesValus);
-  //   parseMessages(messagesValus);
-  // };
-  // const parseMessages = (messages: string[]) => {
-  //   console.log("promptParams", promptParams);
-  //   const paramNames = promptParams.flatMap(([_match, paramName]) => paramName);
-  //   console.log("paramNames", paramNames);
-  //   if (paramNames !== promptParameters) {
-  //     setPromptParameters();
-  //   }
-  // };
 
   const inputMessages: Prompt["messages"] =
     Form.useWatch("messages", form) || [];
 
   const parsedParamNames = inputMessages.flatMap((message) => {
     if (!message.content) return [];
-    const promptParams = [...message.content.matchAll(/\@(\S+)/g)];
+    const promptParams = [...message.content.matchAll(/\s\@(\S+)\s?/g)];
     return promptParams.flatMap(([_match, paramName]) => paramName);
   });
   const promptParameters = [...new Set(parsedParamNames)];
   const paramValues = Form.useWatch([], paramsForm) || {};
 
-  console.log("resolve", inputMessages, paramValues);
+  const resolvedMessages = inputMessages.map((message) => ({
+    ...message,
+    content: resolveTextParams(message.content, paramValues),
+  }));
+  const hasUnsubbed = resolvedMessages.some((message) => {
+    const unresolved = [...message.content.matchAll(/\s\@(\S+)\s?/g)];
+    return unresolved.length > 0;
+  });
 
   if (!prompt) return null;
 
@@ -231,8 +224,8 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
 
         <div className="flex flex-row h-full">
           {/* messages panel */}
-          <div className="w-1/2 py-2 px-4 ">
-            <Typography.Title level={4}>Messages</Typography.Title>
+          <div className="w-1/2 py-2 px-4 border-r-2 border-gray-200 min-h-[86vh]">
+            <Typography.Title level={4}>Chat Template</Typography.Title>
             <Form.List name="messages">
               {(fields, { add, remove }, { errors }) => (
                 <div className="flex flex-col gap-2">
@@ -315,78 +308,81 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
                   key: "test",
                   children: (
                     <div className="flex flex-col gap-4 w-full">
-                      <div className="flex flex-row gap-2">
-                        <Button type="default" htmlType="submit">
-                          Run
-                        </Button>
-                      </div>
+                      <div className="flex flex-row gap-2"></div>
 
-                      <Collapse
-                        defaultActiveKey={["1", "3"]}
-                        ghost
-                        collapsible="icon"
-                      >
-                        <Collapse.Panel
-                          header={
-                            <span>
-                              Parameters{" "}
-                              <span className="text-xs ml-4">
-                                {promptParameters.length} detected
-                              </span>
-                            </span>
-                          }
-                          key="1"
+                      <h3>
+                        Parameters{" "}
+                        <Tooltip title="Declare parameters with @ followed by the name. For example, @my_param">
+                          <Tag className="text-xs ml-4">
+                            {promptParameters.length} detected
+                          </Tag>
+                        </Tooltip>
+                      </h3>
+                      {promptParameters.length === 0 && (
+                        <p className="text-sm">
+                          No prompt parameters detected. Use the <code>@</code>{" "}
+                          symbol to specify a new paramter in a message.
+                        </p>
+                      )}
+                      {promptParameters.length > 0 && (
+                        <Form
+                          size="small"
+                          form={paramsForm}
+                          onFinish={console.log}
+                          onFinishFailed={console.log}
+                          autoComplete="off"
+                          colon={false}
+                          labelAlign="right"
+                          labelWrap
+                          labelCol={{ span: 8 }}
                         >
-                          {promptParameters.length === 0 && (
-                            <p className="text-sm">
-                              No prompt parameters detected. Use the{" "}
-                              <code>@</code> symbol to specify a new paramter in
-                              a message.
-                            </p>
-                          )}
-                          {promptParameters.length > 0 && (
-                            <Form
-                              size="small"
-                              form={paramsForm}
-                              onFinish={console.log}
-                              onFinishFailed={console.log}
-                              autoComplete="off"
-                              colon={false}
-                              labelAlign="left"
-                              labelWrap
-                              labelCol={{ span: 8 }}
-                            >
-                              {promptParameters.map((name) => (
-                                <Form.Item name={name} label={name}>
-                                  <Input type="text" />
-                                </Form.Item>
-                              ))}
-                            </Form>
-                          )}
-                        </Collapse.Panel>
-                        <Collapse.Panel header="Input" key="2">
-                          {inputMessages.map((message) => (
-                            <p>
-                              {resolveTextParams(message.content, paramValues)}
-                            </p>
+                          {promptParameters.map((name) => (
+                            <Form.Item name={name} label={name} initialValue="">
+                              <Input type="text" />
+                            </Form.Item>
                           ))}
-                        </Collapse.Panel>
-                        <Collapse.Panel header="Output" key="3">
-                          {!result && (
-                            <Empty description="No test response yet." />
-                          )}
+                        </Form>
+                      )}
+                      <Card
+                        title="Preview"
+                        className="shadow"
+                        size="small"
+                        actions={[
+                          <div className="flex flex-row justify-end px-4">
+                            <Button
+                              type="primary"
+                              className="flex flex-row items-center"
+                              icon={<Play size={14} className="mr-1" />}
+                              htmlType="button"
+                              onClick={handleRun}
+                            >
+                              Run
+                            </Button>
+                          </div>,
+                        ]}
+                      >
+                        {resolvedMessages.map((message) => (
+                          <p>{message.content}</p>
+                        ))}
+                      </Card>
+
+                      {(result || isChatLoading) && (
+                        <Card
+                          title="Response"
+                          size="small"
+                          className="shadow transition-all"
+                        >
+                          {isChatLoading && <LoadingSpinner />}
                           {result && (
-                            <div>
-                              <PromptResultWithActions
-                                onAddToContext={() =>
-                                  handleAddToContext(result.choices[0].message!)
-                                }
-                                result={result}
-                              />
-                            </div>
+                            <PromptResultWithActions
+                              onAddToContext={() =>
+                                handleAddToContext(result.choices[0].message!)
+                              }
+                              result={result}
+                            />
                           )}
-                        </Collapse.Panel>
-                      </Collapse>
+                        </Card>
+                      )}
                     </div>
                   ),
                 },

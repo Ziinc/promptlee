@@ -1,9 +1,36 @@
-export const resolveTextParams = (text: string, params: Record<string, string>)=>{
-    let replaced = text
+import { Prompt } from "./App";
 
-for (const [key, value] of Object.entries(params)) {
-    replaced = replaced.replaceAll(`@${key}`, value)
+export const resolveTextParams = (
+  text: string,
+  params: Record<string, string>
+) => {
+  let replaced = text;
+
+  for (const [key, value] of Object.entries(params)) {
+    replaced = replaced.replaceAll(`@${key}`, value);
   }
 
-    return replaced
+  return replaced;
+};
+
+export const extractPromptParameters = (prompt: Prompt) => {
+  const inputMessages = prompt.messages;
+
+  const parsedParamNames = inputMessages.flatMap((message) => {
+    if (!message.content) return [];
+    const promptParams = [...message.content.matchAll(/\s\@(\S+)\s?/g)];
+    return promptParams.flatMap(([_match, paramName]) => paramName);
+  });
+  const promptParameters = [...new Set(parsedParamNames)];
+  return promptParameters;
+};
+
+
+export const resolvePrompt = (prompt: Prompt, params: Record<string, string>)=>{
+
+  const resolvedMessages = prompt.messages.map((message) => ({
+    ...message,
+    content: resolveTextParams(message.content, params),
+  }));
+  return {...prompt, messages: resolvedMessages}
 }

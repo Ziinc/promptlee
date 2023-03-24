@@ -5,11 +5,11 @@ import { useLocation } from "wouter";
 const Navbar = () => {
   const [location, navigate] = useLocation();
   return (
-    <div className="w-full bg-white ">
+    <div className="w-full bg-white">
       <div className="flex flex-row justfy-between mx-auto container">
         <Menu
           mode="horizontal"
-          className="w-full border-b-0"
+          className="w-full border-b-0 text-blue-800"
           selectable={false}
           items={[
             { label: "PromptPro", key: "none", onClick: () => navigate("/") },
