@@ -1,10 +1,10 @@
 import { App, Menu, Switch, Tooltip } from "antd";
-import { Moon, Settings, Sun } from "lucide-react";
+import { MessageSquare, Moon, Settings, Sun } from "lucide-react";
 import { FormEvent } from "react";
 import { useLocation } from "wouter";
 import { useAppState } from "../App";
 import { isSystemDarkMode } from "../utils";
-
+import branding from "../assets/promptpro-brand.png";
 const Navbar = () => {
   const [location, navigate] = useLocation();
 
@@ -28,7 +28,19 @@ const Navbar = () => {
           className="w-full border-b-0 text-blue-100 bg-blue-800"
           selectable={false}
           items={[
-            { label: "PromptPro", key: "none", onClick: () => navigate("/") },
+            {
+              label: (
+                <span className="flex flex-row justify-center items-center gap-1">
+                  <MessageSquare size={16} strokeWidth={3} />{" "}
+                  <span className=" tracking-wider text-lg font-bold">
+                    PromptPro
+                  </span>
+                </span>
+              ),
+              className: "!flex !flex-row !items-center",
+              key: "none",
+              onClick: () => navigate("/"),
+            },
             { label: "Prompts", key: "prompts", onClick: () => navigate("/") },
           ]}
         />
