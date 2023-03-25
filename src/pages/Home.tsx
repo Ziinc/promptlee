@@ -194,7 +194,7 @@ const Home: React.FC = () => {
         <div className="flex flex-row flex-wrap  justify-start gap-3">
           {app.prompts.map((prompt) => (
             <Card
-              className="border-2 border-gray-300 w-[24%]"
+              className="border-2 dark:border-slate-700 border-gray-300 w-[24%]"
               key={prompt.id}
               size="small"
               title={prompt.name}
@@ -224,15 +224,20 @@ const Home: React.FC = () => {
                 </Tooltip>
               }
             >
-              {prompt.description ? (
-                <Popover title={prompt.description} overlayClassName="max-w-sm">
-                  <span className="block text-gray-700 text-sm truncate">
-                    {prompt.description}
-                  </span>
-                </Popover>
-              ) : (
-                <span className="italic">No description</span>
-              )}
+              <div className="text-gray-700 dark:text-gray-400">
+                {prompt.description ? (
+                  <Popover
+                    title={prompt.description}
+                    overlayClassName="max-w-sm"
+                  >
+                    <span className="block text-sm truncate">
+                      {prompt.description}
+                    </span>
+                  </Popover>
+                ) : (
+                  <span className="italic">No description</span>
+                )}
+              </div>
               <div className="flex flex-row justify-between w-full pt-2 gap-3 cursor-default">
                 <Tooltip title="Edit prompt">
                   <Button

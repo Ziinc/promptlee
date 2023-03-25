@@ -1,4 +1,4 @@
-import { ConfigProvider } from "antd";
+import { ConfigProvider, theme as antdTheme } from "antd";
 import "antd/dist/reset.css";
 import localforage from "localforage";
 import React, { useContext, useEffect, useState } from "react";
@@ -7,7 +7,7 @@ import { Route } from "wouter";
 import Editor from "./pages/Editor";
 import Home from "./pages/Home";
 import Settings from "./pages/Settings";
-import {  CreateChatCompletionResponse } from "openai";
+import { CreateChatCompletionResponse } from "openai";
 
 export interface Prompt {
   id: string;
@@ -36,6 +36,7 @@ export interface AppState {
   prompts: Prompt[];
   runHistory: RunHistoryItem[];
   apiKey: string;
+  darkMode?: boolean;
 }
 export interface AppContextValue extends AppState {
   setAppState: React.Dispatch<AppState | ((prev: AppState) => AppState)>;
@@ -46,6 +47,7 @@ export const DEFAULT_STATE = {
   prompts: [],
   runHistory: [],
   apiKey: "",
+  darkMode: undefined,
 };
 export const AppContext = React.createContext({
   ...DEFAULT_STATE,
@@ -103,7 +105,20 @@ const App = () => {
     setAppState((prev) => ({ ...prev, ...partial }));
   };
   return (
-    <ConfigProvider theme={theme}>
+    <ConfigProvider
+      theme={{
+        ...theme,
+        algorithm:
+          // manually set to true
+          appState.darkMode === true
+            ? [antdTheme.darkAlgorithm]
+            : // manually set to false
+            appState.darkMode === false
+            ? [antdTheme.defaultAlgorithm]
+            : // let the browser figure it out
+              [antdTheme.defaultAlgorithm, antdTheme.darkAlgorithm],
+      }}
+    >
       <AppContext.Provider value={{ ...appState, setAppState, mergeAppState }}>
         <main>
           <Route path="/prompts/:id/edit" component={Editor} />

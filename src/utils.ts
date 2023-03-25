@@ -46,3 +46,8 @@ export const removeParamsFromMessage = (
 };
 
 export const countWords = (text: string) => (text.match(/\S+/g) || []).length;
+
+
+export const isSystemDarkMode = ()=>{
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+}

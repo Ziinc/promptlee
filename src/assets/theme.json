@@ -6,7 +6,6 @@
     "colorWarning": "#dc9a42",
     "colorError": "#8a2628",
     "colorInfo": "#6275d4",
-    "colorTextBase": "#636262",
     "sizeStep": 4
   }
 }

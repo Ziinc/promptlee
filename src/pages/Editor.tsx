@@ -152,7 +152,7 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
         className="min-h-full relative"
       >
         <Form.Item hidden name="id" />
-        <div className="sticky top-0 z-10 flex flex-row justify-between p-3 border-b-2 border-gray-200 px-4 bg-slate-100">
+        <div className="sticky top-0 z-10 flex flex-row justify-between p-3 border-b-2 dark:border-gray-700 border-gray-200 px-4 dark:bg-slate-800 bg-slate-100">
           <div className="flex gap-4 items-center">
             <Link
               to="/"
@@ -168,7 +168,7 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
             <Button
               onClick={() => setShowDetails(true)}
               type="text"
-              className="italic text-gray-500 text-sm"
+              className="italic dark:text-gray-300 text-gray-500 text-sm"
             >
               <span className="max-w-lg truncate">
                 {form.getFieldValue("description") || "No description yet"}
@@ -312,7 +312,7 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
                     type="dashed"
                     block
                     onClick={() => add()}
-                    className="flex items-center justify-center w-full"
+                    className="flex items-center justify-center w-full dark:border-slate-500"
                     icon={<Plus size={14} className="mr-1" />}
                   >
                     Add a message
