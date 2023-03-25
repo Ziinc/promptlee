@@ -44,7 +44,11 @@ import {
 } from "openai";
 import useChat from "../hooks/useChat";
 import PromptResult from "../components/PromptResult";
-import { resolveTextParams } from "../utils";
+import {
+  countWords,
+  removeParamsFromMessage,
+  resolveTextParams,
+} from "../utils";
 import LoadingSpinner from "../components/LoadingSpinner";
 
 const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
@@ -120,6 +124,7 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
     Form.useWatch("messages", form) || [];
 
   const parsedParamNames = inputMessages.flatMap((message) => {
+    if (!message) return [];
     if (!message.content) return [];
     const promptParams = [...message.content.matchAll(/\s\@(\S+)\s?/g)];
     return promptParams.flatMap(([_match, paramName]) => paramName);
@@ -129,12 +134,8 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
 
   const resolvedMessages = inputMessages.map((message) => ({
     ...message,
-    content: resolveTextParams(message.content, paramValues),
+    content: resolveTextParams(message?.content || "", paramValues),
   }));
-  const hasUnsubbed = resolvedMessages.some((message) => {
-    const unresolved = [...message.content.matchAll(/\s\@(\S+)\s?/g)];
-    return unresolved.length > 0;
-  });
 
   if (!prompt) return null;
 
@@ -229,61 +230,81 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
             <Form.List name="messages">
               {(fields, { add, remove }, { errors }) => (
                 <div className="flex flex-col gap-2">
-                  {fields.map((field, index) => (
-                    <div key={field.key} className="flex flex-row gap-2">
-                      <Form.Item
-                        {...field}
-                        name={[field.name, "role"]}
-                        initialValue="user"
-                        className="w-1/6"
-                      >
-                        <Select
-                          size="small"
-                          defaultValue="user"
-                          options={[
-                            { value: "system", label: "System" },
-                            { value: "user", label: "User" },
-                            { value: "assistant", label: "Assistant" },
-                          ]}
-                        />
-                      </Form.Item>
-                      <div className="relative w-full">
-                        <Form.Item
-                          {...field}
-                          name={[field.name, "content"]}
-                          noStyle
-                        >
-                          <Input.TextArea rows={4} className="pr-6 w-full" />
-                        </Form.Item>
+                  {fields.map((field, index) => {
+                    const inputMessage = inputMessages[index];
+                    const wordCount = inputMessage && inputMessage.content
+                      ? countWords(
+                          removeParamsFromMessage(inputMessage).content
+                        )
+                      : 0;
 
-                        <Tooltip
-                          title="More message actions"
-                          className="absolute right-1 top-1"
-                        >
-                          <Dropdown
-                            menu={{
-                              items: [
-                                {
-                                  label: "Remove message",
-                                  onClick: () => remove(field.name),
-                                  icon: <Minus size={14} />,
-                                  danger: true,
-                                  disabled: index === 0,
-                                  key: "remove",
-                                },
-                              ],
-                            }}
+                    return (
+                      <React.Fragment key={field.key}>
+                        <div className="flex flex-row gap-2">
+                          <Form.Item
+                            {...field}
+                            name={[field.name, "role"]}
+                            initialValue="user"
+                            className="w-1/6"
                           >
-                            <Button
-                              type="ghost"
+                            <Select
                               size="small"
-                              icon={<MoreVertical size={14} />}
+                              defaultValue="user"
+                              options={[
+                                { value: "system", label: "System" },
+                                { value: "user", label: "User" },
+                                { value: "assistant", label: "Assistant" },
+                              ]}
                             />
-                          </Dropdown>
-                        </Tooltip>
-                      </div>
-                    </div>
-                  ))}
+                          </Form.Item>
+                          <div className="relative w-full">
+                            <Form.Item
+                              {...field}
+                              name={[field.name, "content"]}
+                              noStyle
+                            >
+                              <Input.TextArea
+                                rows={4}
+                                className="pr-6 w-full"
+                              />
+                            </Form.Item>
+
+                            <Tooltip
+                              title="More message actions"
+                              className="absolute right-1 top-1"
+                            >
+                              <Dropdown
+                                menu={{
+                                  items: [
+                                    {
+                                      label: "Remove message",
+                                      onClick: () => remove(field.name),
+                                      icon: <Minus size={14} />,
+                                      danger: true,
+                                      disabled: index === 0,
+                                      key: "remove",
+                                    },
+                                  ],
+                                }}
+                              >
+                                <Button
+                                  type="ghost"
+                                  size="small"
+                                  icon={<MoreVertical size={14} />}
+                                />
+                              </Dropdown>
+                            </Tooltip>
+                          </div>
+                        </div>
+                        <div className="flex flex-row justify-end">
+                          <span className="text-xs">{wordCount} words</span>
+                        </div>
+                        {index !== fields.length - 1 && (
+                          <Divider className="my-1" />
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
                   <Button
                     type="dashed"
                     block

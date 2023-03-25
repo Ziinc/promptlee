@@ -25,12 +25,24 @@ export const extractPromptParameters = (prompt: Prompt) => {
   return promptParameters;
 };
 
-
-export const resolvePrompt = (prompt: Prompt, params: Record<string, string>)=>{
-
+export const resolvePrompt = (
+  prompt: Prompt,
+  params: Record<string, string>
+) => {
   const resolvedMessages = prompt.messages.map((message) => ({
     ...message,
     content: resolveTextParams(message.content, params),
   }));
-  return {...prompt, messages: resolvedMessages}
-}
+  return { ...prompt, messages: resolvedMessages };
+};
+
+export const removeParamsFromMessage = (
+  message: Prompt["messages"][number]
+) => {
+  return {
+    ...message,
+    content: message.content.replaceAll(/\s\@(\S+)\s?/g, " "),
+  };
+};
+
+export const countWords = (text: string) => (text.match(/\S+/g) || []).length;
