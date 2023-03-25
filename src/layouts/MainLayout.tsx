@@ -9,7 +9,7 @@ const MainLayout: React.FC<Props> = ({
   variant = "centered",
   contentClassName = "",
 }) => (
-  <div className="flex flex-col h-full min-h-screen">
+    <div className="flex flex-col h-full min-h-screen">
     <Navbar />
     <div
       className={[

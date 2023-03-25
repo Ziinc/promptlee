@@ -170,7 +170,7 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
               type="text"
               className="italic dark:text-gray-300 text-gray-500 text-sm"
             >
-              <span className="max-w-lg truncate">
+              <span className="max-w-lg truncate ">
                 {form.getFieldValue("description") || "No description yet"}
               </span>
             </Button>

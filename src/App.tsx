@@ -120,7 +120,7 @@ const App = () => {
       }}
     >
       <AppContext.Provider value={{ ...appState, setAppState, mergeAppState }}>
-        <main>
+        <main className=" bg-slate-100 dark:bg-slate-900 text-black dark:text-gray-100">
           <Route path="/prompts/:id/edit" component={Editor} />
           <Route path="/" component={Home} />
           <Route path="/settings" component={Settings} />

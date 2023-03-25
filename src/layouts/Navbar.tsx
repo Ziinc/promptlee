@@ -1,6 +1,6 @@
 import { App, Menu, Switch, Tooltip } from "antd";
 import { MessageSquare, Moon, Settings, Sun } from "lucide-react";
-import { FormEvent } from "react";
+import { FormEvent, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAppState } from "../App";
 import { isSystemDarkMode } from "../utils";
@@ -12,13 +12,23 @@ const Navbar = () => {
     if (!document) return;
     let element = document.body;
     if (checked) {
-      element.classList.toggle("dark-mode");
+      element.classList.toggle("dark");
       app.mergeAppState({ darkMode: true });
     } else {
-      element.classList.remove("dark-mode");
+      element.classList.remove("dark");
       app.mergeAppState({ darkMode: false });
     }
   };
+  useEffect(() => {
+    if (
+      document &&
+      !document.body.classList.contains("dark") &&
+      isSystemDarkMode()
+    ) {
+      console.log("setting dark mode")
+      document.body.classList.toggle("dark");
+    }
+  }, []);
   const app = useAppState();
   return (
     <div className="w-full bg-blue-800">
