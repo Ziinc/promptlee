@@ -232,31 +232,37 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
                 <div className="flex flex-col gap-2">
                   {fields.map((field, index) => {
                     const inputMessage = inputMessages[index];
-                    const wordCount = inputMessage && inputMessage.content
-                      ? countWords(
-                          removeParamsFromMessage(inputMessage).content
-                        )
-                      : 0;
+                    const wordCount =
+                      inputMessage && inputMessage.content
+                        ? countWords(
+                            removeParamsFromMessage(inputMessage).content
+                          )
+                        : 0;
 
                     return (
                       <React.Fragment key={field.key}>
-                        <div className="flex flex-row gap-2">
-                          <Form.Item
-                            {...field}
-                            name={[field.name, "role"]}
-                            initialValue="user"
-                            className="w-1/6"
-                          >
-                            <Select
-                              size="small"
-                              defaultValue="user"
-                              options={[
-                                { value: "system", label: "System" },
-                                { value: "user", label: "User" },
-                                { value: "assistant", label: "Assistant" },
-                              ]}
-                            />
-                          </Form.Item>
+                        <div className="flex flex-row gap-2 items-stretch">
+                          <div className="w-1/6 flex flex-col justify-between ">
+                            <Form.Item
+                              {...field}
+                              name={[field.name, "role"]}
+                              initialValue="user"
+                              className="mb-0"
+                            >
+                              <Select
+                                size="small"
+                                defaultValue="user"
+                                options={[
+                                  { value: "system", label: "System" },
+                                  { value: "user", label: "User" },
+                                  { value: "assistant", label: "Assistant" },
+                                ]}
+                              />
+                            </Form.Item>
+                            <div className="flex flex-row justify-end">
+                              <span className="text-xs">{wordCount} words</span>
+                            </div>
+                          </div>
                           <div className="relative w-full">
                             <Form.Item
                               {...field}
@@ -264,8 +270,8 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
                               noStyle
                             >
                               <Input.TextArea
-                                rows={4}
-                                className="pr-6 w-full"
+                                className="pr-6 w-full  min-h-32"
+                                autoSize={{ minRows: 4 }}
                               />
                             </Form.Item>
 
@@ -295,9 +301,6 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
                               </Dropdown>
                             </Tooltip>
                           </div>
-                        </div>
-                        <div className="flex flex-row justify-end">
-                          <span className="text-xs">{wordCount} words</span>
                         </div>
                         {index !== fields.length - 1 && (
                           <Divider className="my-1" />
