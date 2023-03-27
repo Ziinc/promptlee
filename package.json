@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "turbo build",
+    "build": "turbo build && mkdir -p dist/app && mkdir -p dist/docs && cp app/dist/* dist/app && cp docs/dist/* dist/docs/",
     "dev": "turbo dev"
   },
   "author": "",
