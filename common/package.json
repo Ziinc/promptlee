@@ -1,0 +1,14 @@
+{
+ "name":"common",
+  "private": true,
+  "version":"0.0.1",
+ "type": "commonjs",
+ "description":"A utility package with some useful functional stuff",
+ "author": "",
+ "scripts": {
+   "build": "tsc",
+   "dev": "tsc --watch"
+ },
+ "main":"./dist/index.js",
+ "files": ["static", "dist"]
+}

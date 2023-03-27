@@ -107,7 +107,7 @@ const App = () => {
   return (
     <ConfigProvider
       theme={{
-        ...theme,
+        token: theme.token,
         algorithm:
           // manually set to true
           appState.darkMode === true
