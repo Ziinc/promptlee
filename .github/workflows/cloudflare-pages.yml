@@ -19,7 +19,7 @@ jobs:
         include:
           - name: "app"
             # googleAnalyticsId: 'G-XXXXXXXXXX'
-          # - projectName: 'docs'
+          - name: 'docs'
           # googleAnalyticsId: 'G-XXXXXXXXXX'
 
     steps:
