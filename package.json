@@ -9,7 +9,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "turbo build",
-    "dev": "turbo dev"
+    "dev": "turbo dev",
+    "i:turbo": "npm install -D --arch=x64 --platform=linux turbo && npm install -D --arch=arm64 --platform=darwin turbo"
   },
   "author": "",
   "license": "ISC",
