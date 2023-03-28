@@ -14,7 +14,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "turbo": "^1.8.5"
+    "turbo": "^1.8.6"
   },
   "workspaces": [
     "*"
