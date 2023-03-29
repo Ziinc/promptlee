@@ -1,6 +1,8 @@
 {
   "label": "Features",
   "position": 2,
+  "collapsed": false,
+  "collapsible": false,
   "link": {
     "type": "generated-index",
     "description": "An overview of the prompt engineering features of PromptPro"

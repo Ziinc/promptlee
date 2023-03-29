@@ -16,4 +16,4 @@ API keys are stored locally within the browser, and can be inspected by opening 
 
 ### What is `tznc.net`?
 
-It is domain which is used by the developer of PromptPro ([Ziinc](https://github.com/Ziinc)) to host his side projects.
+It is the domain which is used by the developer of PromptPro ([Ziinc](https://github.com/Ziinc)) to host his side projects.
