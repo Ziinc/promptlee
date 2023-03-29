@@ -10,10 +10,10 @@ PromptPro is a fully open-sourced project and is Apache licensed. Anyone can aud
 
 To allow direct interaction with the OpenAI API, there is no middleman service between the browser and the API. All data fetched is returned directly from the API.
 
-## Do You Make Money From This Webapp?
+API keys are stored locally within the browser, and can be inspected by opening developer tools (F12) and viewing the local browser storage.
 
-No, there are currently no revenue streams for this webapp. The developer makes enough from his day job and does not want or need to monetize this at the moment.
+## About the Project
 
-## What is `tznc.net`?
+### What is `tznc.net`?
 
 It is domain which is used by the developer of PromptPro ([Ziinc](https://github.com/Ziinc)) to host his side projects.
