@@ -8,6 +8,7 @@ import Editor from "./pages/Editor";
 import Home from "./pages/Home";
 import Settings from "./pages/Settings";
 import { CreateChatCompletionResponse } from "openai";
+import { isSystemDarkMode } from "./utils";
 
 export interface Prompt {
   id: string;
@@ -36,23 +37,25 @@ export interface AppState {
   prompts: Prompt[];
   runHistory: RunHistoryItem[];
   apiKey: string;
-  darkMode?: boolean;
 }
 export interface AppContextValue extends AppState {
   setAppState: React.Dispatch<AppState | ((prev: AppState) => AppState)>;
   mergeAppState: (tomerge: Partial<AppState>) => void;
+  toggleDarkMode: (checked: boolean) => void;
+  darkMode: boolean;
 }
 
 export const DEFAULT_STATE = {
   prompts: [],
   runHistory: [],
   apiKey: "",
-  darkMode: undefined,
 };
 export const AppContext = React.createContext({
   ...DEFAULT_STATE,
+  darkMode: false,
   setAppState: () => null,
   mergeAppState: () => null,
+  toggleDarkMode: () => null,
 } as AppContextValue);
 
 export const useAppState = () => useContext(AppContext);
@@ -65,18 +68,21 @@ const App = () => {
   }, []);
 
   const setup = async () => {
-    console.log("setup ran, loading local state");
-    const prompts = (await localforage.getItem("prompts")) || [];
-    console.log("prompts", prompts);
-
+    // retrieve cached values and put them into local state
     let cached = {} as any;
     for (var key in DEFAULT_STATE) {
-      console.log("loading from cache", key, await localforage.getItem(key));
       const cachedValue = await localforage.getItem(key);
       if (cachedValue) {
         cached[key] = cachedValue;
       }
     }
+
+    // determine if system dark mode
+    if (isSystemDarkMode() && !document.body.classList.contains("dark")) {
+      document.body.classList.add("dark");
+      mergeAppState({}); // trigger rerender
+    }
+
     setAppState((prev) => ({ ...prev, ...cached }));
   };
 
@@ -84,42 +90,56 @@ const App = () => {
     syncState(appState);
   }, [JSON.stringify(appState)]);
 
-  console.log("appState", appState);
-
   const syncState = async (newState: AppState) => {
     if (newState == DEFAULT_STATE) return;
-    console.log("triggering syncing...");
     for (let key in DEFAULT_STATE) {
-      console.log(key);
       const val = await localforage.getItem(key);
-      console.log(val, (appState as any)[key]);
       if (val !== (appState as any)[key]) {
         await localforage.setItem(key, (appState as any)[key]);
       }
     }
-    console.log("prompts cache", await localforage.getItem("prompts"));
-    console.log("prompts state", appState.prompts);
   };
 
   const mergeAppState: AppContextValue["mergeAppState"] = (partial) => {
     setAppState((prev) => ({ ...prev, ...partial }));
   };
+
+  const toggleDarkMode = (checked: boolean) => {
+    if (checked) {
+      document.body.classList.toggle("dark");
+      mergeAppState({}); // trigger rerender
+    } else {
+      document.body.classList.remove("dark");
+      mergeAppState({}); // trigger rerender
+    }
+  };
+
+  const darkMode = Boolean(document.body.classList.contains("dark"));
+
   return (
     <ConfigProvider
       theme={{
         token: theme.token,
         algorithm:
           // manually set to true
-          appState.darkMode === true
+          darkMode === true
             ? [antdTheme.darkAlgorithm]
             : // manually set to false
-            appState.darkMode === false
+            darkMode === false
             ? [antdTheme.defaultAlgorithm]
             : // let the browser figure it out
               [antdTheme.defaultAlgorithm, antdTheme.darkAlgorithm],
       }}
     >
-      <AppContext.Provider value={{ ...appState, setAppState, mergeAppState }}>
+      <AppContext.Provider
+        value={{
+          ...appState,
+          setAppState,
+          mergeAppState,
+          darkMode,
+          toggleDarkMode,
+        }}
+      >
         <main className=" bg-slate-100 dark:bg-slate-900 text-black dark:text-gray-100">
           <Route path="/prompts/:id/edit" component={Editor} />
           <Route path="/" component={Home} />

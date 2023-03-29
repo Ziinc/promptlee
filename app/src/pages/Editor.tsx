@@ -72,7 +72,6 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
     const promptFields = form.getFieldsValue();
     const params = paramsForm.getFieldsValue();
 
-    console.log("do test run with values: ", prompt, params);
     const resolvedmessages = prompt?.messages.map((message) => ({
       ...message,
       content: resolveTextParams(message.content, params),
@@ -145,9 +144,7 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
         name="prompt-editor"
         form={form}
         initialValues={prompt}
-        onValuesChange={console.log}
         onFinish={handleRun}
-        onFinishFailed={console.log}
         autoComplete="off"
         className="min-h-full relative"
       >
@@ -180,7 +177,6 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
               type="primary"
               onClick={() => {
                 const values = form.getFieldsValue();
-                console.log(values);
                 handleSave(values);
               }}
               className="flex justify-center items-center"
@@ -352,8 +348,7 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
                         <Form
                           size="small"
                           form={paramsForm}
-                          onFinish={console.log}
-                          onFinishFailed={console.log}
+                          onSubmitCapture={(e) => e.preventDefault()}
                           autoComplete="off"
                           colon={false}
                           labelAlign="right"

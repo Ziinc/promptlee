@@ -7,27 +7,6 @@ import { isSystemDarkMode } from "../utils";
 const Navbar = () => {
   const [location, navigate] = useLocation();
 
-  const toggleDarkMode = (checked: boolean) => {
-    if (!document) return;
-    let element = document.body;
-    if (checked) {
-      element.classList.toggle("dark");
-      app.mergeAppState({ darkMode: true });
-    } else {
-      element.classList.remove("dark");
-      app.mergeAppState({ darkMode: false });
-    }
-  };
-  useEffect(() => {
-    if (
-      document &&
-      !document.body.classList.contains("dark") &&
-      isSystemDarkMode()
-    ) {
-      console.log("setting dark mode");
-      document.body.classList.toggle("dark");
-    }
-  }, []);
   const app = useAppState();
   return (
     <div className="w-full bg-blue-800">
@@ -59,11 +38,7 @@ const Navbar = () => {
             {
               label: (
                 <Switch
-                  defaultChecked={
-                    app.darkMode !== undefined
-                      ? app.darkMode
-                      : isSystemDarkMode()
-                  }
+                  checked={app.darkMode}
                   className="dark:!bg-blue-600 !bg-gray-200 hover:!bg-gray-400"
                   checkedChildren={
                     <Moon
@@ -79,7 +54,7 @@ const Navbar = () => {
                       className=" mt-1 text-black"
                     />
                   }
-                  onChange={toggleDarkMode}
+                  onChange={app.toggleDarkMode}
                 />
               ),
               key: "darkMode",

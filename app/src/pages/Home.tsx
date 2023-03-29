@@ -129,9 +129,8 @@ const Home: React.FC = () => {
           <div className="flex flex-col gap-4">
             <Form
               size="small"
+              onSubmitCapture={(e) => e.preventDefault()}
               form={paramsForm}
-              onFinish={console.log}
-              onFinishFailed={console.log}
               autoComplete="off"
               colon={false}
               labelAlign="right"
