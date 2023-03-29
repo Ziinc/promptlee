@@ -4,7 +4,6 @@ import { FormEvent, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAppState } from "../App";
 import { isSystemDarkMode } from "../utils";
-import branding from "../assets/promptpro-brand.png";
 const Navbar = () => {
   const [location, navigate] = useLocation();
 
@@ -25,7 +24,7 @@ const Navbar = () => {
       !document.body.classList.contains("dark") &&
       isSystemDarkMode()
     ) {
-      console.log("setting dark mode")
+      console.log("setting dark mode");
       document.body.classList.toggle("dark");
     }
   }, []);
@@ -40,12 +39,10 @@ const Navbar = () => {
           items={[
             {
               label: (
-                <span className="flex flex-row justify-center items-center gap-1">
-                  <MessageSquare size={16} strokeWidth={3} />{" "}
-                  <span className=" tracking-wider text-lg font-bold">
-                    PromptPro
-                  </span>
-                </span>
+                <img
+                  src="/branding/branding-horizontal-light.png"
+                  className="object-contain h-5"
+                />
               ),
               className: "!flex !flex-row !items-center",
               key: "none",

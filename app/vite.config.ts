@@ -21,4 +21,5 @@ export default defineConfig({
     },
     preserveSymlinks: true,
   },
+  publicDir: path.resolve("../node_modules/common/static"),
 });
