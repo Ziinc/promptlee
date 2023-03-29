@@ -29,6 +29,12 @@ With these example issues, I got around to the key requirements we need to make 
 2. We want to be able to view what the prompt had returned before, so that we can refine the command in order to create a better sandbox for the returned information.
 3. We want to have the prompt at the ready to quickly execute the prompt when needed.
 
-### The Initial Wireframes
+### The Wireframes
 
 I am no designer, I identify as a developer throguh and through. However, I've needed to delve into web design enough times to have a sort of knack at knowing what works and what doesn't via a simple low-fidelity wireframe.
+
+## The Development Process
+
+## The End Result
+
+## The Future
