@@ -3,12 +3,14 @@ import "antd/dist/reset.css";
 import localforage from "localforage";
 import React, { useContext, useEffect, useState } from "react";
 import theme from "./assets/theme.json";
-import { Route } from "wouter";
+import { Route, useLocation } from "wouter";
 import Editor from "./pages/Editor";
 import Home from "./pages/Home";
 import Settings from "./pages/Settings";
 import { CreateChatCompletionResponse } from "openai";
 import { isSystemDarkMode } from "./utils";
+import ReactGA from "react-ga4";
+import TrackedRoute from "./components/TrackedRoute";
 
 export interface Prompt {
   id: string;
@@ -62,12 +64,17 @@ export const useAppState = () => useContext(AppContext);
 const App = () => {
   const [appState, setAppState] = useState<AppState>(DEFAULT_STATE);
 
+  const [location, setLocation] = useLocation();
+
+
   // do setup
   useEffect(() => {
     setup();
   }, []);
 
   const setup = async () => {
+    ReactGA.initialize("G-SKTR3XPW5M");
+
     // retrieve cached values and put them into local state
     let cached = {} as any;
     for (var key in DEFAULT_STATE) {
@@ -141,9 +148,9 @@ const App = () => {
         }}
       >
         <main className=" bg-slate-100 dark:bg-slate-900 text-black dark:text-gray-100">
-          <Route path="/prompts/:id/edit" component={Editor} />
-          <Route path="/" component={Home} />
-          <Route path="/settings" component={Settings} />
+          <TrackedRoute path="/prompts/:id/edit" component={Editor} />
+          <TrackedRoute path="/" component={Home} />
+          <TrackedRoute path="/settings" component={Settings} />
         </main>
       </AppContext.Provider>
     </ConfigProvider>
