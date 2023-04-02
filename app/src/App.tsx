@@ -3,7 +3,7 @@ import "antd/dist/reset.css";
 import localforage from "localforage";
 import React, { useContext, useEffect, useState } from "react";
 import theme from "./assets/theme.json";
-import { Route, useLocation } from "wouter";
+import { useLocation } from "wouter";
 import Editor from "./pages/Editor";
 import Home from "./pages/Home";
 import Settings from "./pages/Settings";
@@ -11,6 +11,7 @@ import { CreateChatCompletionResponse } from "openai";
 import { isSystemDarkMode } from "./utils";
 import ReactGA from "react-ga4";
 import TrackedRoute from "./components/TrackedRoute";
+import Explore from "./pages/Explore";
 
 export interface Prompt {
   id: string;
@@ -65,7 +66,6 @@ const App = () => {
   const [appState, setAppState] = useState<AppState>(DEFAULT_STATE);
 
   const [location, setLocation] = useLocation();
-
 
   // do setup
   useEffect(() => {
@@ -149,6 +149,7 @@ const App = () => {
       >
         <main className=" bg-slate-100 dark:bg-slate-900 text-black dark:text-gray-100">
           <TrackedRoute path="/prompts/:id/edit" component={Editor} />
+          <TrackedRoute path="/explore" component={Explore} />
           <TrackedRoute path="/" component={Home} />
           <TrackedRoute path="/settings" component={Settings} />
         </main>
