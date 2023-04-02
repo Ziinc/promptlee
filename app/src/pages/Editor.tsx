@@ -81,7 +81,11 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
 
   const handleSave = (attrs: Partial<Prompt>) => {
     if (!prompt) return;
-    const newPrompt = { ...prompt, ...attrs };
+    const newPrompt = {
+      ...prompt,
+      ...attrs,
+      updated: new Date().toISOString(),
+    };
     app.setAppState((prev) => {
       const unchanged = prev.prompts.filter((p) => p.id !== newPrompt.id);
       const newPrompts = [...unchanged, newPrompt];

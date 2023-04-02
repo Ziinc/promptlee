@@ -191,7 +191,11 @@ const Home: React.FC = () => {
         </section>
 
         <div className="flex flex-row flex-wrap  justify-start gap-3">
-          {app.prompts.map((prompt) => (
+          {app.prompts.sort((a, b)=> {
+            const aDate: any =new Date(a.updated)
+            const bDate: any = new Date(b.updated) 
+            return  bDate - aDate
+          }).map((prompt) => (
             <Card
               className="border-2 dark:border-slate-700 border-gray-300 w-[24%]"
               key={prompt.id}
