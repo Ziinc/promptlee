@@ -385,7 +385,7 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
                         ]}
                       >
                         {resolvedMessages.map((message) => (
-                          <p>{message.content}</p>
+                          <p className="whitespace-pre-wrap">{message.content}</p>
                         ))}
                       </Card>
 

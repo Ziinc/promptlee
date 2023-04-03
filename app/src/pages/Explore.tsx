@@ -1,6 +1,7 @@
 import MainLayout from "../layouts/MainLayout";
 import common from "common";
-import { Button, Collapse, Tag } from "antd";
+import { Button, Collapse, Tag, Tooltip } from "antd";
+import RunModal from "../components/RunModal";
 const Explore = () => {
   return (
     <MainLayout>
@@ -31,7 +32,19 @@ const Explore = () => {
                   ))}
                 </div>
                 <div className="flex gap-2">
-                  <Button type="default">Try</Button>
+                  <RunModal
+                    prompt={{
+                      id: crypto.randomUUID(),
+                      name: prompt.name,
+                      messages: [{ role: "user", content: prompt.content }],
+                      created: new Date().toISOString(),
+                      updated: new Date().toISOString(),
+                    }}
+                  >
+                    <Tooltip className="Try this prompt">
+                      <Button type="default">Try</Button>
+                    </Tooltip>
+                  </RunModal>
                   <Button type="primary">Customize</Button>
                 </div>
               </div>

@@ -43,7 +43,7 @@ const PromptResult: React.FC<Props> = ({ result }) => {
           </Popover>
         )}
       </div>
-      <p className="text-sm mb-0"> {choice.message?.content}</p>
+      <p className="text-sm mb-0 whitespace-pre-wrap"> {choice.message?.content}</p>
     </div>
   );
 };
