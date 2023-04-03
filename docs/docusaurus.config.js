@@ -4,7 +4,7 @@
 const lightCodeTheme = require("prism-react-renderer/themes/github");
 const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 const common = require("common");
-const path = require("path");
+const EXPLORE = require("common/dist/explore");
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: common.SEO.title,
@@ -53,17 +53,17 @@ const config = {
           anonymizeIP: true,
         },
         sitemap: {
-          changefreq: 'weekly',
+          changefreq: "weekly",
           priority: 0.5,
-          ignorePatterns: ['/tags/**'],
-          filename: 'sitemap.xml',
+          ignorePatterns: ["/tags/**"],
+          filename: "sitemap.xml",
         },
       }),
     ],
   ],
 
   plugins: [
-    async function myPlugin(context, options) {
+    async function postCssPlugin(context, options) {
       return {
         name: "docusaurus-tailwindcss",
         configurePostCss(postcssOptions) {
@@ -74,21 +74,49 @@ const config = {
         },
       };
     },
+
+    async function pagesGenPlugin(context, options) {
+      // ...
+      return {
+        name: "pages-gen",
+        async loadContent() {
+          return EXPLORE.prompts;
+          // ...
+        },
+        async contentLoaded({ content, actions }) {
+          const prompts = content;
+          await Promise.all(
+            // @ts-ignore
+            prompts.map(async (prompt) => {
+              // await actions.createData(
+              //   // Note that this created data path must be in sync with
+              //   // metadataPath provided to mdx-loader.
+              //   `${docuHash(prompt.name)}.json`,
+              //   JSON.stringify(prompt, null, 2)
+              // );
+
+              return actions.addRoute({
+                path:
+                  "/explore/" + prompt.name.toLowerCase().replaceAll(" ", "-"),
+                component: require.resolve(
+                  "./src/components/ExplorePromptPage.tsx"
+                ),
+                
+                exact: true,
+                modules: {
+                  config: `@generated/docusaurus.config`,
+                },
+                prompt,
+              });
+            })
+          );
+
+          // ...
+        },
+        /* other lifecycle API */
+      };
+    },
   ],
-  // plugins: [
-  //   function (context, options) {
-  //     return {
-  //       name: 'webpack-configuration-plugin',
-  //       configureWebpack(config, isServer, utils) {
-  //         return {
-  //           resolve: {
-  //             symlinks: true,
-  //           }
-  //         };
-  //       }
-  //     };
-  //   },
-  // ],
 
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
@@ -109,6 +137,7 @@ const config = {
             label: "Docs",
           },
           { to: "/blog", label: "Blog", position: "left" },
+          { to: "/explore", label: "Explore", position: "left" },
           {
             href: "https://app.promptpro.tznc.net",
             label: "App",
@@ -164,6 +193,10 @@ const config = {
               {
                 label: "Blog",
                 to: "/blog",
+              },
+              {
+                label: "Explore",
+                to: "/explore",
               },
               {
                 label: "GitHub",
