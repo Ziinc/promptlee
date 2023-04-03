@@ -45,7 +45,7 @@ const Explore = () => {
                       <Button type="default">Try</Button>
                     </Tooltip>
                   </RunModal>
-                  <Button type="primary">Customize</Button>
+                  {/* <Button type="primary">Customize</Button> */}
                 </div>
               </div>
             </Collapse.Panel>
