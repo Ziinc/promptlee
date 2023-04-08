@@ -186,7 +186,7 @@ const Editor: React.FC<{ params: { id: string | "new" } }> = ({ params }) => {
               noStyle
               initialValue="Untitled Prompt"
             >
-              <Input type="text" />
+              <Input type="text" className="w-72" />
             </Form.Item>
             <Button
               onClick={() => setShowDetails(true)}
@@ -386,7 +386,12 @@ const Editor: React.FC<{ params: { id: string | "new" } }> = ({ params }) => {
                           labelCol={{ span: 8 }}
                         >
                           {promptParameters.map((name) => (
-                            <Form.Item name={name} label={name} initialValue="">
+                            <Form.Item
+                              key={name}
+                              name={name}
+                              label={name}
+                              initialValue=""
+                            >
                               <Input type="text" />
                             </Form.Item>
                           ))}
@@ -411,7 +416,10 @@ const Editor: React.FC<{ params: { id: string | "new" } }> = ({ params }) => {
                         ]}
                       >
                         {resolvedMessages.map((message) => (
-                          <p className="whitespace-pre-wrap">
+                          <p
+                            className="whitespace-pre-wrap"
+                            key={message.content}
+                          >
                             {message.content}
                           </p>
                         ))}
