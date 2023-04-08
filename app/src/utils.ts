@@ -47,7 +47,17 @@ export const removeParamsFromMessage = (
 
 export const countWords = (text: string) => (text.match(/\S+/g) || []).length;
 
+export const isSystemDarkMode = () => {
+  return (
+    window.matchMedia &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+  );
+};
 
-export const isSystemDarkMode = ()=>{
-  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-}
+export const getQueryParams = () =>
+  new Proxy(new URLSearchParams(window.location.search), {
+    get: (searchParams, prop) => {
+      const val: string | null = searchParams.get(prop as string);
+      return val ? decodeURIComponent(val) : val;
+    },
+  }) as any & Record<string, string>;

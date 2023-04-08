@@ -149,6 +149,7 @@ const App = () => {
       >
         <main className=" bg-slate-100 dark:bg-slate-900 text-black dark:text-gray-100">
           <TrackedRoute path="/prompts/:id/edit" component={Editor} />
+          <TrackedRoute path="/prompts/:id" component={Editor} />
           <TrackedRoute path="/explore" component={Explore} />
           <TrackedRoute path="/" component={Home} />
           <TrackedRoute path="/settings" component={Settings} />

@@ -19,20 +19,7 @@ const Home: React.FC = () => {
   const app = useAppState();
 
   const createPrompt = async () => {
-    const id = crypto.randomUUID();
-    const now = new Date().toISOString();
-    const prompt = {
-      id,
-      name: "Untitled",
-      messages: [{ role: "user" as const, content: "" }],
-      created: now,
-      updated: now,
-    };
-    app.setAppState((prev) => ({
-      ...prev,
-      prompts: [...prev.prompts, prompt],
-    }));
-    navigate(`/prompts/${id}/edit`);
+    navigate(`/prompts/new`);
   };
 
   const deletePrompt = async (id: string) => {

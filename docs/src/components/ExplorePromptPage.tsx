@@ -30,6 +30,24 @@ const ExplorePromptPage = (props) => {
         <div className="border-2 border-l-4 border-solid border-gray-500 dark:bg-gray-800 bg-gray-200 p-4 rounded-lg">
           <p className="whitespace-pre-wrap  ">{prompt.content}</p>
         </div>
+        <div className="py-4 flex flex-row justify-end">
+          <Link
+            href={`https://app.promptpro.tznc.net/prompts/new?attrs=${encodeURIComponent(
+              JSON.stringify({
+                name: prompt.name,
+                description: prompt.description,
+                messages: [{ role: "user", content: prompt.content }],
+              })
+            )}`}
+          >
+            <button
+              className="bg-blue-600 text-white p-2 font-bold rounded-lg border-blue-200 cursor-pointer"
+              title="Customize this prompt"
+            >
+              Customize
+            </button>
+          </Link>
+        </div>
       </main>
     </Layout>
   );

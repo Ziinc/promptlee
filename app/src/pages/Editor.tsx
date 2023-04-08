@@ -3,29 +3,22 @@ import {
   Input,
   Form,
   notification,
-  Space,
   Tooltip,
   Typography,
-  Col,
-  Row,
   Drawer,
-  FormProps,
   Select,
   Dropdown,
   Divider,
   Tabs,
   List,
   Tag,
-  Collapse,
   Empty,
   Card,
-  Alert,
 } from "antd";
 import "antd/dist/reset.css";
-import React, { ComponentProps, useEffect, useRef, useState } from "react";
+import React, { ComponentProps, useMemo, useState } from "react";
 import { Link, useLocation } from "wouter";
 import {
-  ArrowBigLeft,
   ArrowLeft,
   Copy,
   ListPlus,
@@ -36,49 +29,65 @@ import {
   Plus,
   Save,
 } from "lucide-react";
-import { Prompt, useAppState } from "../App";
+import { Message, Prompt, useAppState } from "../App";
 import MainLayout from "../layouts/MainLayout";
-import {
-  ChatCompletionResponseMessage,
-  CreateChatCompletionResponse,
-} from "openai";
+import { ChatCompletionResponseMessage } from "openai";
 import useChat from "../hooks/useChat";
 import PromptResult from "../components/PromptResult";
 import {
   countWords,
+  getQueryParams,
   removeParamsFromMessage,
   resolveTextParams,
 } from "../utils";
 import LoadingSpinner from "../components/LoadingSpinner";
 
-const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
-  const [location, navigate] = useLocation();
+const Editor: React.FC<{ params: { id: string | "new" } }> = ({ params }) => {
+  const [_location, navigate] = useLocation();
   const [form] = Form.useForm();
 
   const [paramsForm] = Form.useForm();
   const [showDetails, setShowDetails] = useState(false);
   const app = useAppState();
+  const isNew = params.id === "new";
   const prompt = app.prompts.find((p) => p.id === params.id);
-  const [toggleDesc, setToggleDesc] = useState(false);
-  const showDesc = !!prompt?.description || toggleDesc;
-  const {
-    result,
-    getResponse,
-    clearResult,
-    isLoading: isChatLoading,
-  } = useChat();
+
+  const initialValues = useMemo(() => {
+    let values: Partial<Prompt>;
+    const query = getQueryParams();
+    if (isNew && query.attrs) {
+      values = JSON.parse(query.attrs);
+    } else if (isNew && !query.attrs) {
+      values = {
+        name: "Untitled Prompt",
+        messages: [{ role: "user", content: "" }],
+      };
+    } else {
+      values = prompt || {};
+    }
+    return values;
+  }, [prompt?.id, isNew]);
+
+  const { result, getResponse, isLoading: isChatLoading } = useChat();
 
   const handleRun = async () => {
     const promptFields = form.getFieldsValue();
     const params = paramsForm.getFieldsValue();
 
-    const resolvedmessages = prompt?.messages.map((message) => ({
+    const resolvedmessages = promptFields?.messages.map((message: Message) => ({
       ...message,
       content: resolveTextParams(message.content, params),
     }));
     await getResponse({ ...promptFields, messages: resolvedmessages });
   };
 
+  const handleNew = (attrs: Prompt) => {
+    app.setAppState((prev) => ({
+      ...prev,
+      prompts: [...prev.prompts, attrs],
+    }));
+    navigate(`/prompts/${attrs.id}/edit`, { replace: true });
+  };
   const handleSave = (attrs: Partial<Prompt>) => {
     if (!prompt) return;
     const newPrompt = {
@@ -140,19 +149,28 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
     content: resolveTextParams(message?.content || "", paramValues),
   }));
 
-  if (!prompt) return null;
-
+  console.log(initialValues);
   return (
     <MainLayout variant="wide" contentClassName="h-full">
       <Form
         name="prompt-editor"
         form={form}
-        initialValues={prompt}
+        initialValues={initialValues}
         onFinish={handleRun}
         autoComplete="off"
         className="min-h-full relative"
       >
-        <Form.Item hidden name="id" />
+        <Form.Item hidden name="id" initialValue={crypto.randomUUID()} />
+        <Form.Item
+          hidden
+          name="inserted"
+          initialValue={new Date().toISOString()}
+        />
+        <Form.Item
+          hidden
+          name="updated"
+          initialValue={new Date().toISOString()}
+        />
         <div className="sticky top-0 z-10 flex flex-row justify-between p-3 border-b-2 dark:border-gray-700 border-gray-200 px-4 dark:bg-slate-800 bg-slate-100">
           <div className="flex gap-4 items-center">
             <Link
@@ -163,8 +181,13 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
               Back
             </Link>
 
-            <Form.Item required name="name" noStyle>
-              <Input type="text" placeholder="your.prompt.name" />
+            <Form.Item
+              required
+              name="name"
+              noStyle
+              initialValue="Untitled Prompt"
+            >
+              <Input type="text" />
             </Form.Item>
             <Button
               onClick={() => setShowDetails(true)}
@@ -181,7 +204,11 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
               type="primary"
               onClick={() => {
                 const values = form.getFieldsValue();
-                handleSave(values);
+                if (isNew) {
+                  handleNew(values);
+                } else {
+                  handleSave(values);
+                }
               }}
               className="flex justify-center items-center"
               icon={<Save size={14} className="mr-1" />}
@@ -385,7 +412,9 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
                         ]}
                       >
                         {resolvedMessages.map((message) => (
-                          <p className="whitespace-pre-wrap">{message.content}</p>
+                          <p className="whitespace-pre-wrap">
+                            {message.content}
+                          </p>
                         ))}
                       </Card>
 
@@ -412,7 +441,7 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
                 {
                   label: "History",
                   key: "history",
-                  children: (
+                  children: prompt ? (
                     <List
                       pagination={{ align: "end", defaultPageSize: 8 }}
                       dataSource={app.runHistory.filter(
@@ -431,6 +460,8 @@ const Editor: React.FC<{ params: { id: string } }> = ({ params }) => {
                         </List.Item>
                       )}
                     />
+                  ) : (
+                    <Empty description="Save the prompt to start storing run history." />
                   ),
                 },
               ]}
