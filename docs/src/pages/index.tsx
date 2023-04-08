@@ -34,7 +34,7 @@ export default function Home(): JSX.Element {
   const { siteConfig } = useDocusaurusContext();
   return (
     <Layout
-      title={`Home | ${siteConfig.title}`}
+      title={`Home`}
       description="The Prompt Engineering Toolkit"
     >
       <HomepageHeader />
