@@ -9,7 +9,7 @@ const ExplorePromptPage = (props) => {
 
   return (
     <Layout
-      title={`Explore - ${prompt.name} | ${siteConfig.title}`}
+      title={`Explore - ${prompt.name}`}
       description="The Prompt Engineering Toolkit"
     >
       <main className="mx-auto container max-w-3xl p-4 min-h-[88vh]">
