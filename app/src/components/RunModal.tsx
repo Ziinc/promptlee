@@ -101,7 +101,7 @@ const RunModal: React.FC<Props> = ({ prompt, triggerClassName, children }) => {
               className="pt-4"
             >
               {promptParameters.map((name) => (
-                <Form.Item name={name} label={name} initialValue="">
+                <Form.Item key={name} name={name} label={name} initialValue="">
                   <Input type="text" />
                 </Form.Item>
               ))}
