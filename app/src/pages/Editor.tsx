@@ -149,7 +149,6 @@ const Editor: React.FC<{ params: { id: string | "new" } }> = ({ params }) => {
     content: resolveTextParams(message?.content || "", paramValues),
   }));
 
-  console.log(initialValues);
   return (
     <MainLayout variant="wide" contentClassName="h-full">
       <Form
