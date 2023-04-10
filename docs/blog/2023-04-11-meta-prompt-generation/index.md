@@ -1,7 +1,7 @@
 ---
 title: Meta Prompt Generation
 authors: ziinc
-tags: [explore, prompts, example]
+tags: [explore, prompt-library, example]
 ---
 
 When developing the **Explore** page for the app, I needed to curate the prompt library and figured that I could automate part of it with the power of ✨PromptPro✨.
@@ -12,11 +12,11 @@ So when it came to building the initial prompt library, I came up with [this nif
 
 ![Prompt Generator Screenshot](./prompt-generator.png)
 
-> Act as a prompt generator. These prompts, when given to an AI, produces interesting, useful prompts for @domain . Each prompt is for a specific use case.
+> Act as a prompt generator. These prompts, when given to an AI, produces interesting, useful prompts for **@domain** . Each prompt is for a specific use case.
 >
 > An example is as follows: "Act as a title generator for written articles. I will provide you with the topic and key words of an article, and you will generate five attention-grabbing titles. Keep the title concise and under 20 words, and ensure that the meaning is maintained."
 >
-> Respond with @count completely different prompt(s), separated by paragraphs. Prompts should be at least @min_words words long. Prompts must aide the user in their job scope or life. Do not do any explaining. Avoid specific topics and ensure that the prompt is generalized. The user must be able to @goal after executing the prompt with the AI. The AI will respond with advice, information, or help. The prompt must be specific in the desired output.
+> Respond with **@count** completely different prompt(s), separated by paragraphs. Prompts should be at least **@min_words** words long. Prompts must aide the user in their job scope or life. Do not do any explaining. Avoid specific topics and ensure that the prompt is generalized. The user must be able to **@goal** after executing the prompt with the AI. The AI will respond with advice, information, or help. The prompt must be specific in the desired output.
 
 To make the prompt a little more reliable, we turn it into a one-shot prompt by giving it an example. We also use a few inputs (like **@domain** and **@goal**) to make the prompt more customizable for different goals, and we can ask for variations as well using the **@count** parameter.
 
