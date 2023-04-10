@@ -8,7 +8,7 @@ import {
   Alert,
 } from "antd";
 import "antd/dist/reset.css";
-import { Edit2, MoreVertical, Play, Trash2 } from "lucide-react";
+import { Copy, Edit2, MoreVertical, Play, Trash2 } from "lucide-react";
 import React from "react";
 import { Link, useLocation } from "wouter";
 import { useAppState } from "../App";
@@ -28,6 +28,32 @@ const Home: React.FC = () => {
       prompts: prev.prompts.filter((p) => p.id !== id),
     }));
     notification.success({ message: "Deleted!", placement: "bottomRight" });
+  };
+
+  const duplicatePrompt = async (id: string) => {
+    const target = app.prompts.find((p) => p.id === id);
+    if (!target) {
+      notification.error({
+        message: "Something went wrong!",
+        placement: "bottomRight",
+      });
+      return;
+    }
+    let copied = {
+      ...Object.assign({}, target),
+      id: crypto.randomUUID(),
+      name: target.name + " copy",
+      inserted: new Date().toISOString(),
+      updated: new Date().toISOString(),
+    };
+    app.setAppState((prev) => ({
+      ...prev,
+      prompts: [...prev.prompts, copied],
+    }));
+    notification.success({
+      message: "Prompt duplicated!",
+      placement: "bottomRight",
+    });
   };
 
   return (
@@ -78,6 +104,15 @@ const Home: React.FC = () => {
                       trigger={["click"]}
                       menu={{
                         items: [
+                          {
+                            label: "Duplicate prompt",
+                            onClick: () => duplicatePrompt(prompt.id),
+                            icon: <Copy size={14} />,
+                            key: "duplicate",
+                          },
+                          {
+                            type: "divider",
+                          },
                           {
                             label: "Delete prompt",
                             onClick: () => deletePrompt(prompt.id),
