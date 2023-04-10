@@ -35,7 +35,8 @@ Multiple declarations are allowed, and will be replaced with the same value of t
 
 For example, we can declare multiple insertion positions and provide only one input to insert the value `rainbow` into multiple locations.
 
-| Template | Input (**name: value**) | Resolved Text |
-| Pick out colors of the **@object** . Describe why you picked this color from @object . | object: rainbow | Pick out colors of the **rainbow** . Describe why you picked this color from **rainbow** .|
+| Template                                                                               | Input (**name: value**) | Resolved Text                                                                              |
+| -------------------------------------------------------------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------ |
+| Pick out colors of the **@object** . Describe why you picked this color from @object . | object: `rainbow`       | Pick out colors of the **rainbow** . Describe why you picked this color from **rainbow** . |
 
 Note that as per the advise in the [Handling Trailing Symbols section](#handling-trailing-symbols-in-input-names), we add a space after the named input, so that the named input does not include the full stop and the punctuation for the resolved text is correct.
