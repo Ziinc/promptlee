@@ -144,7 +144,7 @@ const config = {
             position: "right",
           },
           {
-            href: "https://github.com/facebook/docusaurus",
+            href: "https://github.com/Ziinc/promptpro",
             label: "GitHub",
             position: "right",
           },
