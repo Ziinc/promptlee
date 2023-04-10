@@ -4,7 +4,13 @@ sidebar_position: 1
 
 # Introduction
 
-PromptPro is a prompt development environment, focusing on prompt engineering and automation. It is a free-to-use webapp
+PromptPro is a prompt development environment, focusing on prompt engineering and automation. It is a free-to-use webapp.
+
+![App Home](./app.png)
+
+The Editor interface helps iterative prompt development and testing, simplifying the process for refining prompts for a specific desired output.
+
+![App Editor](./app-editor.png)
 
 ## Getting Started
 
