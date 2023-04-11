@@ -14,12 +14,15 @@ import {
   Tag,
   Empty,
   Card,
+  Modal,
 } from "antd";
 import "antd/dist/reset.css";
 import React, { ComponentProps, useMemo, useState } from "react";
 import { Link, useLocation } from "wouter";
 import {
   ArrowLeft,
+  ChevronDown,
+  ChevronsDownUp,
   Copy,
   ListPlus,
   Minus,
@@ -256,6 +259,92 @@ const Editor: React.FC<{ params: { id: string | "new" } }> = ({ params }) => {
             <Form.List name="messages">
               {(fields, { add, remove }, { errors }) => (
                 <div className="flex flex-col gap-2">
+                  <div className="flex flex-row justify-start gap-2">
+                    <Dropdown
+                      menu={{
+                        items: [
+                          {
+                            label: "Output Formatting",
+                            children: [
+                              {
+                                text: "Separate each result with a comma.",
+                                label: "Comma Separate",
+                              },
+                              {
+                                text: "Separate each result with a single newline.",
+                                label: "Newline Separate",
+                              },
+                              {
+                                text: "Format the results as bullet points.",
+                                label: "Bullet Points",
+                              },
+                              {
+                                text: "Return the response as a pretty formatted JSON, with appropriately named keys for the output(s).",
+                                label: "JSON",
+                              },
+                              {
+                                text: "Return the response as XML, with appropriately named tags and hierarchy.",
+                                label: "XML",
+                              },
+                            ],
+                          },
+                          {
+                            label: "Result Augmentors",
+                            children: [
+                              {
+                                text: "Act as a @role when responding.",
+                                label: "Act As Role",
+                              },
+                              {
+                                text: "Do not explain yourself.",
+                                label: "No Explaining",
+                              },
+                              {
+                                text: 'Explain the reasoning and start it with the "REASON:" prefix.',
+                                label: "Include Reasoning",
+                              },
+                            ],
+                          },
+                        ].map((group) => ({
+                          label: group.label,
+                          key: group.label,
+                          children: group.children.map((item) => ({
+                            label: (
+                              <div className="flex flex-col gap-1">
+                                <span>{item.label}</span>
+                                <span className="text-xs opacity-75">
+                                  {item.text}
+                                </span>
+                              </div>
+                            ),
+                            key: item.label,
+                            onClick: () => {
+                              const len = fields.length;
+                              const last = fields[len - 1];
+                              const val = form.getFieldValue([
+                                "messages",
+                                len - 1,
+                                "content",
+                              ]);
+                              form.setFieldValue(
+                                ["messages", len - 1, "content"],
+                                val + "\n" + item.text
+                              );
+                            },
+                          })),
+                        })),
+                      }}
+                    >
+                      <Button
+                        type="default"
+                        className="flex flex-row items-center gap-1"
+                      >
+                        <span>Insert commands</span>{" "}
+                        <ChevronDown strokeWidth={1.4} size={15} />
+                      </Button>
+                    </Dropdown>
+                  </div>
+
                   {fields.map((field, index) => {
                     const inputMessage = inputMessages[index];
                     const wordCount =
@@ -309,6 +398,29 @@ const Editor: React.FC<{ params: { id: string | "new" } }> = ({ params }) => {
                                 menu={{
                                   items: [
                                     {
+                                      label: "Merge with above message",
+                                      onClick: () => {
+                                        const toAppend = form.getFieldValue([
+                                          "messages",
+                                          index,
+                                          "content",
+                                        ]);
+                                        const val = form.getFieldValue([
+                                          "messages",
+                                          index - 1,
+                                          "content",
+                                        ]);
+                                        form.setFieldValue(
+                                          ["messages", index - 1, "content"],
+                                          val + "\n" + toAppend
+                                        );
+                                        remove(field.name);
+                                      },
+                                      icon: <ChevronsDownUp size={14} />,
+                                      disabled: index === 0,
+                                      key: "merge",
+                                    },
+                                    {
                                       label: "Remove message",
                                       onClick: () => remove(field.name),
                                       icon: <Minus size={14} />,
@@ -341,7 +453,7 @@ const Editor: React.FC<{ params: { id: string | "new" } }> = ({ params }) => {
                     className="flex items-center justify-center w-full dark:border-slate-500"
                     icon={<Plus size={14} className="mr-1" />}
                   >
-                    Add a message
+                    Extend context messages
                   </Button>
                 </div>
               )}
