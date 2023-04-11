@@ -92,6 +92,34 @@ export const prompts: PromptExample[] = [
       'Act as an written article conclusion generator. Create @variation_count article conclusions that neatly wrap up the article on @topic . The key points of the article are as follows:"@key_points". Ensure that the conclusions are interesting and thought-provoking for the reader. Do not explain yourself. Use placeholders with square brackets like [this] when indicating insertion of the writer\'s opinion, which the user of the generator will do.',
     tags: ["writing"],
   },
+  {
+    name: "Concept Simplifier",
+    description: "Explain a concept at a given age level",
+    content:
+      "Explain @topic in simple terms. Explain it to me like I am @age years old. Give examples where possible.",
+    tags: ["teaching"],
+  },
+  {
+    name: "Writing Style Copier",
+    description: "Generate text based on a given sample of text",
+    content:
+      "Analyze the following text after the colon and write about @topic in the same writing style and similar readability level. @example_text",
+    tags: ["writing"],
+  },
+  {
+    name: "Social Media Post Generator",
+    description: "Generate social media content based on some examples",
+    content:
+      'Write a social media post for @platform , using a writing style similar to the following text: "@example" . \nmGive @variation_count variations for the content, each separated by a paragraph. The post should be written for @domain with the goal of the post being @goal',
+    tags: ["writing"],
+  },
+  {
+    name: "Email responder",
+    description: "Write a response to a given eamil",
+    content:
+      'Reply to this email: "@email" \n\nThe reply should be polite and friendly, be @qualities , and should be written in a @tone tone. Do not include a sign off, and do not explain yourself. Avoid complex words and be direct but tactful and concise.',
+    tags: ["writing"],
+  },
 ];
 
-export default { prompts }
+export default { prompts };
