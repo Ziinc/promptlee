@@ -160,7 +160,6 @@ export const workflowToDag = (workflow: Workflow) => {
 };
 
 export const batchToposortDag = (dag: Record<string, string[]>): string[][] => {
-  console.log("batching dag", dag);
   return batchingToposort(dag);
 };
 

@@ -15,11 +15,19 @@ import ReactFlow, {
   NodeProps,
   NodeChange,
   EdgeChange,
+  Connection,
 } from "reactflow";
 import { Button, Card, Divider, List, Tooltip, message } from "antd";
-import { extractPromptParameters, getNodePromptMapping } from "../utils";
+import {
+  batchToposortDag,
+  edgesToDag,
+  extractPromptParameters,
+  getNodePromptMapping,
+  workflowToDag,
+} from "../utils";
 import { Unlink, X } from "lucide-react";
 import isEqual from "lodash/isEqual";
+import WorkflowEditor from "../pages/WorkflowEditor";
 export interface DagEditorProps {
   onChange: (attrs: Attrs) => void;
   className?: string;
@@ -140,7 +148,7 @@ const DagEditor: React.FC<DagEditorProps> = ({
   );
 
   const onConnect = useCallback(
-    (params: Edge<any>) => {
+    (params: Edge | Connection) => {
       const nodeIds = nodes.map((node) => node.id);
       const cleanedEdges = edges.filter(
         (edge) =>
@@ -152,12 +160,25 @@ const DagEditor: React.FC<DagEditorProps> = ({
         (e) =>
           e.target === params.target && e.targetHandle == params.targetHandle
       );
-      if (!conflictingEdge) {
-        const newEdges = addEdge(params, cleanedEdges).map(rfEdgeToWfEdge);
-        maybeChange({ edges: newEdges });
-      } else {
+      if (conflictingEdge) {
         message.open({ type: "error", content: "Parameter already filled!" });
+        return;
       }
+      const newEdges = addEdge(params, cleanedEdges).map(rfEdgeToWfEdge);
+
+      // check if valid dag
+      try {
+        const dag = workflowToDag({ ...workflow, edges: newEdges } as Workflow);
+        batchToposortDag(dag);
+      } catch (e: any) {
+        if (e && (e.message as string).toLowerCase().includes("cycle"))
+          message.open({
+            type: "error",
+            content: `Workflows cannot be cyclic`,
+          });
+        return;
+      }
+      maybeChange({ edges: newEdges });
     },
     [edges, nodes]
   );
