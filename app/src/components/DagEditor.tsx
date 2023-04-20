@@ -16,12 +16,9 @@ import ReactFlow, {
   NodeChange,
   EdgeChange,
 } from "reactflow";
-import { Button, Card, Divider, List, Tooltip } from "antd";
-import {
-  extractPromptParameters,
-  getNodePromptMapping,
-} from "../utils";
-import {  Unlink, X } from "lucide-react";
+import { Button, Card, Divider, List, Tooltip, message } from "antd";
+import { extractPromptParameters, getNodePromptMapping } from "../utils";
+import { Unlink, X } from "lucide-react";
 import isEqual from "lodash/isEqual";
 export interface DagEditorProps {
   onChange: (attrs: Attrs) => void;
@@ -134,8 +131,6 @@ const DagEditor: React.FC<DagEditorProps> = ({
         (edge) =>
           nodeIds?.includes(edge.source) && nodeIds?.includes(edge.target)
       );
-      console.log("nodeIds", nodeIds);
-      console.log("cleanedEdges", cleanedEdges);
       const newEdges = applyEdgeChanges(changes, cleanedEdges).map(
         rfEdgeToWfEdge
       );
@@ -145,16 +140,24 @@ const DagEditor: React.FC<DagEditorProps> = ({
   );
 
   const onConnect = useCallback(
-    (params: any) => {
+    (params: Edge<any>) => {
       const nodeIds = nodes.map((node) => node.id);
       const cleanedEdges = edges.filter(
         (edge) =>
           nodeIds?.includes(edge.source) && nodeIds?.includes(edge.target)
       );
-      console.log("nodeIds", nodeIds);
-      console.log("cleanedEdges", cleanedEdges);
-      const newEdges = addEdge(params, cleanedEdges).map(rfEdgeToWfEdge);
-      maybeChange({ edges: newEdges });
+
+      // don't allow two edges to conflict with same node-parameter edge
+      const conflictingEdge = cleanedEdges.find(
+        (e) =>
+          e.target === params.target && e.targetHandle == params.targetHandle
+      );
+      if (!conflictingEdge) {
+        const newEdges = addEdge(params, cleanedEdges).map(rfEdgeToWfEdge);
+        maybeChange({ edges: newEdges });
+      } else {
+        message.open({ type: "error", content: "Parameter already filled!" });
+      }
     },
     [edges, nodes]
   );
