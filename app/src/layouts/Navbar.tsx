@@ -28,6 +28,7 @@ const Navbar = () => {
               onClick: () => navigate("/"),
             },
             { label: "Prompts", key: "prompts", onClick: () => navigate("/") },
+            { label: "Workflows", key: "workflows", onClick: () => navigate("/workflows") },
             { label: "Explore", key: "explore", onClick: () => navigate("/explore") },
           ]}
         />

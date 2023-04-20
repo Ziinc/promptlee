@@ -12,6 +12,32 @@ import { isSystemDarkMode } from "./utils";
 import ReactGA from "react-ga4";
 import TrackedRoute from "./components/TrackedRoute";
 import Explore from "./pages/Explore";
+import Workflows from "./pages/Workflows";
+import WorkflowEditor from "./pages/WorkflowEditor";
+
+export interface Workflow {
+  id: string;
+  name: string;
+  description?: string;
+  created: string;
+  updated: string;
+  nodes: {
+    id: string;
+    prompt_id: string;
+    rf_meta: {
+      position: {
+        x: number;
+        y: number;
+      };
+    };
+  }[];
+  edges: {
+    id: string;
+    from_node_id: string | null; // null for start
+    to_node_id: string | null; // null for end
+    to_input: string; // input key, without @
+  }[];
+}
 
 export interface Prompt {
   id: string;
@@ -36,9 +62,31 @@ export interface RunHistoryItem {
     apiResponse: CreateChatCompletionResponse;
   };
 }
+
+export interface WorkflowRunHistoryItem {
+  id: string;
+  workflow_id: string;
+  inputs: {
+    parameters: Record<string, string>;
+  };
+  status: "started" | "running" | "complete" | "error";
+  outputs: {
+    nodeResponses: {
+      [node_id: string]: CreateChatCompletionResponse;
+    };
+    nodeErrors: {
+      [node_id: string]: string[];
+    };
+    workflowError: string | null;
+  };
+  started_at: string;
+  stopped_at: string | null;
+}
 export interface AppState {
   prompts: Prompt[];
+  workflows: Workflow[];
   runHistory: RunHistoryItem[];
+  workflowRuns: WorkflowRunHistoryItem[];
   apiKey: string;
 }
 export interface AppContextValue extends AppState {
@@ -50,7 +98,9 @@ export interface AppContextValue extends AppState {
 
 export const DEFAULT_STATE = {
   prompts: [],
+  workflows: [],
   runHistory: [],
+  workflowRuns: [],
   apiKey: "",
 };
 export const AppContext = React.createContext({
@@ -151,6 +201,9 @@ const App = () => {
           <TrackedRoute path="/prompts/:id/edit" component={Editor} />
           <TrackedRoute path="/prompts/:id" component={Editor} />
           <TrackedRoute path="/explore" component={Explore} />
+          <TrackedRoute path="/workflows" component={Workflows} />
+          <TrackedRoute path="/workflows/:id" component={WorkflowEditor} />
+          <TrackedRoute path="/workflows/:id/edit" component={WorkflowEditor} />
           <TrackedRoute path="/" component={Home} />
           <TrackedRoute path="/settings" component={Settings} />
         </main>
