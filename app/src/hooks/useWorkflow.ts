@@ -120,7 +120,6 @@ const useWorkflow = () => {
         const batchResults: typeof nodeResponses =
           Object.fromEntries(resultsWithIndex);
         nodeResponses = merge(nodeResponses, batchResults);
-        console.log("final workflow nodeResponses", nodeResponses);
         mergeWorkflowRunOutputs(app, runId, { outputs: { nodeResponses } });
       }
 

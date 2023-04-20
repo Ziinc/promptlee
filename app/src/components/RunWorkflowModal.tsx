@@ -29,7 +29,6 @@ const RunWorkflowModal: React.FC<Props> = ({
   const [runStep, setRunStep] = useState<"params" | "result">("params");
 
   const { lastRun, clearLastRun, runWorkflow } = hook || useWorkflow();
-  console.log("lastRun", lastRun);
   const isLoading = ["running", "started"].includes(lastRun?.status || "");
   const parameters = useMemo(() => {
     if (!workflow) {
