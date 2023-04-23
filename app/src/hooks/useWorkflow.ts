@@ -1,9 +1,5 @@
 import { notification } from "antd";
 import { isEqual } from "lodash";
-import {
-  ChatCompletionRequestMessage,
-  CreateChatCompletionResponse,
-} from "openai";
 import { useMemo, useState } from "react";
 import { getResponse } from "../api/chat";
 import {
@@ -68,13 +64,12 @@ const useWorkflow = () => {
       let nodeResponses: WorkflowRunHistoryItem["outputs"]["nodeResponses"] =
         {};
       let nodeErrors: WorkflowRunHistoryItem["outputs"]["nodeErrors"] = {};
-      // work through the batch in parallel
-      let nodeOutputs: Record<string, string> = {};
 
       mergeWorkflowRunOutputs(app, runId, {
         status: "running",
       });
 
+      // work through the batch in parallel
       for (const batch of batches) {
         // return early if previous batches had errors
         if (!isEqual(nodeErrors, {})) {

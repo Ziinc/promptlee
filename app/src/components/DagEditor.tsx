@@ -20,14 +20,12 @@ import ReactFlow, {
 import { Button, Card, Divider, List, Tooltip, message } from "antd";
 import {
   batchToposortDag,
-  edgesToDag,
   extractPromptParameters,
   getNodePromptMapping,
   workflowToDag,
 } from "../utils";
 import { Unlink, X } from "lucide-react";
 import isEqual from "lodash/isEqual";
-import WorkflowEditor from "../pages/WorkflowEditor";
 export interface DagEditorProps {
   onChange: (attrs: Attrs) => void;
   className?: string;
