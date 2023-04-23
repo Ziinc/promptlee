@@ -11,17 +11,27 @@ import {
   Descriptions,
   Tabs,
   Tag,
+  Popover,
 } from "antd";
 import dayjs from "dayjs";
 import { Link, useLocation } from "wouter";
 import { useState } from "react";
 import { Prompt, useAppState, Workflow } from "../App";
-import { ArrowLeft, Eye, MoreHorizontal, Plane, Play, Plus, Save, X } from "lucide-react";
+import {
+  ArrowLeft,
+  Eye,
+  MoreHorizontal,
+  Play,
+  Plus,
+  Save,
+  FileText,
+} from "lucide-react";
 import { countWorkflowOutputs, countWorkflowParameters } from "../utils";
 import DagEditor from "../components/DagEditor";
 import useWorkflow from "../hooks/useWorkflow";
 import RunWorkflowModal from "../components/RunWorkflowModal";
 import PreviewPromptModal from "../components/PreviewPromptModal";
+import WorkflowResult from "../components/WorkflowResult";
 const WorkflowEditor = ({ params }: { params: { id: string } }) => {
   const [form] = Form.useForm();
   const [minimize, setMinimze] = useState(false);
@@ -316,10 +326,10 @@ const WorkflowEditor = ({ params }: { params: { id: string } }) => {
                                 </PreviewPromptModal>
                                 <Button
                                   size="small"
-                                    className="flex items-center gap-1"
-                                    type="primary"
-                                    icon={<Plus size={14} />}
-                                    onClick={() => handleCreateNode(prompt)}
+                                  className="flex items-center gap-1"
+                                  type="primary"
+                                  icon={<Plus size={14} />}
+                                  onClick={() => handleCreateNode(prompt)}
                                 >
                                   Add
                                 </Button>
@@ -378,9 +388,33 @@ const WorkflowEditor = ({ params }: { params: { id: string } }) => {
                           ),
                         },
                         {
-                          title: "Actions",
+                          title: "",
                           dataIndex: "id",
-                          render: () => null,
+                          render: (_val, run) => (
+                            <div className="flex justify-end">
+                              <Popover
+                                overlayClassName="max-w-lg"
+                                content={
+                                  workflow ? (
+                                    <WorkflowResult
+                                      workflow={workflow}
+                                      run={run}
+                                    />
+                                  ) : null
+                                }
+                                trigger="click"
+                                placement="left"
+                              >
+                                <Button
+                                  disabled={run.status !== "complete"}
+                                  className="flex items-center gap-1"
+                                  icon={<FileText size={12} />}
+                                >
+                                  Outputs
+                                </Button>
+                              </Popover>
+                            </div>
+                          ),
                         },
                       ]}
                     />
