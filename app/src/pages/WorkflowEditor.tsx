@@ -16,11 +16,12 @@ import dayjs from "dayjs";
 import { Link, useLocation } from "wouter";
 import { useState } from "react";
 import { Prompt, useAppState, Workflow } from "../App";
-import { ArrowLeft, MoreHorizontal, Play, Save, X } from "lucide-react";
+import { ArrowLeft, Eye, MoreHorizontal, Plane, Play, Plus, Save, X } from "lucide-react";
 import { countWorkflowOutputs, countWorkflowParameters } from "../utils";
 import DagEditor from "../components/DagEditor";
 import useWorkflow from "../hooks/useWorkflow";
 import RunWorkflowModal from "../components/RunWorkflowModal";
+import PreviewPromptModal from "../components/PreviewPromptModal";
 const WorkflowEditor = ({ params }: { params: { id: string } }) => {
   const [form] = Form.useForm();
   const [minimize, setMinimze] = useState(false);
@@ -303,11 +304,22 @@ const WorkflowEditor = ({ params }: { params: { id: string } }) => {
                             align: "right",
                             render: (_val, prompt) => (
                               <div className="flex justify-end gap-2">
-                                {/* <Button size="small">Preview</Button> */}
+                                <PreviewPromptModal prompt={prompt}>
+                                  <Button
+                                    size="small"
+                                    className="flex items-center gap-1"
+                                    disabled={!Boolean(prompt)}
+                                    icon={<Eye size={14} />}
+                                  >
+                                    Preview
+                                  </Button>
+                                </PreviewPromptModal>
                                 <Button
                                   size="small"
-                                  type="primary"
-                                  onClick={() => handleCreateNode(prompt)}
+                                    className="flex items-center gap-1"
+                                    type="primary"
+                                    icon={<Plus size={14} />}
+                                    onClick={() => handleCreateNode(prompt)}
                                 >
                                   Add
                                 </Button>

@@ -24,8 +24,9 @@ import {
   getNodePromptMapping,
   workflowToDag,
 } from "../utils";
-import { Unlink, X } from "lucide-react";
+import { Eye, Unlink, X } from "lucide-react";
 import isEqual from "lodash/isEqual";
+import PreviewPromptModal from "./PreviewPromptModal";
 export interface DagEditorProps {
   onChange: (attrs: Attrs) => void;
   className?: string;
@@ -243,7 +244,7 @@ const PromptNode = (props: NodeProps) => {
         </div>
       </NodeToolbar>
       <Card
-        className="w-48 px-3 py-2 shadow-lg"
+        className="w-56 px-3 py-2 shadow-lg"
         bodyStyle={{ padding: 0 }}
         size="small"
         onClick={() => setShowToolbar((prev) => !prev)}
@@ -256,8 +257,15 @@ const PromptNode = (props: NodeProps) => {
             className="-right-3 opacity-75 w-5 h-5 !cursor-pointer dark:hover:bg-gray-500 hover:bg-gray-400 "
           />
         </Tooltip>
-        <div>
+        <div className="flex justify-between items-center">
           <h4>{props.data.prompt.name}</h4>
+          <PreviewPromptModal prompt={props.data.prompt}>
+            <Tooltip title={`Preview '${props.data.prompt.name}''`}>
+              <Button type="text" className=" px-2 py-1">
+                <Eye size={12} />
+              </Button>
+            </Tooltip>
+          </PreviewPromptModal>
         </div>
         {inputs.length > 0 && (
           <>
