@@ -258,7 +258,10 @@ const PromptNode = (props: NodeProps) => {
           />
         </Tooltip>
         <div className="pb-2">
-          <PreviewPromptModal prompt={props.data.prompt}>
+          <PreviewPromptModal
+            prompt={props.data.prompt}
+            triggerClassName="inline-block"
+          >
             <Tooltip title={`Preview '${props.data.prompt.name}''`}>
               <Button
                 type="text"
