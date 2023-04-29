@@ -257,12 +257,18 @@ const PromptNode = (props: NodeProps) => {
             className="-right-3 opacity-75 w-5 h-5 !cursor-pointer dark:hover:bg-gray-500 hover:bg-gray-400 "
           />
         </Tooltip>
-        <div className="flex justify-between items-center">
-          <h4>{props.data.prompt.name}</h4>
+        <div className="pb-2">
           <PreviewPromptModal prompt={props.data.prompt}>
             <Tooltip title={`Preview '${props.data.prompt.name}''`}>
-              <Button type="text" className=" px-2 py-1">
-                <Eye size={12} />
+              <Button
+                type="text"
+                className=" group px-2 py-1 flex flex-row justify-start gap-2 items-center"
+              >
+                <h4 className="m-0 font-bold">{props.data.prompt.name}</h4>
+                <Eye
+                  size={12}
+                  className="group-hover:opacity-100 opacity-0 transition-all duration-500"
+                />
               </Button>
             </Tooltip>
           </PreviewPromptModal>
