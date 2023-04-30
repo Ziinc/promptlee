@@ -16,12 +16,14 @@ interface Props {
   hook?: ReturnType<typeof useWorkflow>;
   triggerClassName?: string;
   children: React.ReactNode | ((args: RenderProps) => React.ReactNode);
+  clearOnClose?: boolean;
 }
 const RunWorkflowModal: React.FC<Props> = ({
   workflow,
   hook,
   triggerClassName,
   children,
+  clearOnClose = true,
 }) => {
   const app = useAppState();
   const [paramsForm] = Form.useForm();
@@ -49,7 +51,9 @@ const RunWorkflowModal: React.FC<Props> = ({
   };
   const handleCancelRun = () => {
     setShow(false);
-    clearLastRun();
+    if (clearOnClose) {
+      clearLastRun();
+    }
   };
   const handleRunInputsNext = async () => {
     setRunStep("result");

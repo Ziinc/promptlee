@@ -25,6 +25,8 @@ import {
   Plus,
   Save,
   FileText,
+  X,
+  Check,
 } from "lucide-react";
 import { countWorkflowOutputs, countWorkflowParameters } from "../utils";
 import DagEditor from "../components/DagEditor";
@@ -32,6 +34,7 @@ import useWorkflow from "../hooks/useWorkflow";
 import RunWorkflowModal from "../components/RunWorkflowModal";
 import PreviewPromptModal from "../components/PreviewPromptModal";
 import WorkflowResult from "../components/WorkflowResult";
+import LoadingSpinner from "../components/LoadingSpinner";
 const WorkflowEditor = ({ params }: { params: { id: string } }) => {
   const [form] = Form.useForm();
   const [minimize, setMinimze] = useState(false);
@@ -159,7 +162,11 @@ const WorkflowEditor = ({ params }: { params: { id: string } }) => {
 
           <div className="flex gap-2">
             {workflow && (
-              <RunWorkflowModal workflow={workflow} hook={useWorkflowHook}>
+              <RunWorkflowModal
+                workflow={workflow}
+                hook={useWorkflowHook}
+                clearOnClose={false}
+              >
                 <Button
                   type="default"
                   className="flex justify-center items-center"
@@ -237,22 +244,59 @@ const WorkflowEditor = ({ params }: { params: { id: string } }) => {
                   {countWorkflowOutputs(workflow)}
                 </Descriptions.Item>
               </Descriptions>
-              {/* {useWorkflowHook.lastRun && (
-                <Card className="px-4 py-2">
-                  <Tag>{useWorkflowHook.lastRun.status}</Tag>
-                  <Tooltip title="Clear">
-                    <Button
-                      type="text"
-                      onClick={useWorkflowHook.clearLastRun}
-                      size="small"
-                      icon={<X size={14} />}
-                    />
-                  </Tooltip>
-                </Card>
-              )} */}
+              {useWorkflowHook.lastRun &&
+                useWorkflowHook.lastRun?.status !== "running" &&
+                useWorkflowHook.lastRun?.status !== "started" && (
+                  <Card className="p-0  w-64 ">
+                    <div className="flex flex-row gap-2 justify-between items-center">
+                      <div className="flex flex-row gap-2 justify-start items-center">
+                        <div
+                          className={[
+                            "w-5 h-5 flex justify-center items-center rounded-full",
+                            useWorkflowHook.lastRun.status === "complete"
+                              ? "dark:text-green-400 text-green-800 dark:bg-green-900 bg-green-200"
+                              : "",
+                            useWorkflowHook.lastRun.status === "error"
+                              ? "dark:text-red-400 text-red-800 dark:bg-red-900 bg-red-200"
+                              : "",
+                          ].join(" ")}
+                        >
+                          {useWorkflowHook.lastRun.status === "complete" && (
+                            <Check size={14} strokeWidth={2} />
+                          )}
+                          {useWorkflowHook.lastRun.status === "error" && (
+                            <X size={14} strokeWidth={2} />
+                          )}
+                        </div>
+
+                        <Tag
+                          className="block "
+                          color={
+                            useWorkflowHook.lastRun.status === "complete"
+                              ? "green"
+                              : useWorkflowHook.lastRun.status === "error"
+                              ? "red"
+                              : undefined
+                          }
+                        >
+                          {useWorkflowHook.lastRun.status}
+                        </Tag>
+                      </div>
+                      <Tooltip title="Clear">
+                        <Button
+                          type="text"
+                          onClick={useWorkflowHook.clearLastRun}
+                          size="small"
+                          icon={<X size={14} />}
+                        />
+                      </Tooltip>
+                    </div>
+                  </Card>
+                )}
             </div>
           )}
           <DagEditor
+            run={useWorkflowHook.lastRun || undefined}
             onMove={() => {
               if (!minimize) {
                 setMinimze(true);

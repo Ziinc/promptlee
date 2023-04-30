@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useAppState, Workflow } from "../App";
+import { useAppState, Workflow, WorkflowRunHistoryItem } from "../App";
 
 import ReactFlow, {
   Controls,
@@ -24,7 +24,7 @@ import {
   getNodePromptMapping,
   workflowToDag,
 } from "../utils";
-import { Eye, Unlink, X } from "lucide-react";
+import { AlertTriangle, Check, Eye, Unlink, X } from "lucide-react";
 import isEqual from "lodash/isEqual";
 import PreviewPromptModal from "./PreviewPromptModal";
 export interface DagEditorProps {
@@ -33,6 +33,7 @@ export interface DagEditorProps {
   workflow?: Workflow;
   onMove?: () => void;
   onDrag?: () => void;
+  run?: WorkflowRunHistoryItem;
 }
 
 interface Attrs {
@@ -60,8 +61,10 @@ const DagEditor: React.FC<DagEditorProps> = ({
   className,
   onMove,
   onDrag,
+  run,
 }) => {
   const app = useAppState();
+  console.log(run);
 
   const maybeChange = (attrs: Attrs) => {
     const edgesChanged = Boolean(
@@ -97,6 +100,8 @@ const DagEditor: React.FC<DagEditorProps> = ({
             onEdgesChange(toRemove);
           },
           prompt: app.prompts.find((p) => p.id === node.prompt_id),
+          nodeResponse: run?.outputs.nodeResponses[node.id],
+          nodeError: run?.outputs.nodeErrors[node.id],
         },
         type: "prompt",
       };
@@ -104,7 +109,7 @@ const DagEditor: React.FC<DagEditorProps> = ({
     const mapping =
       workflow && workflow.nodes ? getNodePromptMapping(app, workflow) : {};
     return [nodes, mapping];
-  }, [workflow?.nodes]);
+  }, [workflow?.nodes, JSON.stringify(run?.outputs.nodeResponses)]);
   const edges: Edge[] = useMemo(() => {
     return (workflow?.edges || []).map((edge, index) => {
       return {
@@ -205,12 +210,19 @@ const DagEditor: React.FC<DagEditorProps> = ({
 
 const PromptNode = (props: NodeProps) => {
   const prompt = props.data.prompt;
+  const nodeResponse:
+    | WorkflowRunHistoryItem["outputs"]["nodeResponses"][string]
+    | undefined = props.data.nodeResponse;
+  const nodeError:
+    | WorkflowRunHistoryItem["outputs"]["nodeErrors"][string]
+    | undefined = props.data.nodeErrors;
   const inputs = extractPromptParameters(prompt);
   const [showToolbar, setShowToolbar] = useState(false);
 
   useEffect(() => {
     setShowToolbar(false);
   }, [props.xPos, props.yPos, props.dragging]);
+  const showStatus = !!(nodeResponse || nodeError);
   return (
     <>
       <NodeToolbar
@@ -244,7 +256,7 @@ const PromptNode = (props: NodeProps) => {
         </div>
       </NodeToolbar>
       <Card
-        className="w-56 px-3 py-2 shadow-lg"
+        className="w-64 px-3 py-2 shadow-lg"
         bodyStyle={{ padding: 0 }}
         size="small"
         onClick={() => setShowToolbar((prev) => !prev)}
@@ -257,24 +269,46 @@ const PromptNode = (props: NodeProps) => {
             className="-right-3 opacity-75 w-5 h-5 !cursor-pointer dark:hover:bg-gray-500 hover:bg-gray-400 "
           />
         </Tooltip>
-        <div className="pb-2">
-          <PreviewPromptModal
-            prompt={props.data.prompt}
-            triggerClassName="inline-block"
-          >
-            <Tooltip title={`Preview '${props.data.prompt.name}''`}>
-              <Button
-                type="text"
-                className=" group px-2 py-1 flex flex-row justify-start gap-2 items-center"
-              >
-                <h4 className="m-0 font-bold">{props.data.prompt.name}</h4>
-                <Eye
-                  size={12}
-                  className="group-hover:opacity-100 opacity-0 transition-all duration-500"
-                />
-              </Button>
-            </Tooltip>
-          </PreviewPromptModal>
+        <div className="pb-2 flex flex-row justify-between items-center pr-1">
+          <div className={[showStatus ? "w-52" : "w-full"].join(" ")}>
+            <PreviewPromptModal prompt={props.data.prompt}>
+              <Tooltip title={`Preview '${props.data.prompt.name}'`}>
+                <Button
+                  type="text"
+                  className=" group px-2 py-1 flex flex-row text-left justify-start gap-2 items-center"
+                >
+                  <h4
+                    className={[
+                      "m-0 font-bold truncate ",
+                      showStatus ? "w-40" : "w-full",
+                    ].join(" ")}
+                  >
+                    {props.data.prompt.name}
+                  </h4>
+                  <Eye
+                    size={12}
+                    className="group-hover:opacity-100 opacity-0 transition-all duration-500"
+                  />
+                </Button>
+              </Tooltip>
+            </PreviewPromptModal>
+          </div>
+          {showStatus && (
+            <div
+              className={[
+                "w-5 h-5 flex justify-center items-center rounded-full",
+                nodeResponse
+                  ? "dark:text-green-400 text-green-800 dark:bg-green-900 bg-green-200"
+                  : "",
+                nodeError
+                  ? "dark:text-red-400 text-red-800 dark:bg-red-900 bg-red-200"
+                  : "",
+              ].join(" ")}
+            >
+              {nodeResponse && <Check size={14} strokeWidth={2} />}
+              {nodeError && <X size={14} strokeWidth={2} />}
+            </div>
+          )}
         </div>
         {inputs.length > 0 && (
           <>
