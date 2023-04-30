@@ -334,6 +334,7 @@ const PromptNode = (props: NodeProps) => {
               <div
                 className={[
                   "w-5 h-5 flex justify-center items-center rounded-full",
+                  "cursor-pointer",
                   nodeResponse
                     ? "dark:text-green-400 text-green-800 dark:bg-green-900 bg-green-200"
                     : "",
