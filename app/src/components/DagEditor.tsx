@@ -17,16 +17,17 @@ import ReactFlow, {
   EdgeChange,
   Connection,
 } from "reactflow";
-import { Button, Card, Divider, List, Tooltip, message } from "antd";
+import { Button, Card, Divider, List, Tooltip, message, Popover } from "antd";
 import {
   batchToposortDag,
   extractPromptParameters,
   getNodePromptMapping,
   workflowToDag,
 } from "../utils";
-import { AlertTriangle, Check, Eye, Unlink, X } from "lucide-react";
+import { AlertTriangle, Check, Copy, Eye, Unlink, X } from "lucide-react";
 import isEqual from "lodash/isEqual";
 import PreviewPromptModal from "./PreviewPromptModal";
+import PromptResult from "./PromptResult";
 export interface DagEditorProps {
   onChange: (attrs: Attrs) => void;
   className?: string;
@@ -294,20 +295,57 @@ const PromptNode = (props: NodeProps) => {
             </PreviewPromptModal>
           </div>
           {showStatus && (
-            <div
-              className={[
-                "w-5 h-5 flex justify-center items-center rounded-full",
-                nodeResponse
-                  ? "dark:text-green-400 text-green-800 dark:bg-green-900 bg-green-200"
-                  : "",
-                nodeError
-                  ? "dark:text-red-400 text-red-800 dark:bg-red-900 bg-red-200"
-                  : "",
-              ].join(" ")}
+            <Popover
+              content={
+                <>
+                  {nodeResponse && (
+                    <div className="flex flex-col items-end gap-2">
+                      <PromptResult result={nodeResponse} />
+
+                      <Tooltip title="Copy to clipboard">
+                        <Button
+                          size="small"
+                          className="flex flex-row justify-center items-center gap-1"
+                          onClick={() => {
+                            if (
+                              !navigator.clipboard ||
+                              !nodeResponse.choices[0].message
+                            )
+                              return;
+                            navigator.clipboard.writeText(
+                              nodeResponse.choices[0].message?.content!
+                            );
+                          }}
+                          icon={<Copy size={14} />}
+                        >
+                          Copy to clipboard
+                        </Button>
+                      </Tooltip>
+                    </div>
+                  )}
+                  {nodeError && (
+                    <p className="text-sm font-mono">
+                      {JSON.stringify(nodeError)}
+                    </p>
+                  )}
+                </>
+              }
             >
-              {nodeResponse && <Check size={14} strokeWidth={2} />}
-              {nodeError && <X size={14} strokeWidth={2} />}
-            </div>
+              <div
+                className={[
+                  "w-5 h-5 flex justify-center items-center rounded-full",
+                  nodeResponse
+                    ? "dark:text-green-400 text-green-800 dark:bg-green-900 bg-green-200"
+                    : "",
+                  nodeError
+                    ? "dark:text-red-400 text-red-800 dark:bg-red-900 bg-red-200"
+                    : "",
+                ].join(" ")}
+              >
+                {nodeResponse && <Check size={14} strokeWidth={2} />}
+                {nodeError && <X size={14} strokeWidth={2} />}
+              </div>
+            </Popover>
           )}
         </div>
         {inputs.length > 0 && (
