@@ -311,27 +311,6 @@ const PromptNode = (props: PromptNodeProps) => {
             <Form.Item name={["nodes", nodeIndex, "prompt_text"]}>
               <Input.TextArea />
             </Form.Item>
-            {/* <PreviewPromptModal prompt={props.data.prompt_text}>
-              <Tooltip title={`Preview '${props.data.prompt_text}'`}>
-                <Button
-                  type="text"
-                  className=" group px-2 py-1 flex flex-row text-left justify-start gap-2 items-center"
-                >
-                  <h4
-                    className={[
-                      "m-0 font-bold truncate ",
-                      showStatus ? "w-40" : "w-full",
-                    ].join(" ")}
-                  >
-                    {props.data.prompt_text}
-                  </h4>
-                  <Eye
-                    size={12}
-                    className="group-hover:opacity-100 opacity-0 transition-all duration-500"
-                  />
-                </Button>
-              </Tooltip>
-            </PreviewPromptModal> */}
           </div>
           {showStatus && (
             <Popover
