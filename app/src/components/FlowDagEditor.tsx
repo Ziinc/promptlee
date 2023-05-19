@@ -298,7 +298,7 @@ const PromptNode = (props: PromptNodeProps) => {
         onClick={() => setShowToolbar((prev) => !prev)}
         onBlur={() => setShowToolbar(false)}
       >
-        <Tooltip title={`Output for '${props.data.prompt_text}'`}>
+        <Tooltip title={`Prompt Output`}>
           <Handle
             type="source"
             position={Position.Right}
