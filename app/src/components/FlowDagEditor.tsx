@@ -42,6 +42,7 @@ import PreviewPromptModal from "./PreviewPromptModal";
 import PromptResult from "./PromptResult";
 import { FlowVersion } from "../api/flows";
 import { CreateChatCompletionResponse } from "openai";
+import { useFlowEditorState } from "../pages/FlowEditor";
 export interface DagEditorProps {
   onChange: (attrs: Attrs) => void;
   className?: string;
@@ -243,6 +244,7 @@ interface PromptNodeProps extends NodeProps {
 }
 
 const PromptNode = (props: PromptNodeProps) => {
+  const editor = useFlowEditorState();
   const promptText = props.data.prompt_text;
   const nodeId = props.data.id;
   const nodeIndex = props.data.index;
@@ -256,18 +258,24 @@ const PromptNode = (props: PromptNodeProps) => {
   const [showToolbar, setShowToolbar] = useState(false);
 
   useEffect(() => {
-    setShowToolbar(false);
+    if (props.dragging && editor.selectedNodeId !== nodeId) {
+      onSelect();
+    }
   }, [props.xPos, props.yPos, props.dragging]);
   const showStatus = !!(nodeResponse || nodeError);
+
+  const onSelect = () => {
+    setShowToolbar(true);
+    editor.mergeState({ selectedNodeId: nodeId });
+  };
   return (
     <>
       <NodeToolbar
-        isVisible={showToolbar}
+        isVisible={editor.selectedNodeId === nodeId}
         position={Position.Top}
-        onBlur={() => setShowToolbar(false)}
       >
-        <div className="w-48 flex justify-end gap-2">
-          <Tooltip title="Remove all input-output flows">
+        <div className="w-96 flex justify-end gap-2">
+          <Tooltip title="Remove all connections">
             <Button
               icon={<Unlink size={12} />}
               size="small"
@@ -292,11 +300,10 @@ const PromptNode = (props: PromptNodeProps) => {
         </div>
       </NodeToolbar>
       <Card
-        className="w-64 px-3 py-2 shadow-lg"
+        className="w-96 px-3 py-2 shadow-lg"
         bodyStyle={{ padding: 0 }}
         size="small"
-        onClick={() => setShowToolbar((prev) => !prev)}
-        onBlur={() => setShowToolbar(false)}
+        onClick={onSelect}
       >
         <Tooltip title={`Prompt Output`}>
           <Handle
@@ -309,7 +316,7 @@ const PromptNode = (props: PromptNodeProps) => {
           <div className={[showStatus ? "w-52" : "w-full"].join(" ")}>
             <Form.Item name={["nodes", nodeIndex, "id"]} hidden />
             <Form.Item name={["nodes", nodeIndex, "prompt_text"]}>
-              <Input.TextArea />
+              <Input.TextArea autoSize={{ maxRows: 10, minRows: 5 }} />
             </Form.Item>
           </div>
           {showStatus && (

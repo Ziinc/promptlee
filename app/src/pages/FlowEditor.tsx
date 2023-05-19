@@ -14,10 +14,18 @@ import {
   Popover,
   Dropdown,
   Divider,
+  FormInstance,
 } from "antd";
 import dayjs from "dayjs";
 import { Link, useLocation } from "wouter";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Prompt, useAppState, Workflow } from "../App";
 import {
   ArrowLeft,
@@ -30,6 +38,7 @@ import {
   X,
   Check,
   AlignLeft,
+  Unlink,
 } from "lucide-react";
 import { countWorkflowOutputs, countWorkflowParameters } from "../utils";
 import DagEditor from "../components/DagEditor";
@@ -48,8 +57,31 @@ import {
 } from "../api/flows";
 import FlowDagEditor from "../components/FlowDagEditor";
 import debounce from "lodash/debounce";
+
+export interface FlowEditorState {
+  selectedNodeId: string | null;
+}
+
+export interface FlowEditorContextValue extends FlowEditorState {
+  form: FormInstance | null;
+  mergeState: (partial: Partial<FlowEditorState>) => void;
+}
+const DEFAULT_STATE = {
+  selectedNodeId: null,
+};
+
+export const FlowEditorContext = createContext<FlowEditorContextValue>({
+  ...DEFAULT_STATE,
+  form: null,
+  mergeState: () => null,
+});
+
+export const useFlowEditorState = () => useContext(FlowEditorContext);
+
 const FlowEditor = ({ params }: { params: { id: string } }) => {
   const [form] = Form.useForm();
+  const [editorState, setEditorState] =
+    useState<FlowEditorState>(DEFAULT_STATE);
   const [showSidebar, setShowSidebar] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [_location, navigate] = useLocation();
@@ -86,6 +118,10 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
     setIsLoading(false);
   };
 
+  const mergeState: FlowEditorContextValue["mergeState"] = (partial) => {
+    setEditorState((prev) => ({ ...prev, ...partial }));
+  };
+
   // const handleDelete = async () => {
   //   const cfm = confirm(
   //     "Are you sure you want to delete this workflow? This cannot be undone."
@@ -105,7 +141,7 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
     await createFlowVersion(flow.id, attrs);
   }, [form, flow]);
   const debouncedHandleSave = useMemo(
-    () => debounce(handleSave, 800),
+    () => debounce(handleSave, 600),
     [handleSave]
   );
 
@@ -121,159 +157,193 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
       } as FlowVersion["nodes"][number],
     ]);
   };
+  const handleUnlink = async () => {
+    if (!editorState.selectedNodeId) return;
+    console.log("Currently selected node: ", editorState.selectedNodeId);
+    const nodeId = editorState.selectedNodeId;
+    const edges: FlowVersion["edges"] = form.getFieldValue("edges") || [];
+    const newEdges = edges.filter(
+      (edge) => edge.from_node_id !== nodeId && edge.to_node_id !== nodeId
+    );
+    form.setFieldValue("edges", newEdges);
+    debouncedHandleSave();
+  };
 
-  // const handleMinimizeToggle = () => {
-  //   setMinimze((prev) => !prev);
-  // };
-  // const formValues = Form.useWatch([], form);
   const formValues = Form.useWatch([], form);
-  console.log({ formValues });
   const isToolbarDisabled = !flow;
 
   return (
-    <Form
-      className=""
-      form={form}
-      initialValues={{ nodes: [], edges: [] }}
-      onFieldsChange={() => {
-        // trigger save
-        debouncedHandleSave.cancel();
-        debouncedHandleSave();
+    <FlowEditorContext.Provider
+      value={{
+        ...editorState,
+        form,
+        mergeState,
       }}
     >
-      <Form.Item hidden name="nodes" />
-      <Form.Item hidden name="edges" />
-      <FlowsLayout
-        showSidebar={showSidebar}
-        toolbarActions={
-          <div>
-            {/* second layer */}
-            <div className="px-2 py-1 flex flex-row gap-1">
-              <Dropdown
-                menu={{
-                  className: "w-48",
-                  items: [
-                    {
-                      key: "new",
-                      label: "New",
-                      onClick: async () => {
-                        const { data, error } = await createFlow();
-                        if (error) return;
-                        window.open(`/flows/${data!.id}`);
+      <Form
+        className=""
+        form={form}
+        initialValues={{ nodes: [], edges: [] }}
+        onFieldsChange={() => {
+          // trigger save
+          debouncedHandleSave.cancel();
+          debouncedHandleSave();
+        }}
+      >
+        <Form.Item hidden name="nodes" />
+        <Form.Item hidden name="edges" />
+        <FlowsLayout
+          showSidebar={showSidebar}
+          toolbarActions={
+            <div>
+              {/* second layer */}
+              <div className="px-2 py-1 flex flex-row gap-1">
+                <Dropdown
+                  trigger={["click", "hover"]}
+                  menu={{
+                    className: "w-48",
+                    items: [
+                      {
+                        key: "new",
+                        label: "New",
+                        onClick: async () => {
+                          const { data, error } = await createFlow();
+                          if (error) return;
+                          window.open(`/flows/${data!.id}`);
+                        },
                       },
-                    },
-                    {
-                      key: "open",
-                      label: "Open",
-                      onClick: () => {
-                        setTimeout(() => {
-                          setShowSidebar(true);
-                        }, 200);
+                      {
+                        key: "open",
+                        label: "Open",
+                        onClick: () => {
+                          setTimeout(() => {
+                            setShowSidebar(true);
+                          }, 200);
+                        },
                       },
-                    },
-                    {
-                      key: "copy",
-                      label: "Make a copy",
-                      onClick: async () => {
-                        if (!flow) {
-                          console.error("No flow selected!");
-                          return;
-                        }
-                        const { data, error } = await createFlow({
-                          name: `${flow.name} copy`,
-                        });
-                        window.open(`/flows/${data!.id}`);
+                      {
+                        key: "copy",
+                        label: "Make a copy",
+                        onClick: async () => {
+                          if (!flow) {
+                            console.error("No flow selected!");
+                            return;
+                          }
+                          const { data, error } = await createFlow({
+                            name: `${flow.name} copy`,
+                          });
+                          window.open(`/flows/${data!.id}`);
+                        },
                       },
-                    },
-                  ],
-                }}
-                disabled={isToolbarDisabled}
-              >
-                <Button size="small" type="text" disabled={isToolbarDisabled}>
-                  File
-                </Button>
-              </Dropdown>
-              <Dropdown
-                menu={{
-                  className: "w-48",
-                  items: [],
-                }}
-                disabled={isToolbarDisabled}
-              >
-                <Button size="small" type="text">
-                  Edit
-                </Button>
-              </Dropdown>
-              <Dropdown
-                menu={{
-                  className: "w-48",
-                  items: [
-                    {
-                      key: "prompt",
-                      label: "Prompt",
-                      onClick: () => {
-                        console.log("new prompt");
+                    ],
+                  }}
+                  disabled={isToolbarDisabled}
+                >
+                  <Button size="small" type="text" disabled={isToolbarDisabled}>
+                    File
+                  </Button>
+                </Dropdown>
+                <Dropdown
+                  trigger={["click", "hover"]}
+                  menu={{
+                    className: "w-48",
+                    items: [
+                      {
+                        key: "unlink",
+                        label: "Remove connections",
+                        onClick: handleUnlink,
+                        icon: <Unlink size={16} />,
+                        disabled: editorState.selectedNodeId == null,
                       },
-                    },
-                  ],
-                }}
-                disabled={isToolbarDisabled}
-              >
-                <Button size="small" type="text">
-                  Insert
-                </Button>
-              </Dropdown>
+                    ],
+                  }}
+                  disabled={isToolbarDisabled}
+                >
+                  <Button size="small" type="text">
+                    Edit
+                  </Button>
+                </Dropdown>
+                <Dropdown
+                  trigger={["click", "hover"]}
+                  menu={{
+                    className: "w-48",
+                    items: [
+                      {
+                        key: "prompt",
+                        label: "Prompt",
+                        icon: <AddPromptIcon />,
+                        className: "flex gap-2 items-center align-center",
+                        onClick: handleAddPrompt,
+                      },
+                    ],
+                  }}
+                  disabled={isToolbarDisabled}
+                >
+                  <Button size="small" type="text">
+                    Insert
+                  </Button>
+                </Dropdown>
+              </div>
+              {/* third layer */}
+              <Divider type="horizontal" className="w-full my-1" />
+              <div className="flex gap-2 items-center justify-start">
+                <ToolbarActionButton
+                  label="Add prompt"
+                  icon={<AddPromptIcon />}
+                  onClick={handleAddPrompt}
+                />
+                <Divider type="vertical" className="h-full" />
+                <ToolbarActionButton
+                  label="Unlink connections"
+                  icon={<Unlink size={14} />}
+                  onClick={handleUnlink}
+                  disabled={editorState.selectedNodeId === null}
+                />
+              </div>
             </div>
-            {/* third layer */}
-            <Divider type="horizontal" className="w-full my-1" />
-            <div className="flex gap-2">
-              <ToolbarActionButton
-                label="Add prompt"
-                icon={<AddPromptIcon />}
-                onClick={handleAddPrompt}
+          }
+        >
+          {/* {!version && (
+            <div>
+              <h3>Add a step to your flow</h3>
+              <Tabs
+                tabPosition="left"
+                items={[
+                  {
+                    label: `Prompt`,
+                    key: "prompt",
+                    children: `Content of Tab`,
+                  },
+                ]}
               />
             </div>
-          </div>
-        }
-      >
-        {!version && (
-          <div>
-            <h3>Add a step to your flow</h3>
-            <Tabs
-              tabPosition="left"
-              items={[
-                {
-                  label: `Prompt`,
-                  key: "prompt",
-                  children: `Content of Tab`,
-                },
-              ]}
+          )} */}
+          {formValues && (
+            <FlowDagEditor
+              // run={useWorkflowHook.lastRun || undefined}
+              // onMove={() => {
+              //   if (!minimize) {
+              //     setMinimze(true);
+              //   }
+              // }}
+              onMove={() => {
+                if (editorState.selectedNodeId) {
+                  mergeState({ selectedNodeId: null });
+                }
+              }}
+              // workflow={formValues}
+              onChange={(values) => {
+                console.log("change registered", values);
+                form.setFieldsValue(values);
+                debouncedHandleSave();
+              }}
+              className="h-[80vh] z-10"
+              flowVersion={formValues}
             />
-          </div>
-        )}
-        {formValues && (
-          <FlowDagEditor
-            // run={useWorkflowHook.lastRun || undefined}
-            // onMove={() => {
-            //   if (!minimize) {
-            //     setMinimze(true);
-            //   }
-            // }}
-            // onDrag={() => {
-            //   if (!minimize) {
-            //     setMinimze(true);
-            //   }
-            // }}
-            // workflow={formValues}
-            onChange={(values) => {
-              form.setFieldsValue(values);
-            }}
-            className="h-[80vh] z-10"
-            flowVersion={formValues}
-          />
-        )}
-      </FlowsLayout>
-    </Form>
+          )}
+        </FlowsLayout>
+      </Form>
+    </FlowEditorContext.Provider>
   );
 };
 
@@ -281,16 +351,19 @@ const ToolbarActionButton = ({
   label,
   icon,
   onClick,
+  disabled,
 }: {
   label: string;
   icon: React.ReactNode;
   onClick: () => void;
+  disabled?: boolean;
 }) => (
-  <Tooltip title={label}>
+  <Tooltip title={label}  placement="bottom">
     <Button
       onClick={onClick}
       type="text"
       icon={icon}
+      disabled={disabled}
       className="flex flex-row items-center justify-center py-1 px-2"
     >
       <span className="sr-only">Add prompt</span>
