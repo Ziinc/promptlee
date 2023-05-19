@@ -6,176 +6,67 @@ import {
   Popover,
   Tooltip,
   Alert,
+  Divider,
 } from "antd";
 import "antd/dist/reset.css";
-import { Copy, Edit2, MoreVertical, Play, Trash2 } from "lucide-react";
+import { Copy, Edit2, File, MoreVertical, Play, Trash2 } from "lucide-react";
 import React from "react";
 import { Link, useLocation } from "wouter";
+import { createFlow, Flow } from "../api/flows";
 import { useAppState } from "../App";
 import RunModal from "../components/RunModal";
+import FlowsLayout from "../layouts/FlowsLayout";
+import FlowsList from "../layouts/FlowsList";
 import MainLayout from "../layouts/MainLayout";
 const Home: React.FC = () => {
   const [_location, navigate] = useLocation();
   const app = useAppState();
 
-  const createPrompt = async () => {
-    navigate(`/prompts/new`);
-  };
-
-  const deletePrompt = async (id: string) => {
-    app.setAppState((prev) => ({
-      ...prev,
-      prompts: prev.prompts.filter((p) => p.id !== id),
-    }));
-    notification.success({ message: "Deleted!", placement: "bottomRight" });
-  };
-
-  const duplicatePrompt = async (id: string) => {
-    const target = app.prompts.find((p) => p.id === id);
-    if (!target) {
-      notification.error({
-        message: "Something went wrong!",
-        placement: "bottomRight",
-      });
-      return;
-    }
-    let copied = {
-      ...Object.assign({}, target),
-      id: crypto.randomUUID(),
-      name: target.name + " copy",
-      inserted: new Date().toISOString(),
-      updated: new Date().toISOString(),
-    };
-    app.setAppState((prev) => ({
-      ...prev,
-      prompts: [...prev.prompts, copied],
-    }));
-    notification.success({
-      message: "Prompt duplicated!",
-      placement: "bottomRight",
-    });
-  };
-
   return (
-    <MainLayout>
-      <div className="flex flex-col gap-10 container mx-auto">
-        {!app.apiKey && (
-          <Alert
-            message={
-              <span>
-                <strong>No API Key Set.</strong> An OpenAI API key is required
-                for PromptPro to work correctly.
-              </span>
-            }
-            action={
-              <Link to="/settings">
-                <Button>Configure</Button>
-              </Link>
-            }
-            type="warning"
-            showIcon
-          />
-        )}
-
-        <section className="flex flex-row justify-between">
-          <h2>Prompts</h2>
-
-          <Button type="primary" onClick={createPrompt}>
-            Create Prompt
-          </Button>
-        </section>
-
-        <div className="flex flex-row flex-wrap  justify-start gap-3">
-          {app.prompts
-            .sort((a, b) => {
-              const aDate: any = new Date(a.updated);
-              const bDate: any = new Date(b.updated);
-              return bDate - aDate;
-            })
-            .map((prompt) => (
-              <Card
-                className="border-2 dark:border-slate-700 border-gray-300 w-[24%]"
-                key={prompt.id}
-                size="small"
-                title={prompt.name}
-                extra={
-                  <Tooltip title="View more actions">
-                    <Dropdown
-                      trigger={["click"]}
-                      menu={{
-                        items: [
-                          {
-                            label: "Duplicate prompt",
-                            onClick: () => duplicatePrompt(prompt.id),
-                            icon: <Copy size={14} />,
-                            key: "duplicate",
-                          },
-                          {
-                            type: "divider",
-                          },
-                          {
-                            label: "Delete prompt",
-                            onClick: () => deletePrompt(prompt.id),
-                            icon: <Trash2 size={14} />,
-                            danger: true,
-                            key: "delete",
-                          },
-                        ],
-                      }}
-                    >
-                      <Button
-                        danger
-                        type="ghost"
-                        size="small"
-                        icon={<MoreVertical size={14} />}
-                      />
-                    </Dropdown>
-                  </Tooltip>
-                }
-              >
-                <div className="text-gray-700 dark:text-gray-400">
-                  {prompt.description ? (
-                    <Popover
-                      title={prompt.description}
-                      overlayClassName="max-w-sm"
-                    >
-                      <span className="block text-sm truncate">
-                        {prompt.description}
-                      </span>
-                    </Popover>
-                  ) : (
-                    <span className="italic">No description</span>
-                  )}
-                </div>
-                <div className="flex flex-row justify-between w-full pt-2 gap-3 cursor-default">
-                  <Tooltip title="Edit prompt">
-                    <Button
-                      type="default"
-                      block
-                      onClick={() => navigate(`/prompts/${prompt.id}/edit`)}
-                      icon={<Edit2 size={12} className="mr-1" />}
-                    >
-                      Edit
-                    </Button>
-                  </Tooltip>
-                  <RunModal prompt={prompt}>
-                    <Tooltip title="Run prompt">
-                      <Button
-                        block
-                        type="primary"
-                        icon={<Play size={12} className="mr-1" />}
-                      >
-                        Run
-                      </Button>
-                    </Tooltip>
-                  </RunModal>
-                </div>
-              </Card>
-            ))}
+    <FlowsLayout>
+      <Card
+        className="w-fit mx-auto mt-[10vh] min-h-[40vh]"
+        title={
+          <div className="p-5">
+            <h3 className="text-base text-center">
+              PromptPro is a ChatGPT prompt manager for creating powerful
+              automation flows
+            </h3>
+          </div>
+        }
+        bordered
+      >
+        <div className="flex">
+          <div className="w-1/2 mx-auto">
+            <h4 className="font-bold opacity-75 text-center">Create a Flow</h4>
+            <Button
+              className="flex justify-start items-center gap-1"
+              block
+              size="large"
+              icon={<File size={18} />}
+              onClick={async () => {
+                const { data, error } = await createFlow();
+                if (error) return;
+                app.mergeAppState({ flows: app.flows?.concat([data as Flow]) });
+                navigate(`/flows/${data!.id}`);
+              }}
+            >
+              New blank flow
+            </Button>
+          </div>
+          {app.flows && app.flows.length > 0 && (
+            <div className="w-1/2 px-2">
+              <div>
+                <h4 className="font-bold opacity-75 text-center">
+                  Open a Flow
+                </h4>
+                <FlowsList />
+              </div>
+            </div>
+          )}
         </div>
-        <span className="ml-auto text-xs">{app.prompts.length} prompts</span>
-      </div>
-    </MainLayout>
+      </Card>
+    </FlowsLayout>
   );
 };
 

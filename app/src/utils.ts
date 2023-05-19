@@ -5,11 +5,14 @@ import {
   Workflow,
   WorkflowRunHistoryItem,
 } from "./App";
+import { createClient } from "@supabase/supabase-js";
 // @ts-ignore
 import batchingToposort from "batching-toposort";
 import slice from "lodash/slice";
 import concat from "lodash/concat";
 import { merge } from "lodash";
+import { Database } from "./database.types";
+import { Flow, FlowVersion } from "./api/flows";
 
 // https://stackoverflow.com/questions/61132262/typescript-deep-partial
 type DeepPartial<T> = T extends object
@@ -31,6 +34,13 @@ export const resolveTextParams = (
   return replaced;
 };
 
+export const extractParametersFromText = (text: string) => {
+
+  const promptParams = [...text.matchAll(/\s\@(\S+)\s?/g)];
+  const params = promptParams.flatMap(([_match, paramName]) => paramName);
+
+  return [...new Set(params)];
+};
 export const extractPromptParameters = (prompt: Prompt) => {
   const inputMessages = prompt.messages;
 
@@ -93,8 +103,9 @@ export const countWorkflowOutputs = (workflow: Workflow): number => {
   return listTerminalOutputNodes(workflow).length;
 };
 
-export const getNodePromptMapping = (app: AppState, workflow: Workflow) => {
-  return workflow.nodes.reduce((acc, node) => {
+
+export const getNodePromptMapping = (app: AppState, workflowOrFlowVersion: Workflow | FlowVersion) => {
+  return workflowOrFlowVersion.nodes.reduce((acc, node) => {
     const prompt = app.prompts.find((p) => p.id === node.prompt_id);
     acc[node.id] = prompt;
     return acc;
@@ -159,6 +170,20 @@ export const workflowToDag = (workflow: Workflow) => {
   return dag;
 };
 
+
+export const flowToDag = (flowVersion: FlowVersion) => {
+  let dag = flowVersion.nodes.reduce((acc, node) => {
+    const edgesFromNode = flowVersion.edges
+      .filter((edge) => edge.to_node_id && edge.from_node_id === node.id)
+      .map((edge) => edge.to_node_id!);
+    acc[node.id] = edgesFromNode;
+    return acc;
+  }, {} as Record<string, string[]>);
+
+  return dag;
+};
+
+
 export const batchToposortDag = (dag: Record<string, string[]>): string[][] => {
   return batchingToposort(dag);
 };
@@ -208,3 +233,9 @@ export const extractWorkflowParams = (
 
   return Object.values(nodeParamsMapping).flat();
 };
+
+// Create a single supabase client for interacting with your database
+export const supabase = createClient<Database>(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_KEY
+);

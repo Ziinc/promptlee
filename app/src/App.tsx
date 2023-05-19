@@ -14,7 +14,12 @@ import TrackedRoute from "./components/TrackedRoute";
 import Explore from "./pages/Explore";
 import Workflows from "./pages/Workflows";
 import WorkflowEditor from "./pages/WorkflowEditor";
-
+import { Flow, getLifetimePromptRunCount, listFlows } from "./api/flows";
+import FlowEditor from "./pages/FlowEditor";
+import { Database } from "./database.types";
+import { Session, User } from "@supabase/gotrue-js";
+import AuthWall from "./components/AuthWall";
+import UpgradePromptModal from "./components/UpgradePromptModal";
 export interface Workflow {
   id: string;
   name: string;
@@ -88,6 +93,13 @@ export interface AppState {
   runHistory: RunHistoryItem[];
   workflowRuns: WorkflowRunHistoryItem[];
   apiKey: string;
+  currentFlow: Flow | null;
+  flows: Flow[] | null;
+  user: User | null;
+  session: Session | null;
+  lifetimePromptRuns: number;
+  isExceedingPromptRuns: boolean;
+  isExceedingFlows: boolean;
 }
 export interface AppContextValue extends AppState {
   setAppState: React.Dispatch<AppState | ((prev: AppState) => AppState)>;
@@ -102,6 +114,13 @@ export const DEFAULT_STATE = {
   runHistory: [],
   workflowRuns: [],
   apiKey: "",
+  currentFlow: null,
+  flows: null,
+  user: null,
+  session: null,
+  lifetimePromptRuns: 0,
+  isExceedingFlows: false,
+  isExceedingPromptRuns: false,
 };
 export const AppContext = React.createContext({
   ...DEFAULT_STATE,
@@ -125,14 +144,22 @@ const App = () => {
   const setup = async () => {
     ReactGA.initialize("G-SKTR3XPW5M");
 
-    // retrieve cached values and put them into local state
-    let cached = {} as any;
-    for (var key in DEFAULT_STATE) {
-      const cachedValue = await localforage.getItem(key);
-      if (cachedValue) {
-        cached[key] = cachedValue;
-      }
-    }
+    // // retrieve cached values and put them into local state
+    // let cached = {} as any;
+    // for (var key in DEFAULT_STATE) {
+    //   const cachedValue = await localforage.getItem(key);
+    //   if (cachedValue) {
+    //     cached[key] = cachedValue;
+    //   }
+    // }
+
+    // fetch all flows
+    const { data: flows } = await listFlows();
+    const { data: lifetimeRuns } = await getLifetimePromptRunCount();
+    mergeAppState({
+      flows,
+      lifetimePromptRuns: lifetimeRuns?.count || 0,
+    });
 
     // determine if system dark mode
     if (isSystemDarkMode() && !document.body.classList.contains("dark")) {
@@ -140,22 +167,22 @@ const App = () => {
       mergeAppState({}); // trigger rerender
     }
 
-    setAppState((prev) => ({ ...prev, ...cached }));
+    // setAppState((prev) => ({ ...prev, ...cached }));
   };
 
-  useEffect(() => {
-    syncState(appState);
-  }, [JSON.stringify(appState)]);
+  // useEffect(() => {
+  //   syncState(appState);
+  // }, [JSON.stringify(appState)]);
 
-  const syncState = async (newState: AppState) => {
-    if (newState == DEFAULT_STATE) return;
-    for (let key in DEFAULT_STATE) {
-      const val = await localforage.getItem(key);
-      if (val !== (appState as any)[key]) {
-        await localforage.setItem(key, (appState as any)[key]);
-      }
-    }
-  };
+  // const syncState = async (newState: AppState) => {
+  //   if (newState == DEFAULT_STATE) return;
+  //   for (let key in DEFAULT_STATE) {
+  //     const val = await localforage.getItem(key);
+  //     if (val !== (appState as any)[key]) {
+  //       await localforage.setItem(key, (appState as any)[key]);
+  //     }
+  //   }
+  // };
 
   const mergeAppState: AppContextValue["mergeAppState"] = (partial) => {
     setAppState((prev) => ({ ...prev, ...partial }));
@@ -195,11 +222,15 @@ const App = () => {
           mergeAppState,
           darkMode,
           toggleDarkMode,
+          isExceedingFlows: (appState.flows || []).length >= 5,
+          isExceedingPromptRuns: appState.lifetimePromptRuns >= 100,
         }}
       >
+        <AuthWall />
         <main className=" bg-slate-100 dark:bg-slate-900 text-black dark:text-gray-100">
           <TrackedRoute path="/prompts/:id/edit" component={Editor} />
           <TrackedRoute path="/prompts/:id" component={Editor} />
+          <TrackedRoute path="/flows/:id" component={FlowEditor} />
           <TrackedRoute path="/explore" component={Explore} />
           <TrackedRoute path="/workflows" component={Workflows} />
           <TrackedRoute path="/workflows/:id" component={WorkflowEditor} />
