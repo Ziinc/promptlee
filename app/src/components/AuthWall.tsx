@@ -12,6 +12,7 @@ const AuthWall = () => {
     setAuthCheck(true);
     if (session) {
       app.mergeAppState({ session, user: session.user ?? null });
+      setAuthCheck(false)
     }
   }
 
