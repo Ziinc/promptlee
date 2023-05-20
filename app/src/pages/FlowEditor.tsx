@@ -183,6 +183,11 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
   };
 
   const formValues = Form.useWatch([], form);
+
+  useEffect(()=>{
+    debouncedHandleSave();
+  }, [JSON.stringify(formValues)])
+  
   const isToolbarDisabled = !flow;
 
   return (
