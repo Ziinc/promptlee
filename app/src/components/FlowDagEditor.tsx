@@ -27,6 +27,7 @@ import {
   Tooltip,
   message,
   Popover,
+  Dropdown,
 } from "antd";
 import {
   batchToposortDag,
@@ -36,19 +37,20 @@ import {
   getNodePromptMapping,
   workflowToDag,
 } from "../utils";
-import { Check, Copy, Eye, Unlink, X } from "lucide-react";
+import { Check, Copy, Eye, Trash, Unlink, X } from "lucide-react";
 import isEqual from "lodash/isEqual";
 import PreviewPromptModal from "./PreviewPromptModal";
 import PromptResult from "./PromptResult";
 import { FlowVersion } from "../api/flows";
 import { CreateChatCompletionResponse } from "openai";
 import { useFlowEditorState } from "../pages/FlowEditor";
-export interface DagEditorProps {
+export interface FlowDagEditorProps {
   onChange: (attrs: Attrs) => void;
   className?: string;
   flowVersion?: FlowVersion;
   onMove?: () => void;
   onDrag?: () => void;
+  onPromptRemove: (nodeId: string) => void;
   run?: WorkflowRunHistoryItem;
 }
 
@@ -71,14 +73,15 @@ const rfEdgeToWfEdge = (edge: Edge): FlowVersion["edges"][number] => {
   };
 };
 
-const FlowDagEditor: React.FC<DagEditorProps> = ({
+const FlowDagEditor = ({
   onChange,
   flowVersion,
   className,
   onMove,
   onDrag,
+  onPromptRemove,
   run,
-}) => {
+}: FlowDagEditorProps) => {
   const app = useAppState();
 
   const maybeChange = (attrs: Attrs) => {
@@ -105,9 +108,7 @@ const FlowDagEditor: React.FC<DagEditorProps> = ({
         data: {
           id: node.id,
           index: index,
-          onRemove: () => {
-            onNodesChange([{ id: node.id, type: "remove" }]);
-          },
+          onRemove: onPromptRemove,
           onUnlink: () => {
             const toRemove = edges
               .filter(
@@ -239,7 +240,7 @@ interface PromptNodeProps extends NodeProps {
     nodeResponse: CreateChatCompletionResponse;
     nodeErrors: string[];
     onUnlink: () => void;
-    onRemove: () => void;
+    onRemove: FlowDagEditorProps["onPromptRemove"];
   };
 }
 
@@ -254,7 +255,7 @@ const PromptNode = (props: PromptNodeProps) => {
   const nodeError:
     | WorkflowRunHistoryItem["outputs"]["nodeErrors"][string]
     | undefined = props.data.nodeErrors;
-  const inputs = extractParametersFromText(promptText);
+  const inputs = extractParametersFromText(promptText || "");
   const [showToolbar, setShowToolbar] = useState(false);
 
   useEffect(() => {
@@ -268,135 +269,138 @@ const PromptNode = (props: PromptNodeProps) => {
     setShowToolbar(true);
     editor.mergeState({ selectedNodeId: nodeId });
   };
+
+  // needed so that when we remove the prompt, the currently rendererd prompt node will stop rendering
+  if (props.data.prompt_text === undefined) return null;
+
   return (
     <>
-      <NodeToolbar
-        isVisible={editor.selectedNodeId === nodeId}
-        position={Position.Top}
+      <Dropdown
+        trigger={["contextMenu"]}
+        placement="bottomLeft"
+        menu={{
+          className: "w-48",
+          items: [
+            {
+              key: "unlink",
+              icon: <Unlink size={16} />,
+              label: "Remove connections",
+              onClick: props.data.onUnlink,
+            },
+            {
+              key: "delete",
+              icon: <Trash size={16} />,
+              label: "Delete",
+              onClick: () => props.data.onRemove(nodeId),
+            },
+          ],
+        }}
       >
-        <div className="w-96 flex justify-end gap-2">
-          <Tooltip title="Remove all connections">
-            <Button
-              icon={<Unlink size={12} />}
-              size="small"
-              danger
-              onClick={() => {
-                props.data.onUnlink();
-                setShowToolbar(false);
-              }}
+        <Card
+          className={[
+            "w-96 px-3 py-2 transition duration-500",
+            props.dragging ? "shadow-xl" : "",
+            editor.selectedNodeId === nodeId
+              ? "dark:bg-slate-900 dark:border-slate-500 border-blue-500 bg-blue-100"
+              : "dark:border-gray-700 dark:bg-neutral-900 border-gray-500 bg-white",
+          ].join(" ")}
+          bodyStyle={{ padding: 0 }}
+          size="small"
+          onClick={onSelect}
+        >
+          <Tooltip title={`Prompt Output`}>
+            <Handle
+              type="source"
+              position={Position.Right}
+              className="-right-3 opacity-75 w-5 h-5 !cursor-pointer dark:hover:bg-gray-500 hover:bg-gray-400 "
             />
           </Tooltip>
-          <Tooltip title="Remove prompt">
-            <Button
-              icon={<X size={12} />}
-              size="small"
-              danger
-              onClick={() => {
-                props.data.onRemove();
-                setShowToolbar(false);
-              }}
-            />
-          </Tooltip>
-        </div>
-      </NodeToolbar>
-      <Card
-        className="w-96 px-3 py-2 shadow-lg"
-        bodyStyle={{ padding: 0 }}
-        size="small"
-        onClick={onSelect}
-      >
-        <Tooltip title={`Prompt Output`}>
-          <Handle
-            type="source"
-            position={Position.Right}
-            className="-right-3 opacity-75 w-5 h-5 !cursor-pointer dark:hover:bg-gray-500 hover:bg-gray-400 "
-          />
-        </Tooltip>
-        <div className="pb-2 flex flex-row justify-between items-center pr-1">
-          <div className={[showStatus ? "w-52" : "w-full"].join(" ")}>
-            <Form.Item name={["nodes", nodeIndex, "id"]} hidden />
-            <Form.Item name={["nodes", nodeIndex, "prompt_text"]}>
-              <Input.TextArea autoSize={{ maxRows: 10, minRows: 5 }} />
-            </Form.Item>
-          </div>
-          {showStatus && (
-            <Popover
-              content={
-                <>
-                  {nodeResponse && (
-                    <div className="flex flex-col items-end gap-2">
-                      <PromptResult result={nodeResponse} />
+          <div className="pb-2 flex flex-row justify-between items-center pr-1">
+            <div className={[showStatus ? "w-52" : "w-full"].join(" ")}>
+              <Form.Item name={["nodes", nodeIndex, "id"]} hidden />
+              <Form.Item name={["nodes", nodeIndex, "prompt_text"]}>
+                <Input.TextArea autoSize={{ maxRows: 10, minRows: 5 }} />
+              </Form.Item>
+            </div>
+            {showStatus && (
+              <Popover
+                content={
+                  <>
+                    {nodeResponse && (
+                      <div className="flex flex-col items-end gap-2">
+                        <PromptResult result={nodeResponse} />
 
-                      <Tooltip title="Copy to clipboard">
-                        <Button
-                          size="small"
-                          className="flex flex-row justify-center items-center gap-1"
-                          onClick={() => {
-                            if (
-                              !navigator.clipboard ||
-                              !nodeResponse.choices[0].message
-                            )
-                              return;
-                            navigator.clipboard.writeText(
-                              nodeResponse.choices[0].message?.content!
-                            );
-                          }}
-                          icon={<Copy size={14} />}
-                        >
-                          Copy to clipboard
-                        </Button>
-                      </Tooltip>
-                    </div>
-                  )}
-                  {nodeError && (
-                    <p className="text-sm font-mono">
-                      {JSON.stringify(nodeError)}
-                    </p>
-                  )}
-                </>
-              }
-            >
-              <div
-                className={[
-                  "w-5 h-5 flex justify-center items-center rounded-full",
-                  "cursor-pointer",
-                  nodeResponse
-                    ? "dark:text-green-400 text-green-800 dark:bg-green-900 bg-green-200"
-                    : "",
-                  nodeError
-                    ? "dark:text-red-400 text-red-800 dark:bg-red-900 bg-red-200"
-                    : "",
-                ].join(" ")}
+                        <Tooltip title="Copy to clipboard">
+                          <Button
+                            size="small"
+                            className="flex flex-row justify-center items-center gap-1"
+                            onClick={() => {
+                              if (
+                                !navigator.clipboard ||
+                                !nodeResponse.choices[0].message
+                              )
+                                return;
+                              navigator.clipboard.writeText(
+                                nodeResponse.choices[0].message?.content!
+                              );
+                            }}
+                            icon={<Copy size={14} />}
+                          >
+                            Copy to clipboard
+                          </Button>
+                        </Tooltip>
+                      </div>
+                    )}
+                    {nodeError && (
+                      <p className="text-sm font-mono">
+                        {JSON.stringify(nodeError)}
+                      </p>
+                    )}
+                  </>
+                }
               >
-                {nodeResponse && <Check size={14} strokeWidth={2} />}
-                {nodeError && <X size={14} strokeWidth={2} />}
-              </div>
-            </Popover>
-          )}
-        </div>
-        {inputs.length > 0 && (
-          <>
-            <Divider className="my-0" />
-
-            <List
-              dataSource={inputs}
-              renderItem={(input) => (
-                <div className="relative mt-1 py-1 px-2  rounded">
-                  <Tooltip title={`Input for @${input} parameter`}>
-                    <Handle
-                      type="target"
-                      id={input}
-                      position={Position.Left}
-                      className="absolute -left-5 opacity-75 w-3.5 h-3.5 dark:hover:bg-gray-500 hover:bg-gray-400 !cursor-pointer"
-                    />
-                  </Tooltip>
-                  <span className="font-mono text-xs">{input}</span>
+                <div
+                  className={[
+                    "w-5 h-5 flex justify-center items-center rounded-full",
+                    "cursor-pointer",
+                    nodeResponse
+                      ? "dark:text-green-400 text-green-800 dark:bg-green-900 bg-green-200"
+                      : "",
+                    nodeError
+                      ? "dark:text-red-400 text-red-800 dark:bg-red-900 bg-red-200"
+                      : "",
+                  ].join(" ")}
+                >
+                  {nodeResponse && <Check size={14} strokeWidth={2} />}
+                  {nodeError && <X size={14} strokeWidth={2} />}
                 </div>
-              )}
-            />
-          </>
-        )}
-      </Card>
+              </Popover>
+            )}
+          </div>
+          {inputs.length > 0 && (
+            <>
+              <Divider className="my-0" />
+
+              <List
+                dataSource={inputs}
+                renderItem={(input) => (
+                  <div className="relative mt-1 py-1 px-2  rounded">
+                    <Tooltip title={`Input for @${input} parameter`}>
+                      <Handle
+                        type="target"
+                        id={input}
+                        position={Position.Left}
+                        className="absolute -left-5 opacity-75 w-3.5 h-3.5 dark:hover:bg-gray-500 hover:bg-gray-400 !cursor-pointer"
+                      />
+                    </Tooltip>
+                    <span className="font-mono text-xs">{input}</span>
+                  </div>
+                )}
+              />
+            </>
+          )}
+        </Card>
+      </Dropdown>
     </>
   );
 };

@@ -121,7 +121,6 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
   const mergeState: FlowEditorContextValue["mergeState"] = (partial) => {
     setEditorState((prev) => ({ ...prev, ...partial }));
   };
-
   // const handleDelete = async () => {
   //   const cfm = confirm(
   //     "Are you sure you want to delete this workflow? This cannot be undone."
@@ -155,9 +154,24 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
       } as FlowVersion["nodes"][number],
     ]);
   };
+
+  const handleDeletePrompt = async (nodeId: string) => {
+    const nodes: FlowVersion["nodes"] = form.getFieldValue("nodes") || [];
+    const edges: FlowVersion["edges"] = form.getFieldValue("edges") || [];
+    const newNodes = nodes.filter((node) => node.id !== nodeId);
+    const newEdges = edges.filter(
+      (edge) => edge.from_node_id !== nodeId && edge.to_node_id !== nodeId
+    );
+
+    form.setFieldsValue({
+      nodes: newNodes,
+      edges: newEdges
+    });
+    debouncedHandleSave();
+  };
+
   const handleUnlink = async () => {
     if (!editorState.selectedNodeId) return;
-    console.log("Currently selected node: ", editorState.selectedNodeId);
     const nodeId = editorState.selectedNodeId;
     const edges: FlowVersion["edges"] = form.getFieldValue("edges") || [];
     const newEdges = edges.filter(
@@ -253,6 +267,14 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
                         icon: <Unlink size={16} />,
                         disabled: editorState.selectedNodeId == null,
                       },
+                      { key: "div", type: "divider" },
+                      {
+                        key: "delete",
+                        label: "Delete",
+                        disabled: editorState.selectedNodeId === null,
+                        onClick: () =>
+                          handleDeletePrompt(editorState.selectedNodeId!),
+                      },
                     ],
                   }}
                   disabled={isToolbarDisabled}
@@ -324,6 +346,7 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
               //     setMinimze(true);
               //   }
               // }}
+              onPromptRemove={handleDeletePrompt}
               onMove={() => {
                 if (editorState.selectedNodeId) {
                   mergeState({ selectedNodeId: null });
@@ -356,7 +379,7 @@ const ToolbarActionButton = ({
   onClick: () => void;
   disabled?: boolean;
 }) => (
-  <Tooltip title={label}  placement="bottom">
+  <Tooltip title={label} placement="bottom">
     <Button
       onClick={onClick}
       type="text"
