@@ -38,9 +38,9 @@ import FreeTierLimit from "./FreeTierLimit";
 import { version } from "os";
 interface Props {
   showSidebar?: boolean;
-  actions?: React.ReactNode
+  actions?: React.ReactNode;
 }
-const FlowsToolbar = ({ showSidebar,actions }: Props) => {
+const FlowsToolbar = ({ showSidebar, actions }: Props) => {
   const [match, params] = useRoute<{ id: string }>("/flows/:id");
 
   const [openSidebar, setOpenSidebar] = useState(false);
@@ -73,6 +73,7 @@ const FlowsToolbar = ({ showSidebar,actions }: Props) => {
   return (
     <div className="w-full dark:bg-blue-900 bg-blue-100">
       <Drawer
+        keyboard={true}
         title={
           <img
             src={`/branding/branding-horizontal-${
@@ -162,6 +163,5 @@ const FlowsToolbar = ({ showSidebar,actions }: Props) => {
     </div>
   );
 };
-
 
 export default FlowsToolbar;
