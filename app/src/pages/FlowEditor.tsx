@@ -321,16 +321,17 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
               </div>
               {/* third layer */}
               <Divider type="horizontal" className="w-full my-1" />
-              <div className="flex gap-2 items-center justify-start">
+              <div className="flex gap-1 items-center justify-start">
                 <ToolbarActionButton
                   label="Add prompt"
                   icon={<AddPromptIcon />}
                   onClick={handleAddPrompt}
                 />
-                <Divider type="vertical" className="h-full" />
+                <span className="h-full w-px  min-h-[24px] dark:bg-slate-700 bg-neutral-300">
+                </span>
                 <ToolbarActionButton
                   label="Unlink connections"
-                  icon={<Unlink size={14} />}
+                  icon={<Unlink size={18} />}
                   onClick={handleUnlink}
                   disabled={editorState.selectedNodeId === null}
                 />
@@ -398,9 +399,10 @@ const ToolbarActionButton = ({
     <Button
       onClick={onClick}
       type="text"
-      icon={icon}
       disabled={disabled}
-      className="flex flex-row items-center justify-center py-1 px-2"
+      rootClassName="w-10 h-10 p-0"
+      className="flex flex-row items-center justify-center "
+      icon={icon}
     >
       <span className="sr-only">Add prompt</span>
     </Button>
@@ -408,7 +410,7 @@ const ToolbarActionButton = ({
 );
 
 const AddPromptIcon = () => (
-  <span className="inline-block mt-1 relative flex items-center justify-center">
+  <span className="mt-1 relative flex items-center justify-center">
     <AlignLeft size={18} />
     <Plus size={12} className="absolute bottom-0 -left-2" />
   </span>
