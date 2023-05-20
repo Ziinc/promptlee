@@ -245,6 +245,11 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
                           const { data, error } = await createFlow({
                             name: `${flow.name} copy`,
                           });
+                          if (!data) return;
+                          await createFlowVersion(data?.id, {
+                            edges: formValues.edges,
+                            nodes: formValues.nodes,
+                          });
                           window.open(`/flows/${data!.id}`);
                         },
                       },
@@ -327,8 +332,7 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
                   icon={<AddPromptIcon />}
                   onClick={handleAddPrompt}
                 />
-                <span className="h-full w-px  min-h-[24px] dark:bg-slate-700 bg-neutral-300">
-                </span>
+                <span className="h-full w-px  min-h-[24px] dark:bg-slate-700 bg-neutral-300"></span>
                 <ToolbarActionButton
                   label="Unlink connections"
                   icon={<Unlink size={18} />}
