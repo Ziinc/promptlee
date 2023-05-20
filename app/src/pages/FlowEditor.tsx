@@ -212,7 +212,7 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
               {/* second layer */}
               <div className="px-2 py-1 flex flex-row gap-1">
                 <Dropdown
-                  trigger={["click", "hover"]}
+                  trigger={["click"]}
                   menu={{
                     className: "w-48",
                     items: [
@@ -248,6 +248,19 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
                           window.open(`/flows/${data!.id}`);
                         },
                       },
+                      { key: "div", type: "divider" },
+                      {
+                        key: "versions",
+                        disabled: true,
+                        label: (
+                          <span className="flex justify-between align-center">
+                            <span>Version history</span>
+                            <Tag rootClassName="rounded-full m-0 dark:bg-purple-900 dark:border-purple-700 border-purple-500 text-purple-900 dark:text-purple-100 font-bold border-none bg-purple-200">
+                              Pro
+                            </Tag>
+                          </span>
+                        ),
+                      },
                     ],
                   }}
                   disabled={isToolbarDisabled}
@@ -257,7 +270,7 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
                   </Button>
                 </Dropdown>
                 <Dropdown
-                  trigger={["click", "hover"]}
+                  trigger={["click"]}
                   menu={{
                     className: "w-48",
                     items: [
@@ -286,7 +299,7 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
                   </Button>
                 </Dropdown>
                 <Dropdown
-                  trigger={["click", "hover"]}
+                  trigger={["click"]}
                   menu={{
                     className: "w-48",
                     items: [
