@@ -83,6 +83,7 @@ const FlowDagEditor = ({
   run,
 }: FlowDagEditorProps) => {
   const app = useAppState();
+  const editor = useFlowEditorState();
 
   const maybeChange = (attrs: Attrs) => {
     const edgesChanged = Boolean(
@@ -220,6 +221,9 @@ const FlowDagEditor = ({
         nodes={nodes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
+        onPaneClick={() => {
+          editor.mergeState({ selectedNodeId: null });
+        }}
         onConnect={onConnect}
         nodeTypes={nodeTypes}
         proOptions={{ hideAttribution: true }}
