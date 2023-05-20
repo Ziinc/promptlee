@@ -256,7 +256,6 @@ const PromptNode = (props: PromptNodeProps) => {
     | WorkflowRunHistoryItem["outputs"]["nodeErrors"][string]
     | undefined = props.data.nodeErrors;
   const inputs = extractParametersFromText(promptText || "");
-  const [showToolbar, setShowToolbar] = useState(false);
 
   useEffect(() => {
     if (props.dragging && editor.selectedNodeId !== nodeId) {
@@ -266,7 +265,6 @@ const PromptNode = (props: PromptNodeProps) => {
   const showStatus = !!(nodeResponse || nodeError);
 
   const onSelect = () => {
-    setShowToolbar(true);
     editor.mergeState({ selectedNodeId: nodeId });
   };
 

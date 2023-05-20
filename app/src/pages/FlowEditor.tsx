@@ -39,6 +39,7 @@ import {
   Check,
   AlignLeft,
   Unlink,
+  Trash,
 } from "lucide-react";
 import { countWorkflowOutputs, countWorkflowParameters } from "../utils";
 import DagEditor from "../components/DagEditor";
@@ -165,7 +166,7 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
 
     form.setFieldsValue({
       nodes: newNodes,
-      edges: newEdges
+      edges: newEdges,
     });
     debouncedHandleSave();
   };
@@ -271,6 +272,7 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
                       {
                         key: "delete",
                         label: "Delete",
+                        icon: <Trash size={14} />,
                         disabled: editorState.selectedNodeId === null,
                         onClick: () =>
                           handleDeletePrompt(editorState.selectedNodeId!),
