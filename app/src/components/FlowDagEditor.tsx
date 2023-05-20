@@ -44,6 +44,7 @@ import PromptResult from "./PromptResult";
 import { FlowVersion } from "../api/flows";
 import { CreateChatCompletionResponse } from "openai";
 import { useFlowEditorState } from "../pages/FlowEditor";
+import MonacoEditor from "./MonacoEditor";
 export interface FlowDagEditorProps {
   onChange: (attrs: Attrs) => void;
   className?: string;
@@ -250,6 +251,7 @@ interface PromptNodeProps extends NodeProps {
 
 const PromptNode = (props: PromptNodeProps) => {
   const editor = useFlowEditorState();
+  const app = useAppState();
   const promptText = props.data.prompt_text;
   const nodeId = props.data.id;
   const nodeIndex = props.data.index;
@@ -300,7 +302,7 @@ const PromptNode = (props: PromptNodeProps) => {
       >
         <Card
           className={[
-            "w-96 px-3 py-2 transition duration-500",
+            "w-96 p-0 transition duration-500",
             props.dragging ? "shadow-xl" : "",
             editor.selectedNodeId === nodeId
               ? "dark:bg-slate-900 dark:border-slate-500 border-blue-500 bg-blue-100"
@@ -314,15 +316,27 @@ const PromptNode = (props: PromptNodeProps) => {
             <Handle
               type="source"
               position={Position.Right}
-              className="-right-3 opacity-75 w-5 h-5 !cursor-pointer dark:hover:bg-gray-500 hover:bg-gray-400 "
+              className="-right-4 opacity-75 w-5 h-5 !cursor-pointer dark:hover:bg-gray-500 hover:bg-gray-400 "
             />
           </Tooltip>
-          <div className="pb-2 flex flex-row justify-between items-center pr-1">
+          <div className="flex flex-row justify-between items-center pr-1">
             <div className={[showStatus ? "w-52" : "w-full"].join(" ")}>
               <Form.Item name={["nodes", nodeIndex, "id"]} hidden />
-              <Form.Item name={["nodes", nodeIndex, "prompt_text"]}>
-                <Input.TextArea autoSize={{ maxRows: 10, minRows: 5 }} />
-              </Form.Item>
+              {/* <Form.Item name={["nodes", nodeIndex, "prompt_text"]}>
+                {/* <Input.TextArea autoSize={{ maxRows: 10, minRows: 5 }} autoFocus/> */}
+              {/* </Form.Item> */}
+                <MonacoEditor
+                  className="rounded-tl-xl rounded-tr-xl h-48"
+                  darkMode={app.darkMode}
+                  id={`editor-${nodeId}-${nodeIndex}`}
+                  defaultValue={promptText}
+                  onInputChange={(value) => {
+                    editor.form?.setFieldValue(
+                      ["nodes", nodeIndex, "prompt_text"],
+                      value
+                    );
+                  }}
+                />
             </div>
             {showStatus && (
               <Popover
