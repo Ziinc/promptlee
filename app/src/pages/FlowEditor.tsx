@@ -146,14 +146,12 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
   );
 
   const handleAddPrompt = () => {
-    console.log("clicked");
     const formNodes = form.getFieldValue("nodes") || [];
-    console.log({ formNodes });
     form.setFieldValue("nodes", [
       ...formNodes,
       {
         id: crypto.randomUUID(),
-        prompt_text: "",
+        prompt_text: "As a ____, do ____ with the following text:\n@text",
       } as FlowVersion["nodes"][number],
     ]);
   };
