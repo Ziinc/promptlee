@@ -59,7 +59,6 @@ const MonacoEditor: FC<Props> = ({
     await monaco.editor.defineTheme("promptpro", theme);
   };
   const onMount = async (editor: any, monaco: any) => {
-    console.log(monaco);
 
     // editor.addAction({
     //   label: "Run Query",

@@ -65,7 +65,6 @@ const DagEditor: React.FC<DagEditorProps> = ({
   run,
 }) => {
   const app = useAppState();
-  console.log(run);
 
   const maybeChange = (attrs: Attrs) => {
     const edgesChanged = Boolean(

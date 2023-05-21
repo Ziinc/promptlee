@@ -81,13 +81,6 @@ const FlowsToolbar = ({
   }, [flow?.id]);
 
   const name = Form.useWatch("name", form) || "";
-  console.log({ name });
-  const nameInputWidth =
-    name.length > 150
-      ? name.length * 4
-      : name.length <= 50
-      ? 100
-      : name.length * 4;
 
   const isToolbarDisabled = !flow;
   return (
