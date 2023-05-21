@@ -118,6 +118,7 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
   const mergeState: FlowEditorContextValue["mergeState"] = (partial) => {
     setEditorState((prev) => ({ ...prev, ...partial }));
   };
+  const [saving, setSaving] = useState<"hide" | "saving" | "saved">("hide");
   // const handleDelete = async () => {
   //   const cfm = confirm(
   //     "Are you sure you want to delete this workflow? This cannot be undone."
@@ -132,9 +133,19 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
   // };
   const handleSave = useCallback(async () => {
     if (!flow) return;
+    setSaving("saving");
     const attrs = form.getFieldValue([]);
     await createFlowVersion(flow.id, attrs);
+    setTimeout(() => {
+      setSaving("saved");
+      debouncedHideSave();
+    }, 500);
   }, [form, flow]);
+  const hideSavedIndicator = () => setSaving("hide");
+  const debouncedHideSave = useMemo(
+    () => debounce(hideSavedIndicator, 5000),
+    [hideSavedIndicator]
+  );
   const debouncedHandleSave = useMemo(
     () => debounce(handleSave, 600),
     [handleSave]
@@ -210,6 +221,7 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
         <Form.Item hidden name="edges" />
         <FlowsLayout
           showSidebar={showSidebar}
+          savingIndicator={saving}
           toolbarActions={
             <div>
               {/* second layer */}

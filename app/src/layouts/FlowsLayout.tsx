@@ -1,4 +1,4 @@
-import FlowsToolbar from "./FlowsToolbar";
+import FlowsToolbar, { FlowsToolbarProps } from "./FlowsToolbar";
 import Navbar from "./Navbar";
 import Sidebar from "./FlowsList";
 import { Drawer } from "antd";
@@ -8,17 +8,18 @@ type Props = React.PropsWithChildren<{
   contentClassName?: string;
   showSidebar?: boolean;
   toolbarActions?: React.ReactNode
+  savingIndicator: FlowsToolbarProps["savingIndicator"]
 }>;
 const FlowsLayout: React.FC<Props> = ({
   children,
   showSidebar,
   // variant = "centered",
   contentClassName = "",
-  toolbarActions
+  toolbarActions,savingIndicator
 }) => (
   <div className="flex flex-row h-full min-h-screen">
     <div className="w-full">
-      <FlowsToolbar showSidebar={showSidebar} actions={toolbarActions} />
+      <FlowsToolbar savingIndicator={savingIndicator} showSidebar={showSidebar} actions={toolbarActions} />
       <div
         className={[
           "flex-grow",

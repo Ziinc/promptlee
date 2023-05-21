@@ -21,7 +21,7 @@ import {
   Sun,
   Plus,
 } from "lucide-react";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useRoute } from "wouter";
 import {
   createFlow,
@@ -36,11 +36,16 @@ import FlowsList from "./FlowsList";
 import debounce from "lodash/debounce";
 import FreeTierLimit from "./FreeTierLimit";
 import { version } from "os";
-interface Props {
+export interface FlowsToolbarProps {
   showSidebar?: boolean;
   actions?: React.ReactNode;
+  savingIndicator: "saving" | "hide" | "saved";
 }
-const FlowsToolbar = ({ showSidebar, actions }: Props) => {
+const FlowsToolbar = ({
+  showSidebar,
+  actions,
+  savingIndicator,
+}: FlowsToolbarProps) => {
   const [match, params] = useRoute<{ id: string }>("/flows/:id");
 
   const [openSidebar, setOpenSidebar] = useState(false);
@@ -49,18 +54,24 @@ const FlowsToolbar = ({ showSidebar, actions }: Props) => {
   const app = useAppState();
   const flow = (app.flows || [])?.find((flow) => flow.id == params?.id);
 
-  const handleNameChange = async (name: string) => {
-    if (!flow) return;
-    const { data: updatedFlow } = await updateFlow(flow.id, { name });
-    if (!updatedFlow) {
-      console.error("Error updating flow");
-    }
-    // update flow list
-    const filtered = (app.flows || []).filter((f) => f.id !== flow.id);
-    app.mergeAppState({ flows: filtered.concat([updatedFlow!]) });
-  };
+  const handleNameChange = useCallback(
+    async (name: string) => {
+      if (!flow) return;
+      const { data: updatedFlow } = await updateFlow(flow.id, { name });
+      if (!updatedFlow) {
+        console.error("Error updating flow");
+      }
+      // update flow list
+      const filtered = (app.flows || []).filter((f) => f.id !== flow.id);
+      app.mergeAppState({ flows: filtered.concat([updatedFlow!]) });
+    },
+    [app.flows]
+  );
 
-  const debouncedNameChange = debounce(handleNameChange, 500);
+  const debouncedNameChange = useMemo(
+    () => debounce(handleNameChange, 1000),
+    [handleNameChange]
+  );
   const [form] = Form.useForm();
 
   // watch for params change
@@ -68,6 +79,15 @@ const FlowsToolbar = ({ showSidebar, actions }: Props) => {
     if (!flow) return;
     form.setFieldsValue(flow);
   }, [flow?.id]);
+
+  const name = Form.useWatch("name", form) || "";
+  console.log({ name });
+  const nameInputWidth =
+    name.length > 150
+      ? name.length * 4
+      : name.length <= 50
+      ? 100
+      : name.length * 4;
 
   const isToolbarDisabled = !flow;
   return (
@@ -113,19 +133,27 @@ const FlowsToolbar = ({ showSidebar, actions }: Props) => {
             initialValues={flow}
             onFinish={() => {}}
             form={form}
-            className="w-72"
             disabled={isToolbarDisabled}
           >
             <Form.Item name="name" noStyle validateFirst>
-              <Input.TextArea
-                autoSize={{ minRows: 1 }}
+              <Input
                 bordered={false}
-                className="focus:ring w-full"
-                placeholder={flow ? undefined : "Untitled Flow"}
+                className="focus:ring border-gray-500 transition !duration-500 !max-w-[300px]"
+                placeholder={flow?.name ? undefined : "Untitled Flow"}
                 onChange={(e) => debouncedNameChange(e.target.value)}
+                style={{
+                  width: !name
+                    ? 120
+                    : Math.min(Math.max(name.length * 12, 120), 300),
+                }}
               />
             </Form.Item>
           </Form>
+          {savingIndicator !== "hide" && (
+            <span className="text-xs  font-semibold opacity-75">
+              {savingIndicator === "saving" ? "Saving..." : "Saved"}
+            </span>
+          )}
         </div>
         <Menu
           disabledOverflow
