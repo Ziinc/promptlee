@@ -358,29 +358,9 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
             </div>
           }
         >
-          {/* {!version && (
-            <div>
-              <h3>Add a step to your flow</h3>
-              <Tabs
-                tabPosition="left"
-                items={[
-                  {
-                    label: `Prompt`,
-                    key: "prompt",
-                    children: `Content of Tab`,
-                  },
-                ]}
-              />
-            </div>
-          )} */}
           {formValues && (
             <FlowDagEditor
               // run={useWorkflowHook.lastRun || undefined}
-              // onMove={() => {
-              //   if (!minimize) {
-              //     setMinimze(true);
-              //   }
-              // }}
               onPromptRemove={handleDeletePrompt}
               onMove={() => {
                 if (editorState.selectedNodeId) {
