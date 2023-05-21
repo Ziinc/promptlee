@@ -35,6 +35,7 @@ import {
   extractPromptParameters,
   flowToDag,
   getNodePromptMapping,
+  notification,
   workflowToDag,
 } from "../utils";
 import { Check, Copy, Eye, Trash, Unlink, X } from "lucide-react";
@@ -220,6 +221,9 @@ const FlowDagEditor = ({
         className="h-72"
         edges={edges}
         nodes={nodes}
+        onNodesDelete={() => {
+          notification.success("Deleted!")
+        }}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onPaneClick={() => {
@@ -307,6 +311,8 @@ const PromptNode = (props: PromptNodeProps) => {
             editor.selectedNodeId === nodeId
               ? "dark:bg-slate-900 dark:border-slate-500 border-blue-500 bg-blue-100"
               : "dark:border-gray-700 dark:bg-neutral-900 border-gray-500 bg-white",
+            // elevate
+            editor.selectedNodeId === nodeId ? "z-30" : "",
           ].join(" ")}
           bodyStyle={{ padding: 0 }}
           size="small"
@@ -316,27 +322,25 @@ const PromptNode = (props: PromptNodeProps) => {
             <Handle
               type="source"
               position={Position.Right}
-              className="-right-4 opacity-75 w-5 h-5 !cursor-pointer dark:hover:bg-gray-500 hover:bg-gray-400 "
+              className="-right-[0.6rem] z-10 rounded opacity-75 w-4 h-4 !cursor-pointer dark:hover:bg-gray-500 hover:bg-gray-400 "
             />
           </Tooltip>
           <div className="flex flex-row justify-between items-center pr-1">
             <div className={[showStatus ? "w-52" : "w-full"].join(" ")}>
               <Form.Item name={["nodes", nodeIndex, "id"]} hidden />
-              {/* <Form.Item name={["nodes", nodeIndex, "prompt_text"]}>
-                {/* <Input.TextArea autoSize={{ maxRows: 10, minRows: 5 }} autoFocus/> */}
-              {/* </Form.Item> */}
-                <MonacoEditor
-                  className="rounded-tl-xl rounded-tr-xl h-48"
-                  darkMode={app.darkMode}
-                  id={`editor-${nodeId}-${nodeIndex}`}
-                  defaultValue={promptText}
-                  onInputChange={(value) => {
-                    editor.form?.setFieldValue(
-                      ["nodes", nodeIndex, "prompt_text"],
-                      value
-                    );
-                  }}
-                />
+              <MonacoEditor
+                className="rounded-tl-xl rounded-tr-xl h-48"
+                darkMode={app.darkMode}
+                id={`editor-${nodeId}-${nodeIndex}`}
+                defaultValue={promptText}
+                onInputChange={(value) => {
+                  editor.form?.setFieldValue(
+                    ["nodes", nodeIndex, "prompt_text"],
+                    value
+                  );
+                }}
+                autoFocus={editor.selectedNodeId === nodeId}
+              />
             </div>
             {showStatus && (
               <Popover
@@ -406,7 +410,7 @@ const PromptNode = (props: PromptNodeProps) => {
                         type="target"
                         id={input}
                         position={Position.Left}
-                        className="absolute -left-5 opacity-75 w-3.5 h-3.5 dark:hover:bg-gray-500 hover:bg-gray-400 !cursor-pointer"
+                        className="absolute -left-[0.5rem] rounded opacity-75 w-3.5 h-3.5 dark:hover:bg-gray-500 hover:bg-gray-400 !cursor-pointer"
                       />
                     </Tooltip>
                     <span className="font-mono text-xs">{input}</span>

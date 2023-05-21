@@ -104,16 +104,12 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
     setIsLoading(true);
     const res = await getLatestFlowVersion(params.id);
     const { data, error } = res;
-    console.log("res", res);
     if (error) {
       console.error("Unable to fetch latest version", error);
     }
-    console.log("data", data);
     if (data) {
       // no version fetched, return
-      console.log("setting latest version", data);
       setVersion(data as any);
-      console.log("data", data);
       form.setFieldsValue(data);
     }
     setIsLoading(false);
@@ -137,7 +133,6 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
   const handleSave = useCallback(async () => {
     if (!flow) return;
     const attrs = form.getFieldValue([]);
-    console.log("saving attrs", attrs);
     await createFlowVersion(flow.id, attrs);
   }, [form, flow]);
   const debouncedHandleSave = useMemo(
@@ -147,13 +142,15 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
 
   const handleAddPrompt = () => {
     const formNodes = form.getFieldValue("nodes") || [];
+    const nodeId = crypto.randomUUID();
     form.setFieldValue("nodes", [
       ...formNodes,
       {
-        id: crypto.randomUUID(),
+        id: nodeId,
         prompt_text: "As a ____, do ____ with the following text:\n@text",
       } as FlowVersion["nodes"][number],
     ]);
+    mergeState({ selectedNodeId: nodeId });
   };
 
   const handleDeletePrompt = async (nodeId: string) => {
@@ -169,6 +166,7 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
       edges: newEdges,
     });
     debouncedHandleSave();
+    notification.success({ message: "Deleted!", placement: "bottomRight" });
   };
 
   const handleUnlink = async () => {
@@ -184,10 +182,10 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
 
   const formValues = Form.useWatch([], form);
 
-  useEffect(()=>{
+  useEffect(() => {
     debouncedHandleSave();
-  }, [JSON.stringify(formValues)])
-  
+  }, [JSON.stringify(formValues)]);
+
   const isToolbarDisabled = !flow;
 
   return (
@@ -377,9 +375,7 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
                   mergeState({ selectedNodeId: null });
                 }
               }}
-              // workflow={formValues}
               onChange={(values) => {
-                console.log("change registered", values);
                 form.setFieldsValue(values);
                 debouncedHandleSave();
               }}

@@ -1,6 +1,7 @@
 import { FC, useEffect, useRef } from "react";
 import Editor, { EditorProps } from "@monaco-editor/react";
 import { merge } from "lodash";
+import { prompts } from "common/dist/explore";
 
 interface Props {
   id: string;
@@ -14,6 +15,7 @@ interface Props {
   options?: EditorProps["options"];
   value?: string;
   darkMode?: boolean;
+  autoFocus?: boolean;
 }
 
 const MonacoEditor: FC<Props> = ({
@@ -28,6 +30,7 @@ const MonacoEditor: FC<Props> = ({
   options,
   value,
   darkMode,
+  autoFocus,
 }) => {
   const editorRef = useRef();
 
@@ -72,7 +75,9 @@ const MonacoEditor: FC<Props> = ({
     // });
 
     setTimeout(() => {
-      editor?.focus();
+      if (autoFocus) {
+        editor?.focus();
+      }
       editorRef.current = editor;
     }, 500);
   };
@@ -82,7 +87,7 @@ const MonacoEditor: FC<Props> = ({
       beforeMount={setEditorTheme}
       value={value ?? undefined}
       path={id}
-      className={`monaco-editor ${className} min-h-[5rem] pt-2 px-1`}
+      className={`monaco-editor ${className} min-h-[5rem] pt-2 px-1 cursor-text`}
       defaultLanguage={"text"}
       defaultValue={defaultValue ?? undefined}
       theme={darkMode ? "vs-dark" : "vs-light"}
@@ -97,7 +102,7 @@ const MonacoEditor: FC<Props> = ({
         quickSuggestions: false,
         hideCursorInOverviewRuler: true,
         smoothScrolling: true,
-        scrollbar: { horizontal: "hidden", verticalScrollbarSize: 6 },
+        scrollbar: {vertical:"auto", horizontal: "hidden", verticalScrollbarSize: 6 },
         lineNumbers: hideLineNumbers ? "off" : undefined,
         glyphMargin: hideLineNumbers ? false : undefined,
         lineNumbersMinChars: hideLineNumbers ? 0 : undefined,

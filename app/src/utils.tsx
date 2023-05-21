@@ -12,7 +12,9 @@ import slice from "lodash/slice";
 import concat from "lodash/concat";
 import { merge } from "lodash";
 import { Database } from "./database.types";
+import { notification as antdNotification } from "antd";
 import { Flow, FlowVersion } from "./api/flows";
+import { Check, X } from "lucide-react";
 
 // https://stackoverflow.com/questions/61132262/typescript-deep-partial
 type DeepPartial<T> = T extends object
@@ -35,7 +37,6 @@ export const resolveTextParams = (
 };
 
 export const extractParametersFromText = (text: string) => {
-
   const promptParams = [...text.matchAll(/\s\@(\S+)\s?/g)];
   const params = promptParams.flatMap(([_match, paramName]) => paramName);
 
@@ -103,8 +104,10 @@ export const countWorkflowOutputs = (workflow: Workflow): number => {
   return listTerminalOutputNodes(workflow).length;
 };
 
-
-export const getNodePromptMapping = (app: AppState, workflowOrFlowVersion: Workflow | FlowVersion) => {
+export const getNodePromptMapping = (
+  app: AppState,
+  workflowOrFlowVersion: Workflow | FlowVersion
+) => {
   return workflowOrFlowVersion.nodes.reduce((acc, node) => {
     const prompt = app.prompts.find((p) => p.id === node.prompt_id);
     acc[node.id] = prompt;
@@ -170,7 +173,6 @@ export const workflowToDag = (workflow: Workflow) => {
   return dag;
 };
 
-
 export const flowToDag = (flowVersion: FlowVersion) => {
   let dag = flowVersion.nodes.reduce((acc, node) => {
     const edgesFromNode = flowVersion.edges
@@ -182,7 +184,6 @@ export const flowToDag = (flowVersion: FlowVersion) => {
 
   return dag;
 };
-
 
 export const batchToposortDag = (dag: Record<string, string[]>): string[][] => {
   return batchingToposort(dag);
@@ -239,3 +240,31 @@ export const supabase = createClient<Database>(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_KEY
 );
+
+export namespace notification {
+  export function success(message: string) {
+    doNotification("success", message);
+  }
+  export function error(message: string) {
+    doNotification("error", message);
+  }
+
+  const doNotification = (type: "success" | "error", message: string) => {
+    const Icon = {
+      success: Check,
+      error: X,
+    }[type];
+
+    antdNotification.open({
+      message: (
+        <div className="flex p-1 gap-2 items-center align-center">
+          <Icon size={20} /> <p className="m-0  ">{message}</p>
+        </div>
+      ),
+      icon: null,
+      closeIcon: <X size={18} />,
+      className: "pt-1 pb-4 flex flex-row justify-start items-start",
+      placement: "bottomRight",
+    });
+  };
+}
