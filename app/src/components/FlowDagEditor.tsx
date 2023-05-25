@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useAppState, WorkflowRunHistoryItem } from "../App";
 
 import ReactFlow, {
@@ -11,7 +11,6 @@ import ReactFlow, {
   Node,
   Handle,
   Position,
-  NodeToolbar,
   NodeProps,
   NodeChange,
   EdgeChange,
@@ -19,7 +18,6 @@ import ReactFlow, {
 } from "reactflow";
 import {
   Form,
-  Input,
   Button,
   Card,
   Divider,
@@ -44,8 +42,8 @@ import PreviewPromptModal from "./PreviewPromptModal";
 import PromptResult from "./PromptResult";
 import { FlowVersion } from "../api/flows";
 import { CreateChatCompletionResponse } from "openai";
-import { useFlowEditorState } from "../pages/FlowEditor";
 import MonacoEditor from "./MonacoEditor";
+import { useFlowEditorState } from "../interfaces/FlowEditorContext";
 export interface FlowDagEditorProps {
   onChange: (attrs: Attrs) => void;
   className?: string;
@@ -222,7 +220,7 @@ const FlowDagEditor = ({
         edges={edges}
         nodes={nodes}
         onNodesDelete={() => {
-          notification.success("Deleted!")
+          notification.success("Deleted!");
         }}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}

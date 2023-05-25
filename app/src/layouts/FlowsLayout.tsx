@@ -1,25 +1,39 @@
-import FlowsToolbar, { FlowsToolbarProps } from "./FlowsToolbar";
-import Navbar from "./Navbar";
-import Sidebar from "./FlowsList";
-import { Drawer } from "antd";
 import React from "react";
+import { Divider } from "antd";
 type Props = React.PropsWithChildren<{
-  variant?: "centered" | "wide";
   contentClassName?: string;
-  showSidebar?: boolean;
-  toolbarActions?: React.ReactNode
-  savingIndicator: FlowsToolbarProps["savingIndicator"]
+  toolbarActions?: React.ReactNode;
+  savingIndicator?: React.ReactNode;
+  navActions?: React.ReactNode;
+  sidebar?: React.ReactNode;
+  flowNameInput?: React.ReactNode;
+  actionsMenu?: React.ReactNode;
 }>;
 const FlowsLayout: React.FC<Props> = ({
   children,
-  showSidebar,
-  // variant = "centered",
   contentClassName = "",
-  toolbarActions,savingIndicator
+  toolbarActions,
+  savingIndicator,
+  navActions,
+  sidebar,
+  flowNameInput,
+  actionsMenu,
 }) => (
   <div className="flex flex-row h-full min-h-screen">
     <div className="w-full">
-      <FlowsToolbar savingIndicator={savingIndicator} showSidebar={showSidebar} actions={toolbarActions} />
+      <div className="w-full dark:bg-blue-900 bg-blue-100 flex-col justify-between items-center">
+        <div className=" flex justify-between items-center py-1 px-2">
+          <div className="flex items-center gap-2">
+            {sidebar}
+            {flowNameInput}
+            {savingIndicator}
+          </div>
+          <div className="flex gap-2 items-center">{navActions}</div>
+        </div>
+        <div className="px-2 py-1 flex flex-row gap-1">{actionsMenu}</div>
+        <Divider type="horizontal" className="w-full my-1" />
+        <div className="w-full">{toolbarActions}</div>
+      </div>
       <div
         className={[
           "flex-grow",

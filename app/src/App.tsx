@@ -228,14 +228,16 @@ const App = () => {
       >
         <AuthWall />
         <main className=" bg-slate-100 dark:bg-slate-900 text-black dark:text-gray-100">
+          <TrackedRoute path="/flows/:id" component={FlowEditor} />
+          <TrackedRoute path="/" component={FlowEditor} />
+
+          
           <TrackedRoute path="/prompts/:id/edit" component={Editor} />
           <TrackedRoute path="/prompts/:id" component={Editor} />
-          <TrackedRoute path="/flows/:id" component={FlowEditor} />
           <TrackedRoute path="/explore" component={Explore} />
           <TrackedRoute path="/workflows" component={Workflows} />
           <TrackedRoute path="/workflows/:id" component={WorkflowEditor} />
           <TrackedRoute path="/workflows/:id/edit" component={WorkflowEditor} />
-          <TrackedRoute path="/" component={Home} />
           <TrackedRoute path="/settings" component={Settings} />
         </main>
       </AppContext.Provider>

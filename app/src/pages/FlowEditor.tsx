@@ -1,103 +1,48 @@
-import MainLayout from "../layouts/MainLayout";
-import {
-  Button,
-  Card,
-  Tooltip,
-  Form,
-  notification,
-  Input,
-  Drawer,
-  Table,
-  Descriptions,
-  Tabs,
-  Tag,
-  Popover,
-  Dropdown,
-  Divider,
-  FormInstance,
-} from "antd";
-import dayjs from "dayjs";
-import { Link, useLocation } from "wouter";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import { Prompt, useAppState, Workflow } from "../App";
-import {
-  ArrowLeft,
-  Eye,
-  MoreHorizontal,
-  Play,
-  Plus,
-  Save,
-  FileText,
-  X,
-  Check,
-  AlignLeft,
-  Unlink,
-  Trash,
-} from "lucide-react";
-import { countWorkflowOutputs, countWorkflowParameters } from "../utils";
-import DagEditor from "../components/DagEditor";
-import useWorkflow from "../hooks/useWorkflow";
-import RunWorkflowModal from "../components/RunWorkflowModal";
-import PreviewPromptModal from "../components/PreviewPromptModal";
-import WorkflowResult from "../components/WorkflowResult";
-import LoadingSpinner from "../components/LoadingSpinner";
+import { Button, Form, notification, Input } from "antd";
+import { useLocation } from "wouter";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useAppState } from "../App";
+import { PlayIcon } from "lucide-react";
 import FlowsLayout from "../layouts/FlowsLayout";
 import {
   createFlow,
   createFlowVersion,
-  Flow,
   FlowVersion,
   getLatestFlowVersion,
+  updateFlow,
 } from "../api/flows";
 import FlowDagEditor from "../components/FlowDagEditor";
 import debounce from "lodash/debounce";
-
-export interface FlowEditorState {
-  selectedNodeId: string | null;
-}
-
-export interface FlowEditorContextValue extends FlowEditorState {
-  form: FormInstance | null;
-  mergeState: (partial: Partial<FlowEditorState>) => void;
-}
-const DEFAULT_STATE = {
-  selectedNodeId: null,
-};
-
-export const FlowEditorContext = createContext<FlowEditorContextValue>({
-  ...DEFAULT_STATE,
-  form: null,
-  mergeState: () => null,
-});
-
-export const useFlowEditorState = () => useContext(FlowEditorContext);
+import FlowSidebar from "../interfaces/FlowSidebar";
+import {
+  DEFAULT_FLOW_EDITOR_STATE,
+  FlowEditorContext,
+  FlowEditorContextValue,
+  FlowEditorState,
+} from "../interfaces/FlowEditorContext";
+import DarkModeSwitch from "../components/DarkModeSwitch";
+import FlowActionsMenu from "../interfaces/FlowActionsMenus";
+import FlowToolbar from "../interfaces/FlowToolbar";
+import WelcomeMessage from "../interfaces/WelcomeMessage";
 
 const FlowEditor = ({ params }: { params: { id: string } }) => {
-  const [form] = Form.useForm();
-  const [editorState, setEditorState] =
-    useState<FlowEditorState>(DEFAULT_STATE);
+  const [versionForm] = Form.useForm();
+  const [flowForm] = Form.useForm();
+  const [editorState, setEditorState] = useState<FlowEditorState>(
+    DEFAULT_FLOW_EDITOR_STATE
+  );
   const [showSidebar, setShowSidebar] = useState(false);
-  const [showDetails, setShowDetails] = useState(false);
-  const [_location, navigate] = useLocation();
   const app = useAppState();
 
-  const [version, setVersion] = useState<FlowVersion | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [saving, setSaving] = useState<"hide" | "saving" | "saved">("hide");
+
   const flow = (app.flows || [])?.find((flow) => flow.id == params?.id);
 
   useEffect(() => {
     // on mount, load latest version
     if (params.id) {
       fetchVersion();
-    } else {
-      setShowSidebar(true);
     }
   }, []);
   const fetchVersion = async () => {
@@ -109,8 +54,7 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
     }
     if (data) {
       // no version fetched, return
-      setVersion(data as any);
-      form.setFieldsValue(data);
+      versionForm.setFieldsValue(data);
     }
     setIsLoading(false);
   };
@@ -118,29 +62,37 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
   const mergeState: FlowEditorContextValue["mergeState"] = (partial) => {
     setEditorState((prev) => ({ ...prev, ...partial }));
   };
-  const [saving, setSaving] = useState<"hide" | "saving" | "saved">("hide");
-  // const handleDelete = async () => {
-  //   const cfm = confirm(
-  //     "Are you sure you want to delete this workflow? This cannot be undone."
-  //   );
-  //   if (!cfm) return;
-  //   app.setAppState((prev) => ({
-  //     ...prev,
-  //     workflows: prev.workflows.filter((p) => p.id !== params.id),
-  //   }));
-  //   navigate("/workflows");
-  //   notification.success({ message: "Deleted!", placement: "bottomRight" });
-  // };
+
+  const handleNewFlow = async () => {
+    const { data, error } = await createFlow();
+    if (error) return;
+    window.open(`/flows/${data!.id}`);
+  };
+  const handleCopyFlow = async () => {
+    if (!flow) {
+      console.error("No flow selected!");
+      return;
+    }
+    const { data, error } = await createFlow({
+      name: `${flow.name} copy`,
+    });
+    if (!data) return;
+    await createFlowVersion(data?.id, {
+      edges: formValues.edges,
+      nodes: formValues.nodes,
+    });
+    window.open(`/flows/${data!.id}`);
+  };
   const handleSave = useCallback(async () => {
     if (!flow) return;
     setSaving("saving");
-    const attrs = form.getFieldValue([]);
+    const attrs = versionForm.getFieldValue([]);
     await createFlowVersion(flow.id, attrs);
     setTimeout(() => {
       setSaving("saved");
       debouncedHideSave();
     }, 500);
-  }, [form, flow]);
+  }, [versionForm, flow]);
   const hideSavedIndicator = () => setSaving("hide");
   const debouncedHideSave = useMemo(
     () => debounce(hideSavedIndicator, 5000),
@@ -152,9 +104,9 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
   );
 
   const handleAddPrompt = () => {
-    const formNodes = form.getFieldValue("nodes") || [];
+    const formNodes = versionForm.getFieldValue("nodes") || [];
     const nodeId = crypto.randomUUID();
-    form.setFieldValue("nodes", [
+    versionForm.setFieldValue("nodes", [
       ...formNodes,
       {
         id: nodeId,
@@ -165,14 +117,16 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
   };
 
   const handleDeletePrompt = async (nodeId: string) => {
-    const nodes: FlowVersion["nodes"] = form.getFieldValue("nodes") || [];
-    const edges: FlowVersion["edges"] = form.getFieldValue("edges") || [];
+    const nodes: FlowVersion["nodes"] =
+      versionForm.getFieldValue("nodes") || [];
+    const edges: FlowVersion["edges"] =
+      versionForm.getFieldValue("edges") || [];
     const newNodes = nodes.filter((node) => node.id !== nodeId);
     const newEdges = edges.filter(
       (edge) => edge.from_node_id !== nodeId && edge.to_node_id !== nodeId
     );
 
-    form.setFieldsValue({
+    versionForm.setFieldsValue({
       nodes: newNodes,
       edges: newEdges,
     });
@@ -180,22 +134,44 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
     notification.success({ message: "Deleted!", placement: "bottomRight" });
   };
 
-  const handleUnlink = async () => {
+  const handleUnlinkPrompt = async () => {
     if (!editorState.selectedNodeId) return;
     const nodeId = editorState.selectedNodeId;
-    const edges: FlowVersion["edges"] = form.getFieldValue("edges") || [];
+    const edges: FlowVersion["edges"] =
+      versionForm.getFieldValue("edges") || [];
     const newEdges = edges.filter(
       (edge) => edge.from_node_id !== nodeId && edge.to_node_id !== nodeId
     );
-    form.setFieldValue("edges", newEdges);
+    versionForm.setFieldValue("edges", newEdges);
     debouncedHandleSave();
   };
 
-  const formValues = Form.useWatch([], form);
+  const formValues = Form.useWatch([], versionForm);
 
   useEffect(() => {
     debouncedHandleSave();
   }, [JSON.stringify(formValues)]);
+
+  const handleNameChange = useCallback(
+    async (name: string) => {
+      if (!flow) return;
+      const { data: updatedFlow } = await updateFlow(flow.id, { name });
+      if (!updatedFlow) {
+        console.error("Error updating flow");
+      }
+      // update flow list
+      const filtered = (app.flows || []).filter((f) => f.id !== flow.id);
+      app.mergeAppState({ flows: filtered.concat([updatedFlow!]) });
+    },
+    [app.flows]
+  );
+
+  const debouncedNameChange = useMemo(
+    () => debounce(handleNameChange, 1000),
+    [handleNameChange]
+  );
+
+  const flowName = Form.useWatch("name", flowForm) || "";
 
   const isToolbarDisabled = !flow;
 
@@ -203,13 +179,20 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
     <FlowEditorContext.Provider
       value={{
         ...editorState,
-        form,
+        form: versionForm,
         mergeState,
+        handleAddPrompt,
+        handleUnlinkPrompt,
+        handleCloseSidebar: () => setShowSidebar(false),
+        handleOpenSidebar: () => setShowSidebar(true),
+        handleCopyFlow,
+        handleDeletePrompt,
+        handleNewFlow,
       }}
     >
       <Form
         className=""
-        form={form}
+        form={versionForm}
         initialValues={{ nodes: [], edges: [] }}
         onFieldsChange={() => {
           // trigger save
@@ -220,145 +203,58 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
         <Form.Item hidden name="nodes" />
         <Form.Item hidden name="edges" />
         <FlowsLayout
-          showSidebar={showSidebar}
-          savingIndicator={saving}
-          toolbarActions={
-            <div>
-              {/* second layer */}
-              <div className="px-2 py-1 flex flex-row gap-1">
-                <Dropdown
-                  trigger={["click"]}
-                  menu={{
-                    className: "w-48",
-                    items: [
-                      {
-                        key: "new",
-                        label: "New",
-                        onClick: async () => {
-                          const { data, error } = await createFlow();
-                          if (error) return;
-                          window.open(`/flows/${data!.id}`);
-                        },
-                      },
-                      {
-                        key: "open",
-                        label: "Open",
-                        onClick: () => {
-                          setTimeout(() => {
-                            setShowSidebar(true);
-                          }, 200);
-                        },
-                      },
-                      {
-                        key: "copy",
-                        label: "Make a copy",
-                        onClick: async () => {
-                          if (!flow) {
-                            console.error("No flow selected!");
-                            return;
-                          }
-                          const { data, error } = await createFlow({
-                            name: `${flow.name} copy`,
-                          });
-                          if (!data) return;
-                          await createFlowVersion(data?.id, {
-                            edges: formValues.edges,
-                            nodes: formValues.nodes,
-                          });
-                          window.open(`/flows/${data!.id}`);
-                        },
-                      },
-                      { key: "div", type: "divider" },
-                      {
-                        key: "versions",
-                        disabled: true,
-                        label: (
-                          <span className="flex justify-between align-center">
-                            <span>Version history</span>
-                            <Tag rootClassName="rounded-full m-0 dark:bg-purple-900 dark:border-purple-700 border-purple-500 text-purple-900 dark:text-purple-100 font-bold border-none bg-purple-200">
-                              Pro
-                            </Tag>
-                          </span>
-                        ),
-                      },
-                    ],
-                  }}
-                  disabled={isToolbarDisabled}
-                >
-                  <Button size="small" type="text" disabled={isToolbarDisabled}>
-                    File
-                  </Button>
-                </Dropdown>
-                <Dropdown
-                  trigger={["click"]}
-                  menu={{
-                    className: "w-48",
-                    items: [
-                      {
-                        key: "unlink",
-                        label: "Remove connections",
-                        onClick: handleUnlink,
-                        icon: <Unlink size={16} />,
-                        disabled: editorState.selectedNodeId == null,
-                      },
-                      { key: "div", type: "divider" },
-                      {
-                        key: "delete",
-                        label: "Delete",
-                        icon: <Trash size={14} />,
-                        disabled: editorState.selectedNodeId === null,
-                        onClick: () =>
-                          handleDeletePrompt(editorState.selectedNodeId!),
-                      },
-                    ],
-                  }}
-                  disabled={isToolbarDisabled}
-                >
-                  <Button size="small" type="text">
-                    Edit
-                  </Button>
-                </Dropdown>
-                <Dropdown
-                  trigger={["click"]}
-                  menu={{
-                    className: "w-48",
-                    items: [
-                      {
-                        key: "prompt",
-                        label: "Prompt",
-                        icon: <AddPromptIcon />,
-                        className: "flex gap-2 items-center align-center",
-                        onClick: handleAddPrompt,
-                      },
-                    ],
-                  }}
-                  disabled={isToolbarDisabled}
-                >
-                  <Button size="small" type="text">
-                    Insert
-                  </Button>
-                </Dropdown>
-              </div>
-              {/* third layer */}
-              <Divider type="horizontal" className="w-full my-1" />
-              <div className="flex gap-1 items-center justify-start">
-                <ToolbarActionButton
-                  label="Add prompt"
-                  icon={<AddPromptIcon />}
-                  onClick={handleAddPrompt}
-                />
-                <span className="h-full w-px  min-h-[24px] dark:bg-slate-700 bg-neutral-300"></span>
-                <ToolbarActionButton
-                  label="Unlink connections"
-                  icon={<Unlink size={18} />}
-                  onClick={handleUnlink}
-                  disabled={editorState.selectedNodeId === null}
-                />
-              </div>
-            </div>
+          sidebar={
+            <FlowSidebar
+              show={showSidebar}
+              onClose={() => setShowSidebar(false)}
+              onOpen={() => setShowSidebar(true)}
+            />
           }
+          flowNameInput={
+            <Form
+              initialValues={flow}
+              onFinish={() => {}}
+              form={flowForm}
+              disabled={isToolbarDisabled}
+            >
+              <Form.Item name="name" noStyle validateFirst>
+                <Input
+                  bordered={false}
+                  className="focus:ring border-gray-500 transition !duration-500 !max-w-[300px]"
+                  placeholder={flow?.name ? undefined : "Untitled Flow"}
+                  onChange={(e) => debouncedNameChange(e.target.value)}
+                  style={{
+                    width: !flowName
+                      ? 120
+                      : Math.min(Math.max(flowName.length * 12, 120), 300),
+                  }}
+                />
+              </Form.Item>
+            </Form>
+          }
+          savingIndicator={
+            saving !== "hide" && (
+              <span className="text-xs  font-semibold opacity-75">
+                {saving === "saving" ? "Saving..." : "Saved"}
+              </span>
+            )
+          }
+          navActions={[
+            <Button
+              type="primary"
+              className="flex gap-1 items-center"
+              shape="round"
+            >
+              <PlayIcon size={16} />
+              Run
+            </Button>,
+            <DarkModeSwitch />,
+          ]}
+          actionsMenu={<FlowActionsMenu disabled={isToolbarDisabled} />}
+          toolbarActions={<FlowToolbar disabled={isToolbarDisabled} />}
         >
-          {formValues && (
+          {!flow && <WelcomeMessage />}
+          {!isLoading && formValues && (
             <FlowDagEditor
               // run={useWorkflowHook.lastRun || undefined}
               onPromptRemove={handleDeletePrompt}
@@ -368,7 +264,7 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
                 }
               }}
               onChange={(values) => {
-                form.setFieldsValue(values);
+                versionForm.setFieldsValue(values);
                 debouncedHandleSave();
               }}
               className="h-[80vh] z-10"
@@ -381,35 +277,4 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
   );
 };
 
-const ToolbarActionButton = ({
-  label,
-  icon,
-  onClick,
-  disabled,
-}: {
-  label: string;
-  icon: React.ReactNode;
-  onClick: () => void;
-  disabled?: boolean;
-}) => (
-  <Tooltip title={label} placement="bottom">
-    <Button
-      onClick={onClick}
-      type="text"
-      disabled={disabled}
-      rootClassName="w-10 h-10 p-0"
-      className="flex flex-row items-center justify-center "
-      icon={icon}
-    >
-      <span className="sr-only">Add prompt</span>
-    </Button>
-  </Tooltip>
-);
-
-const AddPromptIcon = () => (
-  <span className="mt-1 relative flex items-center justify-center">
-    <AlignLeft size={18} />
-    <Plus size={12} className="absolute bottom-0 -left-2" />
-  </span>
-);
 export default FlowEditor;

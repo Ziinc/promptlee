@@ -1,4 +1,4 @@
-import { Button, Modal, Progress, Card } from "antd";
+import { Button, Progress, Card } from "antd";
 import { AlertTriangle, Zap } from "lucide-react";
 import { useState } from "react";
 import { useAppState } from "../App";

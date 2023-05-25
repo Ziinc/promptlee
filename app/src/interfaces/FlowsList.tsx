@@ -1,4 +1,4 @@
-import { Link, useLocation } from "wouter";
+import { Link } from "wouter";
 import { useAppState } from "../App";
 import { useRoute } from "wouter";
 import { Button, Input } from "antd";
