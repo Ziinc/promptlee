@@ -190,71 +190,71 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
         handleNewFlow,
       }}
     >
-      <Form
-        className=""
-        form={versionForm}
-        initialValues={{ nodes: [], edges: [] }}
-        onFieldsChange={() => {
-          // trigger save
-          debouncedHandleSave.cancel();
-          debouncedHandleSave();
-        }}
+      <FlowsLayout
+        sidebar={
+          <FlowSidebar
+            show={showSidebar}
+            onClose={() => setShowSidebar(false)}
+            onOpen={() => setShowSidebar(true)}
+          />
+        }
+        flowNameInput={
+          <Form
+            initialValues={flow}
+            onFinish={() => {}}
+            form={flowForm}
+            disabled={isToolbarDisabled}
+          >
+            <Form.Item name="name" noStyle validateFirst>
+              <Input
+                bordered={false}
+                className="focus:ring border-gray-500 transition !duration-500 !max-w-[300px]"
+                placeholder={flow?.name ? undefined : "Untitled Flow"}
+                onChange={(e) => debouncedNameChange(e.target.value)}
+                style={{
+                  width: !flowName
+                    ? 120
+                    : Math.min(Math.max(flowName.length * 12, 120), 300),
+                }}
+              />
+            </Form.Item>
+          </Form>
+        }
+        savingIndicator={
+          saving !== "hide" && (
+            <span className="text-xs  font-semibold opacity-75">
+              {saving === "saving" ? "Saving..." : "Saved"}
+            </span>
+          )
+        }
+        navActions={[
+          <Button
+            type="primary"
+            className="flex gap-1 items-center"
+            shape="round"
+          >
+            <PlayIcon size={16} />
+            Run
+          </Button>,
+          <DarkModeSwitch />,
+        ]}
+        actionsMenu={<FlowActionsMenu disabled={isToolbarDisabled} />}
+        toolbarActions={<FlowToolbar disabled={isToolbarDisabled} />}
       >
-        <Form.Item hidden name="nodes" />
-        <Form.Item hidden name="edges" />
-        <FlowsLayout
-          sidebar={
-            <FlowSidebar
-              show={showSidebar}
-              onClose={() => setShowSidebar(false)}
-              onOpen={() => setShowSidebar(true)}
-            />
-          }
-          flowNameInput={
-            <Form
-              initialValues={flow}
-              onFinish={() => {}}
-              form={flowForm}
-              disabled={isToolbarDisabled}
-            >
-              <Form.Item name="name" noStyle validateFirst>
-                <Input
-                  bordered={false}
-                  className="focus:ring border-gray-500 transition !duration-500 !max-w-[300px]"
-                  placeholder={flow?.name ? undefined : "Untitled Flow"}
-                  onChange={(e) => debouncedNameChange(e.target.value)}
-                  style={{
-                    width: !flowName
-                      ? 120
-                      : Math.min(Math.max(flowName.length * 12, 120), 300),
-                  }}
-                />
-              </Form.Item>
-            </Form>
-          }
-          savingIndicator={
-            saving !== "hide" && (
-              <span className="text-xs  font-semibold opacity-75">
-                {saving === "saving" ? "Saving..." : "Saved"}
-              </span>
-            )
-          }
-          navActions={[
-            <Button
-              type="primary"
-              className="flex gap-1 items-center"
-              shape="round"
-            >
-              <PlayIcon size={16} />
-              Run
-            </Button>,
-            <DarkModeSwitch />,
-          ]}
-          actionsMenu={<FlowActionsMenu disabled={isToolbarDisabled} />}
-          toolbarActions={<FlowToolbar disabled={isToolbarDisabled} />}
-        >
-          {!flow && <WelcomeMessage />}
-          {!isLoading && formValues && formValues.id  && (
+        {!flow && <WelcomeMessage />}
+        {!isLoading && formValues && formValues.id && (
+          <Form
+            className=""
+            form={versionForm}
+            initialValues={{ nodes: [], edges: [] }}
+            onFieldsChange={() => {
+              // trigger save
+              debouncedHandleSave.cancel();
+              debouncedHandleSave();
+            }}
+          >
+            <Form.Item hidden name="nodes" />
+            <Form.Item hidden name="edges" />
             <FlowDagEditor
               // run={useWorkflowHook.lastRun || undefined}
               onPromptRemove={handleDeletePrompt}
@@ -270,9 +270,9 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
               className="h-[80vh] z-10"
               flowVersion={formValues}
             />
-          )}
-        </FlowsLayout>
-      </Form>
+          </Form>
+        )}
+      </FlowsLayout>
     </FlowEditorContext.Provider>
   );
 };
