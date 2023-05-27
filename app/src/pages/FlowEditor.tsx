@@ -254,7 +254,7 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
           toolbarActions={<FlowToolbar disabled={isToolbarDisabled} />}
         >
           {!flow && <WelcomeMessage />}
-          {!isLoading && formValues && (
+          {!isLoading && formValues && formValues.id  && (
             <FlowDagEditor
               // run={useWorkflowHook.lastRun || undefined}
               onPromptRemove={handleDeletePrompt}
