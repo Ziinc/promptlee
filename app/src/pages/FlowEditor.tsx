@@ -95,7 +95,7 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
   }, [versionForm, flow]);
   const hideSavedIndicator = () => setSaving("hide");
   const debouncedHideSave = useMemo(
-    () => debounce(hideSavedIndicator, 5000),
+    () => debounce(hideSavedIndicator, 2000),
     [hideSavedIndicator]
   );
   const debouncedHandleSave = useMemo(

@@ -4,7 +4,7 @@ type Props = React.PropsWithChildren<{
   contentClassName?: string;
   toolbarActions?: React.ReactNode;
   savingIndicator?: React.ReactNode;
-  navActions?: React.ReactNode;
+  navActions?: React.ReactNode[] | React.ReactNode;
   sidebar?: React.ReactNode;
   flowNameInput?: React.ReactNode;
   actionsMenu?: React.ReactNode;
@@ -28,7 +28,13 @@ const FlowsLayout: React.FC<Props> = ({
             {flowNameInput}
             {savingIndicator}
           </div>
-          <div className="flex gap-2 items-center">{navActions}</div>
+          <div className="flex gap-2 items-center">
+            {Array.isArray(navActions)
+              ? navActions.map((fragment: React.ReactNode, index) => (
+                  <React.Fragment key={index}>{fragment}</React.Fragment>
+                ))
+              : navActions}
+          </div>
         </div>
         <div className="px-2 py-1 flex flex-row gap-1">{actionsMenu}</div>
         <Divider type="horizontal" className="w-full my-1" />
