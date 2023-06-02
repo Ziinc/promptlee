@@ -37,7 +37,12 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [saving, setSaving] = useState<"hide" | "saving" | "saved">("hide");
 
-  const flow = (app.flows || [])?.find((flow) => flow.id == params?.id);
+  const flow = (app.flows || [])?.find((flow) => flow.id === params?.id);
+  useEffect(() => {
+    // set the flow values
+    if (!flow) return;
+    flowForm.setFieldsValue(flow);
+  }, [JSON.stringify(flow)]);
 
   useEffect(() => {
     // on mount, load latest version
@@ -200,7 +205,7 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
         }
         flowNameInput={
           <Form
-            initialValues={flow}
+            initialValues={{ name: "" }}
             onFinish={() => {}}
             form={flowForm}
             disabled={isToolbarDisabled}
