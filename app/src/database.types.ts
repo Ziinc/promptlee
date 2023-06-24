@@ -34,6 +34,52 @@ export interface Database {
   }
   public: {
     Tables: {
+      flow_runs: {
+        Row: {
+          flow_id: string
+          flow_version_id: string
+          id: string
+          inputs: Json
+          outputs: Json
+          started_at: string
+          status: string
+          stopped_at: string | null
+        }
+        Insert: {
+          flow_id: string
+          flow_version_id: string
+          id?: string
+          inputs?: Json
+          outputs: Json
+          started_at?: string
+          status?: string
+          stopped_at?: string | null
+        }
+        Update: {
+          flow_id?: string
+          flow_version_id?: string
+          id?: string
+          inputs?: Json
+          outputs?: Json
+          started_at?: string
+          status?: string
+          stopped_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flow_runs_flow_id_fkey"
+            columns: ["flow_id"]
+            referencedRelation: "flows"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "flow_runs_flow_version_id_fkey"
+            columns: ["flow_version_id"]
+            referencedRelation: "flow_versions"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       flow_versions: {
         Row: {
           created_at: string | null
@@ -41,7 +87,6 @@ export interface Database {
           flow_id: string
           id: string
           nodes: Json[]
-          updated_at: string
         }
         Insert: {
           created_at?: string | null
@@ -49,7 +94,6 @@ export interface Database {
           flow_id: string
           id?: string
           nodes?: Json[]
-          updated_at?: string
         }
         Update: {
           created_at?: string | null
@@ -57,8 +101,15 @@ export interface Database {
           flow_id?: string
           id?: string
           nodes?: Json[]
-          updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "flow_versions_flow_id_fkey"
+            columns: ["flow_id"]
+            referencedRelation: "flows"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       flows: {
         Row: {
@@ -79,6 +130,20 @@ export interface Database {
           name?: string
           user_id?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "flows_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "flows_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "lifetime_prompt_runs"
+            referencedColumns: ["user_id"]
+          }
+        ]
       }
       prompt_run_counts: {
         Row: {
@@ -102,6 +167,26 @@ export interface Database {
           user_id?: string
           value?: number
         }
+        Relationships: [
+          {
+            foreignKeyName: "prompt_run_counts_flow_id_fkey"
+            columns: ["flow_id"]
+            referencedRelation: "flows"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prompt_run_counts_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prompt_run_counts_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "lifetime_prompt_runs"
+            referencedColumns: ["user_id"]
+          }
+        ]
       }
     }
     Views: {
@@ -110,6 +195,7 @@ export interface Database {
           count: number | null
           user_id: string | null
         }
+        Relationships: []
       }
     }
     Functions: {
@@ -158,6 +244,20 @@ export interface Database {
           public?: boolean | null
           updated_at?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "buckets_owner_fkey"
+            columns: ["owner"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "buckets_owner_fkey"
+            columns: ["owner"]
+            referencedRelation: "lifetime_prompt_runs"
+            referencedColumns: ["user_id"]
+          }
+        ]
       }
       migrations: {
         Row: {
@@ -178,6 +278,7 @@ export interface Database {
           id?: number
           name?: string
         }
+        Relationships: []
       }
       objects: {
         Row: {
@@ -216,6 +317,26 @@ export interface Database {
           updated_at?: string | null
           version?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "objects_bucketId_fkey"
+            columns: ["bucket_id"]
+            referencedRelation: "buckets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "objects_owner_fkey"
+            columns: ["owner"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "objects_owner_fkey"
+            columns: ["owner"]
+            referencedRelation: "lifetime_prompt_runs"
+            referencedColumns: ["user_id"]
+          }
+        ]
       }
     }
     Views: {
@@ -247,7 +368,7 @@ export interface Database {
         Args: {
           name: string
         }
-        Returns: string[]
+        Returns: unknown
       }
       get_size_by_bucket: {
         Args: Record<PropertyKey, never>

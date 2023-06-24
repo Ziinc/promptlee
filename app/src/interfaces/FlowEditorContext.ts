@@ -14,6 +14,7 @@ export interface FlowEditorContextValue extends FlowEditorState {
   handleCopyFlow: () => void;
   handleCloseSidebar: () => void;
   handleOpenSidebar: () => void;
+  handleRunFlow: () => void;
   handleDeletePrompt: (id: string) => void;
 }
 export const DEFAULT_FLOW_EDITOR_STATE = {
@@ -31,6 +32,7 @@ export const FlowEditorContext = createContext<FlowEditorContextValue>({
   handleCloseSidebar: () => null,
   handleOpenSidebar: () => null,
   handleDeletePrompt: () => null,
+  handleRunFlow: () => null,
 });
 
 export const useFlowEditorState = () => useContext(FlowEditorContext);

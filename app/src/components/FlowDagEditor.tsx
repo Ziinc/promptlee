@@ -96,7 +96,7 @@ const FlowDagEditor = ({
       onChange(attrs);
     }
   };
-  const [nodes, nodePromptMapping] = useMemo(() => {
+  const nodes = useMemo(() => {
     const nodes: Node[] = (flowVersion?.nodes || []).map((node, index) => {
       return {
         id: node.id,
@@ -125,11 +125,7 @@ const FlowDagEditor = ({
         type: "prompt",
       };
     });
-    const mapping =
-      flowVersion && flowVersion.nodes
-        ? getNodePromptMapping(app, flowVersion)
-        : {};
-    return [nodes, mapping];
+    return nodes;
   }, [flowVersion?.nodes, JSON.stringify(run?.outputs.nodeResponses)]);
   const edges: Edge[] = useMemo(() => {
     return (flowVersion?.edges || []).map((edge, index) => {

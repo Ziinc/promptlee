@@ -1,5 +1,4 @@
 import { Button, Form, notification, Input } from "antd";
-import { useLocation } from "wouter";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAppState } from "../App";
 import { PlayIcon } from "lucide-react";
@@ -24,6 +23,9 @@ import DarkModeSwitch from "../components/DarkModeSwitch";
 import FlowActionsMenu from "../interfaces/FlowActionsMenus";
 import FlowToolbar from "../interfaces/FlowToolbar";
 import WelcomeMessage from "../interfaces/WelcomeMessage";
+import { getPromptOutput } from "../api/chat";
+import RunFlowModal from "../components/RunFlowModal";
+import useFlow from "../hooks/useFlow";
 
 const FlowEditor = ({ params }: { params: { id: string } }) => {
   const [versionForm] = Form.useForm();
@@ -151,7 +153,14 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
     debouncedHandleSave();
   };
 
+  const handleRunFlow = async () => {
+    const nodes: FlowVersion["nodes"] = versionForm.getFieldValue("nodes");
+    const [node] = nodes;
+    const response = await getPromptOutput(node.prompt_text);
+  };
+
   const formValues = Form.useWatch([], versionForm);
+  const useFlowHook = useFlow(formValues);
 
   useEffect(() => {
     debouncedHandleSave();
@@ -163,10 +172,11 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
       const { data: updatedFlow } = await updateFlow(flow.id, { name });
       if (!updatedFlow) {
         console.error("Error updating flow");
+        return;
       }
       // update flow list
       const filtered = (app.flows || []).filter((f) => f.id !== flow.id);
-      app.mergeAppState({ flows: filtered.concat([updatedFlow!]) });
+      app.mergeAppState({ flows: [...filtered, updatedFlow] });
     },
     [app.flows]
   );
@@ -179,7 +189,6 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
   const flowName = Form.useWatch("name", flowForm) || "";
 
   const isToolbarDisabled = !flow;
-
   return (
     <FlowEditorContext.Provider
       value={{
@@ -193,6 +202,7 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
         handleCopyFlow,
         handleDeletePrompt,
         handleNewFlow,
+        handleRunFlow,
       }}
     >
       <FlowsLayout
@@ -210,6 +220,8 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
             form={flowForm}
             disabled={isToolbarDisabled}
           >
+            <Form.Item name="flow_id"  hidden />
+            <Form.Item name="id"  hidden />
             <Form.Item name="name" noStyle validateFirst>
               <Input
                 bordered={false}
@@ -233,21 +245,27 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
           )
         }
         navActions={[
-          <Button
-            type="primary"
-            className="flex gap-1 items-center"
-            shape="round"
-          >
-            <PlayIcon size={16} />
-            Run
-          </Button>,
+          <RunFlowModal flowVersion={formValues} hook={useFlowHook}>
+            {({ onRun, isOpen }) => (
+              <Button
+                type="primary"
+                className="flex gap-1 items-center"
+                shape="round"
+                disabled={isOpen}
+                onClick={onRun}
+              >
+                <PlayIcon size={16} />
+                Run
+              </Button>
+            )}
+          </RunFlowModal>,
           <DarkModeSwitch />,
         ]}
         actionsMenu={<FlowActionsMenu disabled={isToolbarDisabled} />}
         toolbarActions={<FlowToolbar disabled={isToolbarDisabled} />}
       >
         {!flow && <WelcomeMessage />}
-        {!isLoading && formValues && formValues.id && (
+        {!isLoading && flow && (
           <Form
             className=""
             form={versionForm}
@@ -258,6 +276,8 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
               debouncedHandleSave();
             }}
           >
+            <Form.Item hidden name="id" />
+            <Form.Item hidden name="flow_id" />
             <Form.Item hidden name="nodes" />
             <Form.Item hidden name="edges" />
             <FlowDagEditor

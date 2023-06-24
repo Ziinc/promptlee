@@ -87,6 +87,7 @@ export interface WorkflowRunHistoryItem {
   started_at: string;
   stopped_at: string | null;
 }
+
 export interface AppState {
   prompts: Prompt[];
   workflows: Workflow[];
@@ -231,7 +232,6 @@ const App = () => {
           <TrackedRoute path="/flows/:id" component={FlowEditor} />
           <TrackedRoute path="/" component={FlowEditor} />
 
-          
           <TrackedRoute path="/prompts/:id/edit" component={Editor} />
           <TrackedRoute path="/prompts/:id" component={Editor} />
           <TrackedRoute path="/explore" component={Explore} />

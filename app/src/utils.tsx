@@ -65,6 +65,16 @@ export const resolvePrompt = (
   return { ...prompt, messages: resolvedMessages };
 };
 
+export const buildPrompt = (text: string, params: Record<string, string>) => {
+  return {
+    id: "",
+    name: "",
+    created: new Date().toISOString(),
+    updated: new Date().toISOString(),
+    messages: [{ role: "user", content: resolveTextParams(text, params) }],
+  } as Prompt;
+};
+
 export const removeParamsFromMessage = (
   message: Prompt["messages"][number]
 ) => {
@@ -100,19 +110,37 @@ export const listTerminalOutputNodes = (workflow: Workflow) => {
   });
   return terminalNodes;
 };
+
+export const listTerminalOutputNodesFlow = (flowVersion: FlowVersion) => {
+  const terminalNodes = flowVersion.nodes.filter((node) => {
+    const connection = flowVersion.edges.find((edge) => {
+      return edge.from_node_id === node.id;
+    });
+    return !connection;
+  });
+  return terminalNodes;
+};
+
+
+
+
 export const countWorkflowOutputs = (workflow: Workflow): number => {
   return listTerminalOutputNodes(workflow).length;
 };
 
-export const getNodePromptMapping = (
-  app: AppState,
-  workflowOrFlowVersion: Workflow | FlowVersion
-) => {
-  return workflowOrFlowVersion.nodes.reduce((acc, node) => {
+export const getNodePromptMapping = (app: AppState, workflow: Workflow) => {
+  return workflow.nodes.reduce((acc, node) => {
     const prompt = app.prompts.find((p) => p.id === node.prompt_id);
     acc[node.id] = prompt;
     return acc;
   }, {} as Record<string, Prompt | undefined>);
+};
+
+export const getNodePromptTextMapping = (flowVersion: FlowVersion) => {
+  return flowVersion.nodes.reduce((acc, node) => {
+    acc[node.id] = node.prompt_text;
+    return acc;
+  }, {} as Record<string, string>);
 };
 
 export const filterInputNodes = (workflow: Workflow) => {
@@ -122,6 +150,17 @@ export const filterInputNodes = (workflow: Workflow) => {
   });
 
   return workflow.nodes.filter((node) => {
+    return !connectedOutputNodeIds.includes(node.id);
+  });
+};
+
+export const filterInputFlowNodes = (flowVersion: FlowVersion) => {
+  //
+  const connectedOutputNodeIds = flowVersion.edges.map((edge) => {
+    return edge.from_node_id;
+  });
+
+  return flowVersion.nodes.filter((node) => {
     return !connectedOutputNodeIds.includes(node.id);
   });
 };
@@ -225,6 +264,30 @@ export const extractWorkflowParams = (
   }, {} as Record<string, string[]>);
 
   workflow.edges.reduce((acc, edge) => {
+    if (!edge.to_node_id || !inputNodeIds.includes(edge.to_node_id)) return acc;
+
+    const params = acc[edge.to_node_id];
+    acc[edge.to_node_id] = params.filter((p) => p !== edge.to_input);
+    return acc;
+  }, nodeParamsMapping);
+
+  return Object.values(nodeParamsMapping).flat();
+};
+
+export const extractFlowParams = (flowVersion: FlowVersion): string[] => {
+  const inputNodes = filterInputFlowNodes(flowVersion);
+  console.log("inputNodes", inputNodes);
+  const inputNodeIds = inputNodes.map((n) => n.id);
+  // eliminate params for nodes that have input edges
+  let nodeParamsMapping = inputNodes.reduce((acc, node) => {
+    // const prompt = app.prompts.find((p) => p.id === node.);
+    const params = extractParametersFromText(node.prompt_text);
+    acc[node.id] = params;
+    // acc[node.id] = prompt ? extractPromptParameters(prompt) : [];
+    return acc;
+  }, {} as Record<string, string[]>);
+
+  flowVersion.edges.reduce((acc, edge) => {
     if (!edge.to_node_id || !inputNodeIds.includes(edge.to_node_id)) return acc;
 
     const params = acc[edge.to_node_id];
