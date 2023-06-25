@@ -12,6 +12,9 @@ process.env = {
   VITE_DESCRIPTION: common.SEO.description,
 };
 export default defineConfig({
+  build: {
+    outDir: "../dist"
+  },
   plugins: [react()],
   css: { postcss: { plugins: [tailwindcss, autoprefixer] } },
   resolve: {

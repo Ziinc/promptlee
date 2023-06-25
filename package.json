@@ -10,17 +10,17 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "turbo build",
     "dev": "turbo dev",
+    "serve": "serve dist",
     "types": "supabase gen types typescript --local > app/src/database.types.ts",
     "i:turbo": "npm install -D --arch=x64 --platform=linux turbo && npm install -D --arch=arm64 --platform=darwin turbo"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "serve": "^14.2.0",
     "turbo": "^1.8.6"
   },
   "workspaces": [
     "*"
-  ],
-  "dependencies": {
-  }
+  ]
 }

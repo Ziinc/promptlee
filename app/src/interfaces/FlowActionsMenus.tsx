@@ -1,5 +1,5 @@
 import { Button, Dropdown, Tag } from "antd";
-import { Trash, Unlink } from "lucide-react";
+import { Book, Trash, Unlink } from "lucide-react";
 import AddPromptIcon from "../components/icons/AddPromptIcon";
 import { useFlowEditorState } from "./FlowEditorContext";
 
@@ -102,6 +102,30 @@ const FlowActionsMenu = ({ disabled }: FlowActionsMenuProps) => {
       >
         <Button size="small" type="text" disabled={disabled}>
           Insert
+        </Button>
+      </Dropdown>
+      <Dropdown
+        trigger={["click"]}
+        menu={{
+          className: "w-48",
+          items: [
+            {
+              key: "docs",
+              label: "Documentation",
+              icon: <Book size={14} />,
+              className: "flex gap-2 items-center align-center",
+              onClick: ()=>{
+                const docsHref = `${import.meta.env.VITE_DOCS_URL}/docs`
+                console.log('docsHref', docsHref)
+                window.open(docsHref)
+              },
+            },
+          ],
+        }}
+        disabled={disabled}
+      >
+        <Button size="small" type="text" disabled={disabled}>
+          Help
         </Button>
       </Dropdown>
     </>
