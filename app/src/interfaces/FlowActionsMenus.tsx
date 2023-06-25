@@ -39,14 +39,12 @@ const FlowActionsMenu = ({ disabled }: FlowActionsMenuProps) => {
             {
               key: "versions",
               disabled: true,
-              label: (
-                <span className="flex justify-between align-center">
-                  <span>Version history</span>
-                  <Tag rootClassName="rounded-full m-0 dark:bg-purple-900 dark:border-purple-700 border-purple-500 text-purple-900 dark:text-purple-100 font-bold border-none bg-purple-200">
-                    Pro
-                  </Tag>
-                </span>
-              ),
+              label: <ProLabel text="Version history" />,
+            },
+            {
+              key: "runs",
+              disabled: true,
+              label: <ProLabel text="Run history" />,
             },
           ],
         }}
@@ -114,10 +112,9 @@ const FlowActionsMenu = ({ disabled }: FlowActionsMenuProps) => {
               label: "Documentation",
               icon: <Book size={14} />,
               className: "flex gap-2 items-center align-center",
-              onClick: ()=>{
-                const docsHref = `${import.meta.env.VITE_DOCS_URL}/docs`
-                console.log('docsHref', docsHref)
-                window.open(docsHref)
+              onClick: () => {
+                const docsHref = `${import.meta.env.VITE_DOCS_URL}/docs`;
+                window.open(docsHref);
               },
             },
           ],
@@ -132,4 +129,12 @@ const FlowActionsMenu = ({ disabled }: FlowActionsMenuProps) => {
   );
 };
 
+const ProLabel = ({ text }: { text: string }) => (
+  <span className="flex justify-between align-center">
+    <span>{text}</span>
+    <Tag rootClassName="rounded-full m-0 dark:bg-purple-900 dark:border-purple-700 border-purple-500 text-purple-900 dark:text-purple-100 font-bold border-none bg-purple-200">
+      Pro
+    </Tag>
+  </span>
+);
 export default FlowActionsMenu;
