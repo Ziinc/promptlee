@@ -22,7 +22,7 @@ const WelcomeMessage = () => {
     >
       <div className="flex">
         <div className="w-1/2 mx-auto">
-          <h4 className="font-bold opacity-75 text-center">Create a Flow</h4>
+          <h4 className="font-bold opacity-75 text-center">Create a flow</h4>
           <Button
             className="flex justify-start items-center gap-1"
             block
