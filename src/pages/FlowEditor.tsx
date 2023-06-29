@@ -1,4 +1,5 @@
-import { Button, Form, notification, Input } from "antd";
+import {  Form, notification, Input } from "antd";
+import Button from "antd/es/button/button"
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAppState } from "../App";
 import { PlayIcon } from "lucide-react";

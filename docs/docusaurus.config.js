@@ -3,15 +3,15 @@
 
 const lightCodeTheme = require("prism-react-renderer/themes/github");
 const darkCodeTheme = require("prism-react-renderer/themes/dracula");
-const common = require("common");
-const EXPLORE = require("common/dist/explore");
+//@ts-ignore
+const CONSTANTS = require("common/constants.json");
 const isProd = process.env.NODE_ENV === "production";
 const appUrl = isProd ? "https://promptpro.tznc.net" : "http://localhost:5173";
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: common.SEO.title,
-  tagline: common.SEO.tagline,
+  title: CONSTANTS.title,
+  tagline: CONSTANTS.tagline,
   favicon: "/favicon.ico",
 
   // Set the production url of your site here

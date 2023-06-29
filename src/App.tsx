@@ -1,25 +1,20 @@
 import { ConfigProvider, theme as antdTheme } from "antd";
 import "antd/dist/reset.css";
-import localforage from "localforage";
 import React, { useContext, useEffect, useState } from "react";
 import theme from "./assets/theme.json";
 import { useLocation } from "wouter";
 import Editor from "./pages/Editor";
-import Home from "./pages/Home";
 import Settings from "./pages/Settings";
 import { CreateChatCompletionResponse } from "openai";
 import { isSystemDarkMode } from "./utils";
 import ReactGA from "react-ga4";
 import TrackedRoute from "./components/TrackedRoute";
-import Explore from "./pages/Explore";
 import Workflows from "./pages/Workflows";
 import WorkflowEditor from "./pages/WorkflowEditor";
 import { Flow, getLifetimePromptRunCount, listFlows } from "./api/flows";
 import FlowEditor from "./pages/FlowEditor";
-import { Database } from "./database.types";
 import { Session, User } from "@supabase/gotrue-js";
 import AuthWall from "./components/AuthWall";
-import UpgradePromptModal from "./components/UpgradePromptModal";
 export interface Workflow {
   id: string;
   name: string;
@@ -234,7 +229,6 @@ const App = () => {
 
           <TrackedRoute path="/prompts/:id/edit" component={Editor} />
           <TrackedRoute path="/prompts/:id" component={Editor} />
-          <TrackedRoute path="/explore" component={Explore} />
           <TrackedRoute path="/workflows" component={Workflows} />
           <TrackedRoute path="/workflows/:id" component={WorkflowEditor} />
           <TrackedRoute path="/workflows/:id/edit" component={WorkflowEditor} />
