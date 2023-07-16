@@ -1,8 +1,14 @@
-import { Button, Modal, Divider } from "antd";
+import { Modal, Divider } from "antd";
 import { useEffect, useState } from "react";
 import { getSession, onAuthStateChange, signInWithGoogle } from "../api/auth";
 import { useAppState } from "../App";
 
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
+import Button from "@mui/material/Button";
 const AuthWall = () => {
   const [authCheck, setAuthCheck] = useState(false);
   const app = useAppState();
@@ -12,7 +18,7 @@ const AuthWall = () => {
     setAuthCheck(true);
     if (session) {
       app.mergeAppState({ session, user: session.user ?? null });
-      setAuthCheck(false)
+      setAuthCheck(false);
     }
   }
 
@@ -32,7 +38,46 @@ const AuthWall = () => {
 
   return (
     <>
-      <Modal
+      <Dialog
+        open={authCheck && !app.session}
+        disableEscapeKeyDown
+        PaperProps={{className: "rounded-lg"}}
+      >
+        <DialogContent className="px-10 rounded ">
+          <div className="h-[30vh] flex flex-col gap-4 items-center justify-center">
+            <div className="flex flex-col justify-center items-center">
+              <img src="/branding/icon-only.png" className="p-2 h-20" />
+              <p>Sign into PromptPro</p>
+              <p className="mb-0">
+                All new users will have <strong>5 prompt flows</strong> and{" "}
+                <strong>100 runs</strong> for <strong>free</strong>
+              </p>
+            </div>
+            <Divider className="my-0" />
+            <Button
+              className="flex flex-row gap-2 items-center justify-center w-full"
+              variant="outlined"
+              color="secondary"
+              onClick={signInWithGoogle}
+            >
+              <GoogleIcon width={16} />
+              Sign in with Google
+            </Button>
+          </div>
+        </DialogContent>
+
+        {/* <DialogTitle>
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Let Google help apps determine location. This means sending
+            anonymous location data to Google, even when no apps are running.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+        </DialogActions> */}
+      </Dialog>
+      {/* <Modal
         closable={false}
         open={authCheck && !app.session}
         okButtonProps={{ className: "hidden" }}
@@ -49,18 +94,15 @@ const AuthWall = () => {
           </div>
           <Divider className="my-0" />
           <Button
-            className="flex flex-row gap-2 items-center justify-center"
-            block
-            size="large"
-            icon={<GoogleIcon width={16} />}
-            onClick={()=>{
-                signInWithGoogle()
-            }}
+            className="flex flex-row gap-2 items-center justify-center w-full"
+            variant="outlined"
+            onClick={signInWithGoogle}
           >
+            <GoogleIcon width={16} />
             Sign in with Google
           </Button>
         </div>
-      </Modal>
+      </Modal> */}
     </>
   );
 };

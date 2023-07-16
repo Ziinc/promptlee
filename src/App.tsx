@@ -1,20 +1,19 @@
 import { ConfigProvider, theme as antdTheme } from "antd";
 import "antd/dist/reset.css";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import theme from "./assets/theme.json";
-import { useLocation } from "wouter";
-import Editor from "./pages/Editor";
-import Settings from "./pages/Settings";
 import { CreateChatCompletionResponse } from "openai";
 import { isSystemDarkMode } from "./utils";
 import ReactGA from "react-ga4";
 import TrackedRoute from "./components/TrackedRoute";
-import Workflows from "./pages/Workflows";
-import WorkflowEditor from "./pages/WorkflowEditor";
 import { Flow, getLifetimePromptRunCount, listFlows } from "./api/flows";
 import FlowEditor from "./pages/FlowEditor";
 import { Session, User } from "@supabase/gotrue-js";
 import AuthWall from "./components/AuthWall";
+import CssBaseline from "@mui/material/CssBaseline";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import { StyledEngineProvider } from "@mui/material/styles";
+
 export interface Workflow {
   id: string;
   name: string;
@@ -129,10 +128,6 @@ export const AppContext = React.createContext({
 export const useAppState = () => useContext(AppContext);
 const App = () => {
   const [appState, setAppState] = useState<AppState>(DEFAULT_STATE);
-
-  const [location, setLocation] = useLocation();
-
-  // do setup
   useEffect(() => {
     setup();
   }, []);
@@ -140,16 +135,6 @@ const App = () => {
   const setup = async () => {
     ReactGA.initialize("G-SKTR3XPW5M");
 
-    // // retrieve cached values and put them into local state
-    // let cached = {} as any;
-    // for (var key in DEFAULT_STATE) {
-    //   const cachedValue = await localforage.getItem(key);
-    //   if (cachedValue) {
-    //     cached[key] = cachedValue;
-    //   }
-    // }
-
-    // fetch all flows
     const { data: flows } = await listFlows();
     const { data: lifetimeRuns } = await getLifetimePromptRunCount();
     mergeAppState({
@@ -162,23 +147,7 @@ const App = () => {
       document.body.classList.add("dark");
       mergeAppState({}); // trigger rerender
     }
-
-    // setAppState((prev) => ({ ...prev, ...cached }));
   };
-
-  // useEffect(() => {
-  //   syncState(appState);
-  // }, [JSON.stringify(appState)]);
-
-  // const syncState = async (newState: AppState) => {
-  //   if (newState == DEFAULT_STATE) return;
-  //   for (let key in DEFAULT_STATE) {
-  //     const val = await localforage.getItem(key);
-  //     if (val !== (appState as any)[key]) {
-  //       await localforage.setItem(key, (appState as any)[key]);
-  //     }
-  //   }
-  // };
 
   const mergeAppState: AppContextValue["mergeAppState"] = (partial) => {
     setAppState((prev) => ({ ...prev, ...partial }));
@@ -196,6 +165,64 @@ const App = () => {
 
   const darkMode = Boolean(document.body.classList.contains("dark"));
 
+  const muiThemem = useMemo(() => {
+    if (darkMode) {
+      return createTheme({
+        palette: {
+          mode: "dark",
+          primary: {
+            main: "#0f172a",
+          },
+          secondary: {
+            main: "#bfdbfe",
+          },
+          success: {
+            main: "#89d247",
+          },
+          warning: {
+            main: "#dc9a42",
+          },
+          error: {
+            main: "#8a2628",
+          },
+          info: {
+            main: "#6275d4",
+          },
+          background: {
+            paper: "#0f172a",
+            default: "#0f172a",
+          },
+        },
+      });
+    }
+    return createTheme({
+      palette: {
+        mode: "light",
+        primary: {
+          main: "#0f172a",
+        },
+        secondary: {
+          main: "#bfdbfe",
+        },
+        success: {
+          main: "#89d247",
+        },
+        warning: {
+          main: "#dc9a42",
+        },
+        error: {
+          main: "#8a2628",
+        },
+        info: {
+          main: "#6275d4",
+        },
+        background: {
+          paper: "#f1f5f9",
+        },
+      },
+    });
+  }, [darkMode]);
+
   return (
     <ConfigProvider
       theme={{
@@ -211,30 +238,28 @@ const App = () => {
               [antdTheme.defaultAlgorithm, antdTheme.darkAlgorithm],
       }}
     >
-      <AppContext.Provider
-        value={{
-          ...appState,
-          setAppState,
-          mergeAppState,
-          darkMode,
-          toggleDarkMode,
-          isExceedingFlows: (appState.flows || []).length >= 5,
-          isExceedingPromptRuns: appState.lifetimePromptRuns >= 100,
-        }}
-      >
-        <AuthWall />
-        <main className=" bg-slate-100 dark:bg-slate-900 text-black dark:text-gray-100">
-          <TrackedRoute path="/flows/:id" component={FlowEditor} />
-          <TrackedRoute path="/" component={FlowEditor} />
-
-          <TrackedRoute path="/prompts/:id/edit" component={Editor} />
-          <TrackedRoute path="/prompts/:id" component={Editor} />
-          <TrackedRoute path="/workflows" component={Workflows} />
-          <TrackedRoute path="/workflows/:id" component={WorkflowEditor} />
-          <TrackedRoute path="/workflows/:id/edit" component={WorkflowEditor} />
-          <TrackedRoute path="/settings" component={Settings} />
-        </main>
-      </AppContext.Provider>
+      {/* https://mui.com/material-ui/guides/interoperability/#tailwind-css */}
+      <StyledEngineProvider injectFirst>
+        <ThemeProvider theme={muiThemem}>
+          <AppContext.Provider
+            value={{
+              ...appState,
+              setAppState,
+              mergeAppState,
+              darkMode,
+              toggleDarkMode,
+              isExceedingFlows: (appState.flows || []).length >= 5,
+              isExceedingPromptRuns: appState.lifetimePromptRuns >= 100,
+            }}
+          >
+            <AuthWall />
+            <main className="bg-slate-100 dark:bg-slate-900 text-black dark:text-gray-100">
+              <TrackedRoute path="/flows/:id" component={FlowEditor} />
+              <TrackedRoute path="/" component={FlowEditor} />
+            </main>
+          </AppContext.Provider>
+        </ThemeProvider>
+      </StyledEngineProvider>
     </ConfigProvider>
   );
 };

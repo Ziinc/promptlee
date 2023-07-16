@@ -5,6 +5,8 @@ import matchers from "@testing-library/jest-dom/matchers";
 // extends Vitest's expect method with methods from react-testing-library
 expect.extend(matchers);
 vi.mock("../src/api/flows")
+vi.mock("../src/api/auth")
+vi.mock("../src/api/chat")
 
 Object.defineProperty(window, "matchMedia", {
   writable: true,
