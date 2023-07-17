@@ -37,4 +37,5 @@ test("authed - do not render AuthWall", async () => {
   (getSession as Mock).mockReturnValue({ session: { user: { id: "123" } } });
   render(<App />);
   expect(await screen.queryByText("Sign in with Google")).toBeNull();
+  await screen.findByText(/PromptPro is a ChatGPT prompt manager/)
 });
