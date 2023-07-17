@@ -41,19 +41,21 @@ const AuthWall = () => {
       <Dialog
         open={authCheck && !app.session}
         disableEscapeKeyDown
-        PaperProps={{className: "rounded-lg"}}
+        PaperProps={{ className: "rounded-lg" }}
       >
         <DialogContent className="px-10 rounded ">
           <div className="h-[30vh] flex flex-col gap-4 items-center justify-center">
             <div className="flex flex-col justify-center items-center">
               <img src="/branding/icon-only.png" className="p-2 h-20" />
-              <p>Sign into PromptPro</p>
-              <p className="mb-0">
-                All new users will have <strong>5 prompt flows</strong> and{" "}
+              <DialogTitle>Sign into PromptPro</DialogTitle>
+              <DialogContentText className="mb-0">
+                All new users will have <strong>5 flows</strong> and{" "}
                 <strong>100 runs</strong> for <strong>free</strong>
-              </p>
+              </DialogContentText>
             </div>
             <Divider className="my-0" />
+          </div>
+          <DialogActions>
             <Button
               className="flex flex-row gap-2 items-center justify-center w-full"
               variant="outlined"
@@ -63,7 +65,7 @@ const AuthWall = () => {
               <GoogleIcon width={16} />
               Sign in with Google
             </Button>
-          </div>
+          </DialogActions>
         </DialogContent>
 
         {/* <DialogTitle>
