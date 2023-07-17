@@ -202,7 +202,7 @@ const App = () => {
           main: "#0f172a",
         },
         secondary: {
-          main: "#bfdbfe",
+          main: "#64748b",
         },
         success: {
           main: "#89d247",
@@ -253,14 +253,20 @@ const App = () => {
             }}
           >
             <AuthWall />
-            <main className="bg-slate-100 dark:bg-slate-900 text-black dark:text-gray-100">
-              <TrackedRoute path="/flows/:id" component={FlowEditor} />
-              <TrackedRoute path="/" component={FlowEditor} />
-            </main>
+            <AuthedApp />
           </AppContext.Provider>
         </ThemeProvider>
       </StyledEngineProvider>
     </ConfigProvider>
+  );
+};
+
+export const AuthedApp = () => {
+  return (
+    <main className="bg-slate-100 dark:bg-slate-900 text-black dark:text-gray-100">
+      <TrackedRoute path="/flows/:id" component={FlowEditor} />
+      <TrackedRoute path="/" component={FlowEditor} />
+    </main>
   );
 };
 
