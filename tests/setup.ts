@@ -21,6 +21,7 @@ Object.defineProperty(window, "matchMedia", {
     dispatchEvent: vi.fn(),
   })),
 });
+window.open = vi.fn();
 afterEach(() => {
   cleanup();
 });

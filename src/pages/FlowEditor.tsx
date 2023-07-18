@@ -27,6 +27,7 @@ import WelcomeMessage from "../interfaces/WelcomeMessage";
 import { getPromptOutput } from "../api/chat";
 import RunFlowModal from "../components/RunFlowModal";
 import useFlow from "../hooks/useFlow";
+import { useLocation } from "wouter";
 
 const FlowEditor = ({ params }: { params: { id: string } }) => {
   const [versionForm] = Form.useForm();
@@ -35,6 +36,7 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
     DEFAULT_FLOW_EDITOR_STATE
   );
   const [showSidebar, setShowSidebar] = useState(false);
+  const [_location, navigate] = useLocation()
   const app = useAppState();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -74,7 +76,13 @@ const FlowEditor = ({ params }: { params: { id: string } }) => {
   const handleNewFlow = async () => {
     const { data, error } = await createFlow();
     if (error) return;
-    window.open(`/flows/${data!.id}`);
+    const path = `/flows/${data!.id}`
+    if (location.pathname.startsWith("/flows/")) {
+      window.open(path);
+    } else {
+      // navigate to the flow
+      navigate(path)
+    }
   };
   const handleCopyFlow = async () => {
     if (!flow) {

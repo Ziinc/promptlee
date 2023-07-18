@@ -171,10 +171,10 @@ const App = () => {
         palette: {
           mode: "dark",
           primary: {
-            main: "#0f172a",
+            main: "#7c3aed",
           },
           secondary: {
-            main: "#bfdbfe",
+            main: "#cbd5e1",
           },
           success: {
             main: "#89d247",

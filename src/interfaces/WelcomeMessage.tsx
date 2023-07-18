@@ -1,47 +1,52 @@
-import { Button, Card } from "antd";
 import { File } from "lucide-react";
 import { useAppState } from "../App";
 import { useFlowEditorState } from "./FlowEditorContext";
 import FlowsList from "./FlowsList";
+
+import Button from "@mui/material/Button";
+import Divider from "@mui/material/Divider";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import CardActions from "@mui/material/CardActions";
+import CardHeader from "@mui/material/CardHeader";
 
 const WelcomeMessage = () => {
   const editor = useFlowEditorState();
   const app = useAppState();
   return (
     <Card
-      className="w-fit mx-auto mt-[10vh] min-h-[40vh]"
-      title={
-        <div className="p-5">
-          <h3 className="text-base text-center">
+      className="w-fit mx-auto mt-[10vh] flex flex-col justify-between"
+      variant="outlined"
+    >
+      <CardHeader
+        title={
+          <h3 className="text-base font-bold text-center">
             PromptPro is a ChatGPT prompt manager for creating powerful
             automation flows
           </h3>
-        </div>
-      }
-      bordered
-    >
-      <div className="flex">
-        <div className="w-1/2 mx-auto">
-          <h4 className="font-bold opacity-75 text-center">Create a flow</h4>
-          <Button
-            className="flex justify-start items-center gap-1"
-            block
-            size="large"
-            icon={<File size={18} />}
-            onClick={editor.handleNewFlow}
-          >
-            New blank flow
-          </Button>
-        </div>
+        }
+      />
+      <Divider flexItem />
+      <CardContent className="flex flex-col gap-3 justify-start">
         {app.flows && app.flows.length > 0 && (
-          <div className="w-1/2 px-2">
-            <div>
-              <h4 className="font-bold opacity-75 text-center">Open a Flow</h4>
-              <FlowsList />
-            </div>
+          <div className="flex-grow h-full ">
+            <h4 className="font-bold opacity-75  text-sm">Open a Flow</h4>
+            <FlowsList />
           </div>
         )}
-      </div>
+      </CardContent>
+      <Divider flexItem />
+      <CardActions className="flex flex-row justify-end">
+        <Button
+          className="flex justify-start items-center gap-2"
+          variant="text"
+          color="secondary"
+          onClick={editor.handleNewFlow}
+        >
+          <File size={14} />
+          New blank flow
+        </Button>
+      </CardActions>
     </Card>
   );
 };
