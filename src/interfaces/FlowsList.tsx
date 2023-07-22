@@ -25,6 +25,7 @@ const FlowsList = ({ close = () => null }: Props) => {
               variant={flow?.id === currentFlowId ? "contained" : "text"}
               color="secondary"
               className="text-left"
+              size="small"
             >
               {flow.name}
             </Button>
