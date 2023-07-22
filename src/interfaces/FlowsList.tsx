@@ -1,8 +1,7 @@
-import { Link } from "wouter";
+import { useRoute, Link } from "wouter";
 import { useAppState } from "../App";
-import { useRoute } from "wouter";
-import { Button, Input } from "antd";
-import { useState } from "react";
+
+import Button from '@mui/material/Button';
 interface Props {
   close?: () => void;
 }
@@ -11,23 +10,9 @@ const FlowsList = ({ close = () => null }: Props) => {
   const currentFlowId = params?.id;
   const app = useAppState();
   const flows = app.flows;
-  const [search, setSearch] = useState("");
   return (
     <div className="flex flex-col gap-2 items-start relative w-full h-full overflow-y-auto snap-manadatory snap-y">
-      <Input
-        className={[
-          "sticky top-0 z-10 mb-1",
-          (flows || []).length < 10 ? "hidden" : "",
-        ].join(" ")}
-        value={search}
-        placeholder="Filter by name..."
-        size="small"
-        onChange={(e) => setSearch(e.target.value)}
-      />
       {(flows || [])
-        .filter((flow) =>
-          flow.name.toLocaleLowerCase().includes(search.toLocaleLowerCase())
-        )
         .sort((a, b) => a.name.localeCompare(b.name))
         .map((flow) => (
           <Link
@@ -37,8 +22,8 @@ const FlowsList = ({ close = () => null }: Props) => {
             onClick={close}
           >
             <Button
-              type={flow?.id === currentFlowId ? "primary" : "text"}
-              block
+              variant={flow?.id === currentFlowId ? "contained" : "text"}
+              color="secondary"
               className="text-left"
             >
               {flow.name}
