@@ -1,4 +1,3 @@
-import { Modal, Divider } from "antd";
 import { useEffect, useState } from "react";
 import { getSession, onAuthStateChange, signInWithGoogle } from "../api/auth";
 import { useAppState } from "../App";
@@ -39,31 +38,25 @@ const AuthWall = () => {
 
   return (
     <>
-      <Dialog
-        open={authCheck && !app.session}
-        disableEscapeKeyDown
-        PaperProps={{ className: "rounded-lg" }}
-      >
-        <DialogContent className="px-10 rounded ">
-          <div className="h-[30vh] flex flex-col gap-4 items-center justify-center">
-            <div className="flex flex-col justify-center items-center">
-              <img src="/branding/icon-only.png" className="p-2 h-20" />
+      <Dialog open={authCheck && !app.session} disableEscapeKeyDown>
+        <DialogContent>
+          <div>
+            <div>
+              <img src="/branding/icon-only.png" />
               <DialogTitle>Sign into PromptPro</DialogTitle>
-              <DialogContentText className="mb-0">
+              <DialogContentText>
                 All new users will have <strong>5 flows</strong> and{" "}
                 <strong>100 runs</strong> for <strong>free</strong>
               </DialogContentText>
             </div>
-            <Divider className="my-0" />
           </div>
           <DialogActions>
             <Button
-              className="flex flex-row gap-2 items-center justify-center w-full"
               variant="outlined"
               color="secondary"
               onClick={signInWithGoogle}
+              startIcon={<GoogleIcon width={16} />}
             >
-              <GoogleIcon width={16} />
               Sign in with Google
             </Button>
           </DialogActions>
