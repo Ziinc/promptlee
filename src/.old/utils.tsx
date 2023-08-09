@@ -4,14 +4,14 @@ import {
   Prompt,
   Workflow,
   WorkflowRunHistoryItem,
-} from "./App";
+} from "../App";
 import { createClient } from "@supabase/supabase-js";
 // @ts-ignore
 import batchingToposort from "batching-toposort";
 import slice from "lodash/slice";
 import concat from "lodash/concat";
 import { merge } from "lodash";
-import { Database } from "./database.types";
+import { Database } from "../database.types";
 import { notification as antdNotification } from "antd";
 import { Flow, FlowVersion } from "./api/flows";
 import { Check, X } from "lucide-react";

@@ -19,7 +19,7 @@ export default defineConfig({
     outDir: "./dist",
   },
   plugins: [react()],
-  css: { postcss: { plugins: [tailwindcss, autoprefixer] } },
+  // css: { postcss: { plugins: [tailwindcss, autoprefixer] } },
   // resolve: {
   //   alias: {
   //     react: path.resolve("./node_modules/react"),
