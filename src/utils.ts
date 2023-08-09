@@ -12,3 +12,39 @@ export const isSystemDarkMode = () => {
     window.matchMedia("(prefers-color-scheme: dark)").matches
   );
 };
+
+
+
+/**
+ * Example usage
+ * > extractParametersFromText("some @test")
+ * ["test"]
+ */
+export const extractParametersFromText = (text: string) : string[] => {
+  const promptParams = [...text.matchAll(/\s\@(\S+)\s?/g)];
+  const params = promptParams.flatMap(([_match, paramName]) => paramName);
+
+  return [...new Set(params)];
+};
+
+
+
+/**
+ * Resolves a prompt's parameters with a params object
+ * 
+ * Example usage
+ * > resolveTextParams("some @test", {test: "123"})
+ * "some 123"
+ */
+export const resolveTextParams = (
+  text: string,
+  params: Record<string, string>
+):string => {
+  let replaced = text;
+
+  for (const [key, value] of Object.entries(params)) {
+    replaced = replaced.replaceAll(`@${key}`, value);
+  }
+
+  return replaced;
+};

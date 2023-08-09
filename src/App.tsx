@@ -50,7 +50,7 @@ const App = () => {
         setAppState,
         mergeAppState,
         toggleDarkMode,
-        putAppState
+        putAppState,
       }}
     >
       <CssBaseline />
