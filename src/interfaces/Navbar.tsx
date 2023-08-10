@@ -1,13 +1,15 @@
 import { FormControlLabel, FormGroup, Tooltip, Switch } from "@mui/material";
-import { Container, Stack } from "@mui/system";
+import { Container } from "@mui/system";
 import { Moon, Sun } from "lucide-react";
+import { signOut } from "../api/auth";
 import { useAppState } from "../App";
-
+import Button from "@mui/material/Button";
 const Navbar = () => {
   const app = useAppState();
 
   return (
     <Container>
+      <Button onClick={signOut}>Sign out</Button>
       <FormGroup>
         <FormControlLabel
           control={

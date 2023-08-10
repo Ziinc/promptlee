@@ -8,9 +8,11 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Button from "@mui/material/Button";
+import Snackbar from "@mui/material/Snackbar";
 
 const AuthWall = () => {
   const [authCheck, setAuthCheck] = useState(false);
+  const [signedOut, setSignedOut] = useState(false);
   const app = useAppState();
 
   async function getSupabaseSession() {
@@ -25,11 +27,15 @@ const AuthWall = () => {
   useEffect(() => {
     getSupabaseSession();
 
-    const { subscription } = onAuthStateChange(async (_event, session) => {
+    const { subscription } = onAuthStateChange(async (event, session) => {
+      if (event == "SIGNED_OUT") {
+        setSignedOut(true);
+      }
       if (session) {
         app.mergeAppState({ session, user: session.user ?? null });
       } else {
         app.mergeAppState({ session: null, user: null });
+        setAuthCheck(true);
       }
     });
 
@@ -38,6 +44,12 @@ const AuthWall = () => {
 
   return (
     <>
+      <Snackbar
+        open={signedOut}
+        autoHideDuration={3000}
+        onClose={() => setSignedOut(false)}
+        message="Signed out successfully"
+      />
       <Dialog open={authCheck && !app.session} disableEscapeKeyDown>
         <DialogContent>
           <div>

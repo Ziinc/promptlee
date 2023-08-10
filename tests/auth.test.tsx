@@ -40,4 +40,14 @@ test("authed - do not render AuthWall", async () => {
   await screen.findByText(/PromptPro is a ChatGPT prompt manager/);
 });
 
-test.todo("authed - can log out")
+test("authed - can sign out", async () => {
+  (getSession as Mock).mockReturnValue({ session: { user: { id: "123" } } });
+  render(<App />);
+  const btn = await screen.findByText("Sign out");
+  await userEvent.click(btn);
+  // simulate sign out subscription callback
+  const callback = (onAuthStateChange as Mock).mock.calls[0][0];
+  await callback("SIGNED_OUT", null);
+  await screen.findByText("Signed out successfully");
+  await screen.findByText("Sign in with Google");
+});
