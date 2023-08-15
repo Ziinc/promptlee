@@ -27,6 +27,9 @@ global.ResizeObserver = vi.fn().mockImplementation(() => ({
   unobserve: vi.fn(),
   disconnect: vi.fn(),
 }));
+// @ts-ignore
+global.navigator.clipboard = vi.fn()
+global.navigator.clipboard.writeText = vi.fn().mockResolvedValue(null)
 
 window.open = vi.fn();
 afterEach(() => {

@@ -13,3 +13,13 @@ A webapp focused on prompt engineering and iterative prompt development. Interac
 ## License
 
 [Apache V2 licensed](./LICENSE)
+
+## Developer
+
+```bash
+# To develop editor
+npm run dev
+# To develop the extension
+npm run build:app:firefox -- --watch
+npm run serve:firefox
+```

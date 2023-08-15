@@ -1,4 +1,5 @@
 /// <reference types="vite/client" />
+/// <reference types="@samrum/vite-plugin-web-extension/client" />
 
 interface ImportMetaEnv {
   readonly VITE_SUPABASE_URL: string;

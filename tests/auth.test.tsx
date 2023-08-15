@@ -8,6 +8,7 @@ import {
   onAuthStateChange,
   signInWithGoogle,
 } from "../src/api/auth";
+import useResponsiveObserver from "antd/es/_util/responsiveObserver";
 
 beforeEach(() => {
   vi.clearAllMocks();

@@ -29,7 +29,7 @@ export const chatResponseFixture = (
   return {
     id: "some id",
     model: "chatgpt",
-    choices: [{message: }],
+    choices: [{ message: { role: "user", content: response } }],
     object: "",
     created: new Date().getUTCMilliseconds(),
   };

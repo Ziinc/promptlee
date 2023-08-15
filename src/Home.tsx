@@ -15,11 +15,12 @@ import Navbar from "./interfaces/Navbar";
 import { extractParametersFromText, resolveTextParams } from "./utils";
 import { getPromptOutput } from "./api/chat";
 import PromptResult from "./interfaces/PromptResult";
+import { ChatCompletionResponseMessage, CreateChatCompletionResponse } from "openai";
 
 const Home: React.FC<{}> = () => {
   const [selected, setSelected] = useState(0);
   const [testParams, setTestParams] = useState({});
-  const [runResult, setRunResult] = useState(null);
+  const [runResult, setRunResult] = useState<CreateChatCompletionResponse | null>(null);
   const selectedPrompt = DEFAULT_PROMPTS[selected];
   const parsedParameters = extractParametersFromText(
     selectedPrompt.prompt_text
