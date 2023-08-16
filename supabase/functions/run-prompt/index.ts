@@ -3,6 +3,7 @@
 // This enables autocomplete, go to definition, etc.
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.32.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,10 +12,9 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
   }
 
   if (req.method !== "POST") {
@@ -28,30 +28,52 @@ serve(async (req) => {
       }
     );
   }
-  const { prompt } = await req.json();
-  console.log("prompt", prompt);
+  const { prompt, flow_id } = await req.json();
 
-  // select
-  // content
-  //  from
-  //    http_post(
-  //      'https://api.openai.com/v1/chat/completions',
-  //      -- jsonb_build_object(
-  //      --   'myvar','myval','foo','bar'
-  //      --   ),
-  //      '{"model": "gpt-3.5-turbo", "messages": [{"role": "user", "content": "Hello!"}]}',
-  //      ARRAY[
-  //        http_header('Content-Type','application/json'),
-  //        http_header('Authorization','Bearer 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')
-  //      ]
-  //    );
+  const supabase = createClient(
+    // Supabase API URL - env var exported by default.
+    Deno.env.get("SUPABASE_URL"),
+    // Supabase API ANON KEY - env var exported by default.
+    Deno.env.get("SUPABASE_ANON_KEY"),
+    {
+      auth: { persistSession: false },
+      global: { headers: { Authorization: req.headers.get("Authorization")! } },
+    }
+  );
+  // Now we can get the session or user object
+  const { data } = await supabase.auth.getUser();
+  const user = data.user;
+  console.log("user data", data);
+  if (!user) {
+    return new Response(
+      JSON.stringify({
+        error: "User must be logged in",
+      }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 401,
+      }
+    );
+  }
+
+  // log the prompt run
+  const payload = {
+    user_id: user.id,
+    flow_id: flow_id,
+    value: 1,
+  };
+  const logResult = await supabase.from("prompt_run_counts").insert([payload]);
+  if (logResult.error) {
+    console.error(logResult.error);
+  }
+
   const body = JSON.stringify({
     model: "gpt-3.5-turbo",
     messages: [{ role: "user", content: prompt }],
   });
 
   const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-  console.log('OPENAI_API_KEY :', OPENAI_API_KEY)
+
   const openAiRequest = new Request(
     "https://api.openai.com/v1/chat/completions",
     {
@@ -63,18 +85,12 @@ serve(async (req) => {
       },
     }
   );
-  const openAiResponse = await fetch(openAiRequest).then(res =>res.json() )
-  
-  console.log("openai response", openAiResponse);
-  
+  const openAiResponse = await fetch(openAiRequest).then((res) => res.json());
+
+  // console.log("openai response", openAiResponse);
+
   return new Response(JSON.stringify(openAiResponse), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
     status: 200,
   });
 });
-
-// To invoke:
-// curl -i --location --request POST 'http://localhost:54321/functions/v1/' \
-//   --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' \
-//   --header 'Content-Type: application/json' \
-//   --data '{"name":"Functions"}'
