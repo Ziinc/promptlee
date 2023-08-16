@@ -22,4 +22,7 @@ npm run dev
 # To develop the extension
 npm run build:app:firefox -- --watch
 npm run serve:firefox
+
+# save sb studio changes locally
+supabase db diff -f my_migration_file
 ```
