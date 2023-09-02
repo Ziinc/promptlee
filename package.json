@@ -36,6 +36,7 @@
     "react-dom": "^18.2.0",
     "react-ga4": "^2.1.0",
     "reactflow": "^11.7.0",
+    "swr": "^2.2.2",
     "webextension-polyfill": "^0.10.0",
     "wouter": "^2.10.0"
   },

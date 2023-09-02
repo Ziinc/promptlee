@@ -11,7 +11,6 @@ interface Props {
 }
 
 const Widget = ({ result, onClose }: Props) => {
-  console.log("result", result);
   const [copied, setCopied] = useState(false);
   const handleCopyToClipboard = async () => {
     if (!result) return;

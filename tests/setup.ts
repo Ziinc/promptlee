@@ -7,6 +7,7 @@ expect.extend(matchers);
 vi.mock("../src/api/flows");
 vi.mock("../src/api/auth");
 vi.mock("../src/api/chat");
+vi.mock("../src/api/credits");
 
 Object.defineProperty(window, "matchMedia", {
   writable: true,
@@ -32,6 +33,9 @@ global.navigator.clipboard = vi.fn()
 global.navigator.clipboard.writeText = vi.fn().mockResolvedValue(null)
 
 window.open = vi.fn();
+beforeEach(()=>{
+  vi.clearAllMocks()
+})
 afterEach(() => {
   cleanup();
 });

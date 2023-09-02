@@ -25,7 +25,7 @@ const AuthWall = () => {
   }
 
   useEffect(() => {
-    getSupabaseSession();
+  getSupabaseSession();
 
     const { subscription } = onAuthStateChange(async (event, session) => {
       if (event == "SIGNED_OUT") {

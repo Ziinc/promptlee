@@ -3,35 +3,10 @@ export type Json =
   | number
   | boolean
   | null
-  | { [key: string]: Json }
+  | { [key: string]: Json | undefined }
   | Json[]
 
 export interface Database {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          operationName?: string
-          query?: string
-          variables?: Json
-          extensions?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       flow_runs: {
@@ -136,266 +111,93 @@ export interface Database {
             columns: ["user_id"]
             referencedRelation: "users"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "flows_user_id_fkey"
-            columns: ["user_id"]
-            referencedRelation: "lifetime_prompt_runs"
-            referencedColumns: ["user_id"]
           }
         ]
       }
-      prompt_run_counts: {
+      prompt_run_credits: {
         Row: {
           created_at: string | null
-          flow_id: string
+          flow_id: string | null
+          free: boolean
           id: number
           user_id: string
           value: number
         }
         Insert: {
           created_at?: string | null
-          flow_id: string
+          flow_id?: string | null
+          free?: boolean
           id?: number
           user_id: string
-          value?: number
+          value: number
         }
         Update: {
           created_at?: string | null
-          flow_id?: string
+          flow_id?: string | null
+          free?: boolean
           id?: number
           user_id?: string
           value?: number
         }
         Relationships: [
           {
-            foreignKeyName: "prompt_run_counts_flow_id_fkey"
+            foreignKeyName: "prompt_run_credits_flow_id_fkey"
             columns: ["flow_id"]
             referencedRelation: "flows"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "prompt_run_counts_user_id_fkey"
+            foreignKeyName: "prompt_run_credits_user_id_fkey"
             columns: ["user_id"]
             referencedRelation: "users"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "prompt_run_counts_user_id_fkey"
-            columns: ["user_id"]
-            referencedRelation: "lifetime_prompt_runs"
-            referencedColumns: ["user_id"]
           }
         ]
       }
     }
     Views: {
-      lifetime_prompt_runs: {
+      credit_history: {
+        Row: {
+          balance: number | null
+          created_at: string | null
+          free: boolean | null
+          total_credit: number | null
+          total_debit: number | null
+          user_id: string | null
+          value: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prompt_run_credits_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      prompt_run_counts: {
         Row: {
           count: number | null
+          date: string | null
           user_id: string | null
         }
-        Relationships: []
-      }
-    }
-    Functions: {
-      [_ in never]: never
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
-  storage: {
-    Tables: {
-      buckets: {
-        Row: {
-          allowed_mime_types: string[] | null
-          avif_autodetection: boolean | null
-          created_at: string | null
-          file_size_limit: number | null
-          id: string
-          name: string
-          owner: string | null
-          public: boolean | null
-          updated_at: string | null
-        }
-        Insert: {
-          allowed_mime_types?: string[] | null
-          avif_autodetection?: boolean | null
-          created_at?: string | null
-          file_size_limit?: number | null
-          id: string
-          name: string
-          owner?: string | null
-          public?: boolean | null
-          updated_at?: string | null
-        }
-        Update: {
-          allowed_mime_types?: string[] | null
-          avif_autodetection?: boolean | null
-          created_at?: string | null
-          file_size_limit?: number | null
-          id?: string
-          name?: string
-          owner?: string | null
-          public?: boolean | null
-          updated_at?: string | null
-        }
         Relationships: [
           {
-            foreignKeyName: "buckets_owner_fkey"
-            columns: ["owner"]
+            foreignKeyName: "prompt_run_credits_user_id_fkey"
+            columns: ["user_id"]
             referencedRelation: "users"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "buckets_owner_fkey"
-            columns: ["owner"]
-            referencedRelation: "lifetime_prompt_runs"
-            referencedColumns: ["user_id"]
-          }
-        ]
-      }
-      migrations: {
-        Row: {
-          executed_at: string | null
-          hash: string
-          id: number
-          name: string
-        }
-        Insert: {
-          executed_at?: string | null
-          hash: string
-          id: number
-          name: string
-        }
-        Update: {
-          executed_at?: string | null
-          hash?: string
-          id?: number
-          name?: string
-        }
-        Relationships: []
-      }
-      objects: {
-        Row: {
-          bucket_id: string | null
-          created_at: string | null
-          id: string
-          last_accessed_at: string | null
-          metadata: Json | null
-          name: string | null
-          owner: string | null
-          path_tokens: string[] | null
-          updated_at: string | null
-          version: string | null
-        }
-        Insert: {
-          bucket_id?: string | null
-          created_at?: string | null
-          id?: string
-          last_accessed_at?: string | null
-          metadata?: Json | null
-          name?: string | null
-          owner?: string | null
-          path_tokens?: string[] | null
-          updated_at?: string | null
-          version?: string | null
-        }
-        Update: {
-          bucket_id?: string | null
-          created_at?: string | null
-          id?: string
-          last_accessed_at?: string | null
-          metadata?: Json | null
-          name?: string | null
-          owner?: string | null
-          path_tokens?: string[] | null
-          updated_at?: string | null
-          version?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "objects_bucketId_fkey"
-            columns: ["bucket_id"]
-            referencedRelation: "buckets"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "objects_owner_fkey"
-            columns: ["owner"]
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "objects_owner_fkey"
-            columns: ["owner"]
-            referencedRelation: "lifetime_prompt_runs"
-            referencedColumns: ["user_id"]
           }
         ]
       }
     }
-    Views: {
-      [_ in never]: never
-    }
     Functions: {
-      can_insert_object: {
+      insert_free_credits: {
         Args: {
-          bucketid: string
-          name: string
-          owner: string
-          metadata: Json
+          uid: string
+          num: number
         }
         Returns: undefined
-      }
-      extension: {
-        Args: {
-          name: string
-        }
-        Returns: string
-      }
-      filename: {
-        Args: {
-          name: string
-        }
-        Returns: string
-      }
-      foldername: {
-        Args: {
-          name: string
-        }
-        Returns: unknown
-      }
-      get_size_by_bucket: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          size: number
-          bucket_id: string
-        }[]
-      }
-      search: {
-        Args: {
-          prefix: string
-          bucketname: string
-          limits?: number
-          levels?: number
-          offsets?: number
-          search?: string
-          sortcolumn?: string
-          sortorder?: string
-        }
-        Returns: {
-          name: string
-          id: string
-          updated_at: string
-          created_at: string
-          last_accessed_at: string
-          metadata: Json
-        }[]
       }
     }
     Enums: {
