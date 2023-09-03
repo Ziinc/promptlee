@@ -32,7 +32,7 @@ test("fetch and display credit balance", async () => {
   });
   render(<App />);
   await screen.findByText(/94 credits remaining/);
-  const history = await screen.findByText(/View history/);
+  const history = await screen.findByText(/View usage/);
   expect(getCreditBalance).toBeCalledTimes(1);
   // view history
   await userEvent.click(history);

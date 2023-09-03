@@ -84,7 +84,7 @@ const Home: React.FC<{}> = () => {
               size="small"
               onClick={() => setShowHistory(!showHistory)}
             >
-              View history
+              View usage
             </ToggleButton>
           </div>
         ) : (
