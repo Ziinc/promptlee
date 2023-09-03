@@ -78,7 +78,7 @@ const Home: React.FC<{}> = () => {
           <div>
             <span>{creditBalanceResult?.data.balance} credits remaining</span>
             <ToggleButton
-              value={null}
+              value=""
               color="secondary"
               selected={showHistory}
               size="small"

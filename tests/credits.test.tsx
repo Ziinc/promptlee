@@ -26,8 +26,8 @@ test("fetch and display credit balance", async () => {
       free: true,
       balance: 94,
       user_id: "123",
-      total_debit: 554,
-      total_credit: 333,
+      consumed: 554,
+      added: 333,
     }],
   });
   render(<App />);
