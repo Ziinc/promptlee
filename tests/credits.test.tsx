@@ -1,9 +1,8 @@
-import { test, vi, expect, Mock } from "vitest";
+import { test, expect, Mock } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "../src/App";
 import { getCreditBalance, listCreditHistory } from "../src/api/credits";
-vi.mock("../src/api/auth");
 
 test("fetch and display credit balance", async () => {
   (getCreditBalance as Mock).mockResolvedValue({
