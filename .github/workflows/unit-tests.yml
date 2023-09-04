@@ -6,7 +6,7 @@ on:
   push:
 
 jobs:
-  publish:
+  ui_tests:
     runs-on: ubuntu-latest
 
     permissions:
