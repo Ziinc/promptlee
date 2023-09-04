@@ -1,4 +1,4 @@
-name: Build check
+name: Node Unit Tests
 
 on:
   workflow_dispatch:
