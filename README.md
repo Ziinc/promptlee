@@ -10,6 +10,27 @@ A webapp focused on prompt engineering and iterative prompt development. Interac
 <!-- - [Blog](https://promptpro.tznc.net/blog) -->
 - [Webapp - app.promptpro.tznc.net](https://app.promptpro.tznc.net)
 
+## Developer
+
+```bash
+# To develop editor
+npm run dev
+
+# To develop the extension
+npm run build:app:firefox -- --watch
+npm run serve:firefox
+
+# save sb studio changes locally
+supabase db diff -f my_migration_file
+```
+
+Admin functions
+
+```sql
+-- give a user credits
+select insert_free_credits('2f991f94-0aeb-4146-9897-601e8e3019a5'::uuid, 123);
+```
+
 ## License
 
 [Apache V2 licensed](./LICENSE)

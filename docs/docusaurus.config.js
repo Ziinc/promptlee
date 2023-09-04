@@ -3,19 +3,26 @@
 
 const lightCodeTheme = require("prism-react-renderer/themes/github");
 const darkCodeTheme = require("prism-react-renderer/themes/dracula");
-const common = require("common");
-const EXPLORE = require("common/dist/explore");
+//@ts-ignore
+const CONSTANTS = require("common/constants.json");
+const isProd = process.env.NODE_ENV === "production";
+const appUrl = isProd ? "https://promptpro.tznc.net" : "http://localhost:5173";
+
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: common.SEO.title,
-  tagline: common.SEO.tagline,
+  title: CONSTANTS.title,
+  tagline: CONSTANTS.tagline,
   favicon: "/favicon.ico",
 
   // Set the production url of your site here
   url: "https://promptpro.tznc.net",
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: "/",
+  baseUrl: "/docs",
+
+  customFields: {
+    appUrl,
+  },
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
@@ -40,10 +47,14 @@ const config = {
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
+          path: "docs",
+          routeBasePath: "/",
           sidebarPath: require.resolve("./sidebars.js"),
         },
         blog: {
           showReadingTime: true,
+          path: "blog",
+          routeBasePath: "blog",
         },
         theme: {
           customCss: require.resolve("./src/css/custom.css"),
@@ -74,48 +85,6 @@ const config = {
         },
       };
     },
-
-    async function pagesGenPlugin(context, options) {
-      // ...
-      return {
-        name: "pages-gen",
-        async loadContent() {
-          return EXPLORE.prompts;
-          // ...
-        },
-        async contentLoaded({ content, actions }) {
-          const prompts = content;
-          await Promise.all(
-            // @ts-ignore
-            prompts.map(async (prompt) => {
-              // await actions.createData(
-              //   // Note that this created data path must be in sync with
-              //   // metadataPath provided to mdx-loader.
-              //   `${docuHash(prompt.name)}.json`,
-              //   JSON.stringify(prompt, null, 2)
-              // );
-
-              return actions.addRoute({
-                path:
-                  "/explore/" + prompt.name.toLowerCase().replaceAll(" ", "-"),
-                component: require.resolve(
-                  "./src/components/ExplorePromptPage.tsx"
-                ),
-                
-                exact: true,
-                modules: {
-                  config: `@generated/docusaurus.config`,
-                },
-                prompt,
-              });
-            })
-          );
-
-          // ...
-        },
-        /* other lifecycle API */
-      };
-    },
   ],
 
   themeConfig:
@@ -137,10 +106,9 @@ const config = {
             label: "Docs",
           },
           { to: "/blog", label: "Blog", position: "left" },
-          { to: "/explore", label: "Explore", position: "left" },
           {
-            href: "https://app.promptpro.tznc.net",
-            label: "App",
+            to: appUrl,
+            label: "Back to App",
             position: "right",
           },
           {
@@ -157,8 +125,8 @@ const config = {
             title: "Docs",
             items: [
               {
-                label: "Tutorial",
-                to: "/docs/intro",
+                label: "Documentation",
+                to: "/",
               },
               // {
               //   label: "Getting Started",
@@ -193,10 +161,6 @@ const config = {
               {
                 label: "Blog",
                 to: "/blog",
-              },
-              {
-                label: "Explore",
-                to: "/explore",
               },
               {
                 label: "GitHub",

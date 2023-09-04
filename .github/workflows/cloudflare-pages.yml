@@ -13,15 +13,7 @@ jobs:
     permissions:
       contents: read
       deployments: write
-
-    strategy:
-      matrix:
-        include:
-          - name: "app"
-            # googleAnalyticsId: 'G-XXXXXXXXXX'
-          - name: 'docs'
-          # googleAnalyticsId: 'G-XXXXXXXXXX'
-
+      
     steps:
       - name: Checkout 🛎
         uses: actions/checkout@v3
@@ -34,13 +26,13 @@ jobs:
         run: npm ci
 
       - name: Run build
-        run: npm run build -- --filter=${{ matrix.name }}
+        run: npm run build
 
       - name: Publish
         uses: cloudflare/pages-action@1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: promptpro-${{ matrix.name }}
-          directory: ./${{ matrix.name}}/dist
+          projectName: promptpro-app
+          directory: ./dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
