@@ -17,7 +17,7 @@ A webapp focused on prompt engineering and iterative prompt development. Interac
 npm run dev
 
 # To develop the extension
-npm run build:app:firefox -- --watch
+npm run build:firefox -- --watch
 npm run serve:firefox
 
 # save sb studio changes locally
