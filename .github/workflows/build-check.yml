@@ -30,6 +30,7 @@ jobs:
         run: npm run build:firefox
       - name: Run build (chrome)
         run: npm run build:chrome
+  
   docs:
     runs-on: ubuntu-latest
 
