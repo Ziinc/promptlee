@@ -5,7 +5,7 @@ on:
   pull_request:
 
 jobs:
-  publish:
+  build:
     runs-on: ubuntu-latest
 
     permissions:
@@ -24,7 +24,7 @@ jobs:
 
       - name: Run build
         run: npm run build:app
-        
+
       # extension builds
       - name: Run build (firefox)
         run: npm run build:app:firefox
