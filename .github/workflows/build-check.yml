@@ -23,4 +23,10 @@ jobs:
         run: npm ci
 
       - name: Run build
-        run: npm run build
+        run: npm run build:app
+        
+      # extension builds
+      - name: Run build (firefox)
+        run: npm run build:app:firefox
+      - name: Run build (chrome)
+        run: npm run build:app:chrome
