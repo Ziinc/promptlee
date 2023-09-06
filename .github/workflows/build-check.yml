@@ -30,12 +30,25 @@ jobs:
         run: npm run build:firefox
       - name: Run build (chrome)
         run: npm run build:chrome
-
-      # docs build
-      - name: Install deps
-        run: npm ci
-        working-direectory: docs
-      - name: Run docs build
-        run: npm run build
-        working-direectory: docs
   
+  docs:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      
+    steps:
+      - name: Checkout 🛎
+        uses: actions/checkout@v3
+      - name: Setup node env 🏗
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.13.0
+          cache: "npm"
+      - name: Install
+        run: npm ci
+        working-directory: docs
+
+      - name: Run build
+        run: npm run build
+        working-directory: docs
