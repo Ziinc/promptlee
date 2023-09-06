@@ -7,10 +7,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run build:app && (cd docs; npm run build)",
-    "build:app": "npm run build:app:chrome",
-    "build:app:firefox": "tsc && TARGET_BROWSER=firefox vite build",
-    "build:app:chrome": "tsc && TARGET_BROWSER=chrome vite build",
+    "build": "npm run build:chrome",
+    "build:firefox": "tsc && TARGET_BROWSER=firefox vite build",
+    "build:chrome": "tsc && TARGET_BROWSER=chrome vite build",
     "preview": "vite preview",
     "test": "vitest",
     "serve:firefox": "web-ext run --start-url \"https://example.com\"  --source-dir ./dist/",
