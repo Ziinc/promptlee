@@ -4,21 +4,16 @@
 const lightCodeTheme = require("prism-react-renderer/themes/github");
 const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 //@ts-ignore
-const CONSTANTS = require("common/constants.json");
 const isProd = process.env.NODE_ENV === "production";
 const appUrl = isProd ? "https://promptpro.tznc.net" : "http://localhost:5173";
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: CONSTANTS.title,
-  tagline: CONSTANTS.tagline,
+  title: "Promptlee",
+  tagline: "Your fully customizable AI assistant",
   favicon: "/favicon.ico",
-
-  // Set the production url of your site here
-  url: "https://promptpro.tznc.net",
-  // Set the /<baseUrl>/ pathname under which your site is served
-  // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: "/docs",
+  url: "https://promptlee.tznc.net",
+  baseUrl: "/",
 
   customFields: {
     appUrl,
@@ -27,7 +22,7 @@ const config = {
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: "Ziinc", // Usually your GitHub org/user name.
-  projectName: "promptpro", // Usually your repo name.
+  projectName: "promptlee", // Usually your repo name.
 
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
@@ -93,9 +88,9 @@ const config = {
       // Replace with your project's social card
       image: "branding/social-banner.png",
       navbar: {
-        title: "PromptPro",
+        title: "Propmtlee",
         logo: {
-          alt: "PromptPro",
+          alt: "Propmtlee",
           src: "branding/icon-only.svg",
         },
         items: [
@@ -112,7 +107,7 @@ const config = {
             position: "right",
           },
           {
-            href: "https://github.com/Ziinc/promptpro",
+            href: "https://github.com/Ziinc/promptlee",
             label: "GitHub",
             position: "right",
           },
