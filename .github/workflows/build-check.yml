@@ -1,0 +1,32 @@
+name: Node Build Check
+
+on:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      
+    steps:
+      - name: Checkout 🛎
+        uses: actions/checkout@v3
+      - name: Setup node env 🏗
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.13.0
+          cache: "npm"
+      - name: Install
+        run: npm ci
+
+      - name: Run build
+        run: npm run build:app
+
+      # extension builds
+      - name: Run build (firefox)
+        run: npm run build:app:firefox
+      - name: Run build (chrome)
+        run: npm run build:app:chrome
