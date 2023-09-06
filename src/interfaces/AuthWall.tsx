@@ -3,12 +3,12 @@ import { getSession, onAuthStateChange, signInWithGoogle } from "../api/auth";
 import { useAppState } from "../App";
 
 import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Button from "@mui/material/Button";
 import Snackbar from "@mui/material/Snackbar";
+import Stack from "@mui/material/Stack";
 
 const AuthWall = () => {
   const [authCheck, setAuthCheck] = useState(false);
@@ -25,7 +25,7 @@ const AuthWall = () => {
   }
 
   useEffect(() => {
-  getSupabaseSession();
+    getSupabaseSession();
 
     const { subscription } = onAuthStateChange(async (event, session) => {
       if (event == "SIGNED_OUT") {
@@ -50,19 +50,28 @@ const AuthWall = () => {
         onClose={() => setSignedOut(false)}
         message="Signed out successfully"
       />
-      <Dialog open={authCheck && !app.session} disableEscapeKeyDown>
-        <DialogContent>
-          <div>
-            <div>
-              <img src="/branding/icon-only.png" />
-              <DialogTitle>Sign into PromptPro</DialogTitle>
-              <DialogContentText>
-                All new users will have <strong>5 flows</strong> and{" "}
-                <strong>100 runs</strong> for <strong>free</strong>
-              </DialogContentText>
-            </div>
-          </div>
-          <DialogActions>
+      <Dialog
+        open={authCheck && !app.session}
+        disableEscapeKeyDown
+        maxWidth="lg"
+      >
+        <DialogContent sx={{ minWidth: 600 }}>
+          <Stack alignItems="center" spacing={0}>
+            <img style={{ width: 80 }} src="/branding/icon-only.png" />
+            <DialogTitle>Sign into Promptlee</DialogTitle>
+            <DialogContentText>
+              All new users receive <strong>100 free credits</strong>.
+            </DialogContentText>
+          </Stack>
+          <Stack direction="column" spacing={1} sx={{ mt: 3 }}>
+            <Button
+              variant="text"
+              color="secondary"
+              href="https://docs.promptlee.tznc.net"
+              target="_blank"
+            >
+              Documentation
+            </Button>
             <Button
               variant="outlined"
               color="secondary"
@@ -71,7 +80,7 @@ const AuthWall = () => {
             >
               Sign in with Google
             </Button>
-          </DialogActions>
+          </Stack>
         </DialogContent>
       </Dialog>
     </>
