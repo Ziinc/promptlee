@@ -1,12 +1,12 @@
 # Promptlee
 
-> The Prompt Engineering Toolkit
+> AI Browser Automation
 
-A webapp focused on prompt engineering and iterative prompt development. Interacts directly with ChatGPT API. Privacy focused, Bring Your Own API Keys.
+An AI assistant in the browser.
 
 - [Website](https://promptlee.tznc.net)
-- [Documentation](https://docs/promptlee.tznc.net/docs)
-- [Blog](https://docs/promptlee.tznc.net/blog)
+- [Documentation](https://docs.promptlee.tznc.net)
+- [Blog](https://docs.promptlee.tznc.net/blog)
 
 ## Developer
 
