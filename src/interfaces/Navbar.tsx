@@ -13,7 +13,7 @@ const Navbar = () => {
   const app = useAppState();
 
   return (
-    <Container>
+    <Container sx={{pt: 1}}>
       <Stack
         direction="row"
         justifyContent="between"
