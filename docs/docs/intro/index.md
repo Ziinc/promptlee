@@ -5,7 +5,7 @@ slug: /
 
 # Introduction
 
-PromptPro is a prompt development environment, focusing on prompt engineering and automation. It is a free-to-use webapp.
+Promptlee is a prompt development environment, focusing on prompt engineering and automation. It is a free-to-use webapp.
 
 ![App Home](./app.png)
 

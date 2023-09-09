@@ -21,7 +21,7 @@ const WelcomeMessage = () => {
       <CardHeader
         title={
           <h3 className="text-base font-bold text-center">
-            PromptPro is a ChatGPT prompt manager for creating powerful
+            Promptlee is a ChatGPT prompt manager for creating powerful
             automation flows
           </h3>
         }

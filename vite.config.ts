@@ -9,13 +9,15 @@ import path from "node:path";
 // https://vitejs.dev/config/
 import webExtension from "@samrum/vite-plugin-web-extension";
 
+import svgr from 'vite-plugin-svgr'
+
 export default defineConfig({
   build: {
     outDir: "./dist",
   },
   plugins: [
     react(),
-
+    svgr(),
     webExtension({
       manifest: {
         name: "PromptPro",
