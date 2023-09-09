@@ -61,7 +61,7 @@ const Navbar = () => {
               }
             />
           </FormGroup>
-          <Button onClick={signOut}>Sign out</Button>
+          <Button variant="outlined" onClick={signOut}>Sign out</Button>
         </Stack>
       </Stack>
     </Container>
