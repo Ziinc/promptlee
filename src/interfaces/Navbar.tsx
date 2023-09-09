@@ -40,6 +40,7 @@ const Navbar = () => {
                     onChange={(e) => {
                       app.putAppState("darkMode", e.target.checked);
                     }}
+                    size="small"
                   />
                 </Tooltip>
               }
@@ -47,13 +48,13 @@ const Navbar = () => {
                 app.darkMode ? (
                   <Moon
                     size={14}
-                    strokeWidth={3}
+                    strokeWidth={2}
                     style={{ verticalAlign: "middle" }}
                   />
                 ) : (
                   <Sun
                     size={14}
-                    strokeWidth={3}
+                    strokeWidth={2  }
                     style={{ verticalAlign: "middle" }}
                   />
                 )
