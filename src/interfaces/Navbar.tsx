@@ -1,6 +1,6 @@
 import { FormControlLabel, FormGroup, Tooltip, Switch } from "@mui/material";
 import { Box, Container } from "@mui/system";
-import { Moon, Sun } from "lucide-react";
+import { LogOut, Moon, Sun } from "lucide-react";
 import { signOut } from "../api/auth";
 import { useAppState } from "../App";
 
@@ -13,7 +13,7 @@ const Navbar = () => {
   const app = useAppState();
 
   return (
-    <Container sx={{pt: 1}}>
+    <Container sx={{ pt: 1 }}>
       <Stack
         direction="row"
         justifyContent="between"
@@ -46,22 +46,20 @@ const Navbar = () => {
               }
               label={
                 app.darkMode ? (
-                  <Moon
-                    size={14}
-                    strokeWidth={2}
-                    style={{ verticalAlign: "middle" }}
-                  />
+                  <Moon size={14} style={{ verticalAlign: "middle" }} />
                 ) : (
-                  <Sun
-                    size={14}
-                    strokeWidth={2  }
-                    style={{ verticalAlign: "middle" }}
-                  />
+                  <Sun size={14} style={{ verticalAlign: "middle" }} />
                 )
               }
             />
           </FormGroup>
-          <Button variant="outlined" onClick={signOut}>Sign out</Button>
+          <Button
+            startIcon={<LogOut size={14} />}
+            variant="outlined"
+            onClick={signOut}
+          >
+            Sign out
+          </Button>
         </Stack>
       </Stack>
     </Container>
