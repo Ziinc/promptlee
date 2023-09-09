@@ -88,7 +88,7 @@ const config = {
       // Replace with your project's social card
       image: "branding/social-banner.png",
       navbar: {
-        title: "Propmtlee",
+        title: "Promptlee",
         logo: {
           alt: "Propmtlee",
           src: "branding/icon-only.svg",
