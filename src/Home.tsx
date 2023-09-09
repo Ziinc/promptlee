@@ -32,6 +32,7 @@ import {
   CreateChatCompletionResponse,
 } from "openai";
 import { getCreditBalance, listCreditHistory } from "./api/credits";
+import UsageChart from "./interfaces/UsageChart";
 
 const Home: React.FC<{}> = () => {
   const { data: creditBalanceResult } = useSWR(
@@ -74,6 +75,11 @@ const Home: React.FC<{}> = () => {
       <p>Promptlee is a ChatGPT prompt manager</p>
 
       <Box>
+        {creditHistoryResult?.data && (
+          <div>
+            <UsageChart data={creditHistoryResult?.data} />
+          </div>
+        )}
         {creditBalanceResult?.data ? (
           <div>
             <span>{creditBalanceResult?.data.balance} credits remaining</span>

@@ -12,6 +12,7 @@
     "build:chrome": "tsc && TARGET_BROWSER=chrome vite build",
     "preview": "vite preview",
     "test": "vitest",
+    "types": "supabase gen types typescript --local --schema public > src/database.types.ts",
     "serve:firefox": "web-ext run --start-url \"https://example.com\"  --source-dir ./dist/",
     "serve:chrome": "web-ext run -t chromium --start-url \"https://example.com\" --source-dir ./dist/"
   },
@@ -35,6 +36,7 @@
     "react-dom": "^18.2.0",
     "react-ga4": "^2.1.0",
     "reactflow": "^11.7.0",
+    "recharts": "^2.8.0",
     "swr": "^2.2.2",
     "webextension-polyfill": "^0.10.0",
     "wouter": "^2.10.0"
