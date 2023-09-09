@@ -102,8 +102,8 @@ const config = {
           },
           { to: "/blog", label: "Blog", position: "left" },
           {
-            to: appUrl,
-            label: "Back to App",
+            href: appUrl,
+            label: "App",
             position: "right",
           },
           {
