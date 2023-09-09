@@ -71,7 +71,7 @@ const Home: React.FC<{}> = () => {
   return (
     <Container>
       <Navbar />
-      <p>PromptPro is a ChatGPT prompt manager</p>
+      <p>Promptlee is a ChatGPT prompt manager</p>
 
       <Box>
         {creditBalanceResult?.data ? (

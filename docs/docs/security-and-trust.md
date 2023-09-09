@@ -4,7 +4,7 @@ sidebar_position: 4
 
 # Security and Trust
 
-PromptPro is a fully open-sourced project and is Apache licensed. Anyone can audit the source code to ensure that API keys are not exposed to any third party.
+Promptlee is a fully open-sourced project and is Apache licensed. Anyone can audit the source code to ensure that API keys are not exposed to any third party.
 
 ## Bring Your Own API Keys
 
