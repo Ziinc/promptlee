@@ -51,5 +51,5 @@ Execute the prompt by clicking on "Run", and you've got your first AI response!
 
 To level up your prompt engineering skills, explore these key features that will unlock the development power of PromptPro:
 
-- [Input Templating](/docs/features/input-templating)
+- [Input Templating](/features/input-templating)
 <!-- - [Iterations and Run History](/docs/iterations-and-run-history) -->
