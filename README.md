@@ -20,6 +20,9 @@ npm run serve:firefox
 
 # save sb studio changes locally
 supabase db diff -f my_migration_file
+
+# update generated db types
+npm run types
 ```
 
 Admin functions
