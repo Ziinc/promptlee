@@ -15,6 +15,8 @@ export const isSystemDarkMode = () => {
 
 
 
+export const nArray = (num: number) => [...Array(num).keys()]
+
 /**
  * Example usage
  * > extractParametersFromText("some @test")

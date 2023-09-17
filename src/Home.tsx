@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 
 import Box from "@mui/material/Box";
 import List from "@mui/material/List";
@@ -11,6 +11,7 @@ import TextField from "@mui/material/TextField";
 import Skeleton from "@mui/material/Skeleton";
 import Button from "@mui/material/Button";
 import ToggleButton from "@mui/material/ToggleButton";
+import Stack from "@mui/material/Stack";
 
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -22,17 +23,15 @@ import Paper from "@mui/material/Paper";
 
 import { DEFAULT_PROMPTS } from "./constants";
 import Navbar from "./interfaces/Navbar";
-import { extractParametersFromText, resolveTextParams } from "./utils";
+import { extractParametersFromText, nArray, resolveTextParams } from "./utils";
 import { getPromptOutput } from "./api/chat";
 import PromptResult from "./interfaces/PromptResult";
 import useSWR from "swr";
 
-import {
-  ChatCompletionResponseMessage,
-  CreateChatCompletionResponse,
-} from "openai";
+import { CreateChatCompletionResponse } from "openai";
 import { getCreditBalance, listCreditHistory } from "./api/credits";
-import UsageChart from "./interfaces/UsageChart";
+import UsageChart, { DailyUsageDatum } from "./interfaces/UsageChart";
+import dayjs from "dayjs";
 
 const Home: React.FC<{}> = () => {
   const { data: creditBalanceResult } = useSWR(
@@ -69,6 +68,31 @@ const Home: React.FC<{}> = () => {
     setRunResult(data);
   };
 
+  const usageChartData: DailyUsageDatum[] = useMemo(() => {
+    if (!creditHistoryResult?.data) return [];
+    const now = dayjs().startOf("day");
+    const expectedDates = nArray(30).map((n) => now.subtract(n, "day"));
+    const existingDates = creditHistoryResult?.data.map((row) =>
+      dayjs(row.date)
+    );
+
+    const toAdd = expectedDates.map((dateToCheck) => {
+      if (!existingDates.includes(dateToCheck)) {
+        return {
+          date: dateToCheck.toISOString(),
+          consumed: 0,
+        };
+      }
+    });
+    return [
+      ...creditHistoryResult.data.map((d) => ({
+        consumed: d.consumed!,
+        date: dayjs(d.date!).toISOString(),
+      })),
+      ...toAdd,
+    ];
+  }, [creditHistoryResult?.data]);
+
   return (
     <Container>
       <Navbar />
@@ -77,22 +101,23 @@ const Home: React.FC<{}> = () => {
       <Box>
         {creditHistoryResult?.data && (
           <div>
-            <UsageChart data={creditHistoryResult?.data} />
+            <UsageChart data={usageChartData} />
           </div>
         )}
         {creditBalanceResult?.data ? (
-          <div>
-            <span>{creditBalanceResult?.data.balance} credits remaining</span>
+          <Stack direction="row" alignItems="center" gap={4}>
+            <Typography variant="body1">
+              {creditBalanceResult?.data.balance} credits remaining
+            </Typography>
             <ToggleButton
               value=""
               color="secondary"
               selected={showHistory}
-              size="small"
               onClick={() => setShowHistory(!showHistory)}
             >
               View usage
             </ToggleButton>
-          </div>
+          </Stack>
         ) : (
           <Skeleton variant="rectangular" width={100} height={50} />
         )}
@@ -113,7 +138,7 @@ const Home: React.FC<{}> = () => {
                 <TableBody>
                   {creditHistoryResult?.data &&
                     creditHistoryResult?.data.map((row) => (
-                      <TableRow key={row.created_at}>
+                      <TableRow key={row.date}>
                         <TableCell component="th" scope="row">
                           {row.date}
                         </TableCell>

@@ -8,6 +8,13 @@ select plan(5);
 select has_view( 'prompt_run_counts' );
 select has_view( 'credit_history' );
 
+
+SELECT tests.create_supabase_user('test_user2');
+select tests.authenticate_as('test_user2');
+insert into prompt_run_credits (user_id, value)  values (tests.get_supabase_uid('test_user2') , -1);
+
+
+
 SELECT tests.create_supabase_user('test_user3');
 select tests.authenticate_as('test_user3');
 
