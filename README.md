@@ -11,8 +11,11 @@ An AI assistant in the browser.
 ## Developer
 
 ```bash
-# To develop editor
+# To develop
+npm start
 npm run dev
+npm test
+npm run test:sb
 
 # To develop the extension
 npm run build:firefox -- --watch
