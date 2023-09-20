@@ -21,4 +21,4 @@ jobs:
       - name: Start stack
         run: npm start
       - name: Run tests
-        run: supabase test db
+        run: npm run test:sb
