@@ -10,7 +10,14 @@ import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Skeleton from "@mui/material/Skeleton";
 import Button from "@mui/material/Button";
+import Modal from "@mui/material/Modal";
 import ToggleButton from "@mui/material/ToggleButton";
+
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import CardActions from "@mui/material/CardActions";
+import CardHeader from "@mui/material/CardHeader";
+
 import Stack from "@mui/material/Stack";
 
 import Table from "@mui/material/Table";
@@ -69,10 +76,10 @@ const Home: React.FC<{}> = () => {
   };
 
   const usageChartData: DailyUsageDatum[] = useMemo(() => {
-    if (!creditHistoryResult?.data) return [];
+    if (!creditHistoryResult?.data) return [] as DailyUsageDatum[];
     const now = dayjs().startOf("day");
     const expectedDates = nArray(30).map((n) => now.subtract(n, "day"));
-    const existingDates = creditHistoryResult?.data.map((row) =>
+    const existingDates = creditHistoryResult.data.map((row) =>
       dayjs(row.date)
     );
 
@@ -99,58 +106,70 @@ const Home: React.FC<{}> = () => {
       <p>Promptlee is a ChatGPT prompt manager</p>
 
       <Box>
-        {creditHistoryResult?.data && (
-          <div>
-            <UsageChart data={usageChartData} />
-          </div>
-        )}
+        <Typography variant="body1">Last 30 days</Typography>
+        {creditHistoryResult?.data && <UsageChart data={usageChartData} />}
         {creditBalanceResult?.data ? (
-          <Stack direction="row" alignItems="center" gap={4}>
-            <Typography variant="body1">
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="flex-end"
+            gap={4}
+          >
+            <Typography variant="body2">
               {creditBalanceResult?.data.balance} credits remaining
             </Typography>
-            <ToggleButton
-              value=""
-              color="secondary"
-              selected={showHistory}
-              onClick={() => setShowHistory(!showHistory)}
+            <Button onClick={() => setShowHistory(true)}>View history</Button>
+            <Modal
+              open={showHistory}
+              onClose={() => setShowHistory(!showHistory)}
             >
-              View usage
-            </ToggleButton>
+              <Card
+                sx={{ maxWidth: "60vw", mx: "auto", mt: "10vh", py: 2, px: 12 }}
+              >
+                <CardContent>
+                  <Typography variant="h5">30 Day Credit History</Typography>
+                  <TableContainer component={Paper}>
+                    <Table sx={{ minWidth: 650 }} size="small">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Date</TableCell>
+                          <TableCell align="right">Added</TableCell>
+                          <TableCell align="right">Consumed</TableCell>
+                          <TableCell align="right">Balance</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {creditHistoryResult?.data &&
+                          creditHistoryResult?.data.map((row) => (
+                            <TableRow key={row.date}>
+                              <TableCell component="th" scope="row">
+                                {dayjs(row.date).format("D MMMM")}
+                              </TableCell>
+                              <TableCell align="right">{row.added}</TableCell>
+                              <TableCell align="right">
+                                {row.consumed}
+                              </TableCell>
+                              <TableCell align="right">{row.balance}</TableCell>
+                            </TableRow>
+                          ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </CardContent>
+                <CardActions>
+                  <Button
+                    onClick={() => setShowHistory(false)}
+                    color="secondary"
+                    sx={{ ml: "auto" }}
+                  >
+                    Close
+                  </Button>
+                </CardActions>
+              </Card>
+            </Modal>
           </Stack>
         ) : (
           <Skeleton variant="rectangular" width={100} height={50} />
-        )}
-
-        {showHistory && (
-          <div>
-            <h3>Last 30 Days</h3>
-            <TableContainer component={Paper}>
-              <Table sx={{ minWidth: 650 }}>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Date</TableCell>
-                    <TableCell align="right">Added</TableCell>
-                    <TableCell align="right">Consumed</TableCell>
-                    <TableCell align="right">Balance</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {creditHistoryResult?.data &&
-                    creditHistoryResult?.data.map((row) => (
-                      <TableRow key={row.date}>
-                        <TableCell component="th" scope="row">
-                          {row.date}
-                        </TableCell>
-                        <TableCell align="right">{row.added}</TableCell>
-                        <TableCell align="right">{row.consumed}</TableCell>
-                        <TableCell align="right">{row.balance}</TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </div>
         )}
       </Box>
 
