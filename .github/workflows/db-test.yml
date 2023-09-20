@@ -10,6 +10,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      # TODO: can remove this and use make instead
       - name: Setup node env 🏗
         uses: actions/setup-node@v3
         with:
