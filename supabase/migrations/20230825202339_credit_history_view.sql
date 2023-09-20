@@ -80,9 +80,9 @@ from (
         c.user_id,
         c.balance,
         date_trunc('day', c.created_at) as date,
-        sum(c.added) OVER (partition by c.user_id) AS added,
-        sum(c.consumed) OVER (partition by c.user_id) AS consumed,
-        row_number() OVER (partition by c.user_id  ORDER BY c.created_at desc) AS rn
+        sum(c.added) OVER (partition by c.user_id, date_trunc('day', c.created_at)) AS added,
+        sum(c.consumed) OVER (partition by c.user_id, date_trunc('day', c.created_at)) AS consumed,
+        row_number() OVER (partition by c.user_id,date_trunc('day', c.created_at)  ORDER BY c.created_at desc) AS rn
     FROM credit_history c
 ) t
 where t.rn = 1;

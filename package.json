@@ -14,7 +14,8 @@
     "build:chrome": "tsc && TARGET_BROWSER=chrome vite build",
     "preview": "vite preview",
     "test": "vitest",
-    "test:sb": "supabase db reset && supabase test db",
+    "test:sb": "supabase test db",
+    "test:sb:reset": "supabase db reset && supabase test db",
     "types": "supabase gen types typescript --local --schema public > src/database.types.ts",
     "serve:firefox": "web-ext run --start-url \"https://example.com\"  --source-dir ./dist/",
     "serve:chrome": "web-ext run -t chromium --start-url \"https://example.com\" --source-dir ./dist/"

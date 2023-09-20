@@ -47,11 +47,13 @@ const Home: React.FC<{}> = () => {
   );
   const [showHistory, setShowHistory] = useState(false);
 
-  const { data: creditHistoryResult } = useSWR(
-    "credit_history",
-    listCreditHistory
+  const { data: creditHistoryResult } = useSWR("credit_history", async () =>
+    listCreditHistory(
+      dayjs().subtract(30, "day").startOf("day").toISOString()
+    )
   );
 
+  console;
   const [selected, setSelected] = useState(0);
   const [testParams, setTestParams] = useState({});
   const [runResult, setRunResult] =
