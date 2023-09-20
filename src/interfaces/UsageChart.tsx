@@ -30,8 +30,9 @@ const UsageChart = ({ data }: Props) => {
           dataKey="date"
           tickSize={3}
           tick={{ fontSize: 11 }}
+          minTickGap={200}
           reversed
-          tickFormatter={(tick) => dayjs(tick).format("DD/MM")}
+          tickFormatter={(tick) => dayjs(tick).format("D MMM")}
           interval="preserveStartEnd"
         />
         <YAxis hide />
