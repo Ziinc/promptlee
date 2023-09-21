@@ -9,7 +9,6 @@ const fontFamily = [
   "sans-serif",
 ].join(", ");
 
-console.log('fontFamily', fontFamily)
 const common: ThemeOptions = {
   typography: {
     fontFamily,
