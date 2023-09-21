@@ -48,9 +48,7 @@ const Home: React.FC<{}> = () => {
   const [showHistory, setShowHistory] = useState(false);
 
   const { data: creditHistoryResult } = useSWR("credit_history", async () =>
-    listCreditHistory(
-      dayjs().subtract(30, "day").startOf("day").toISOString()
-    )
+    listCreditHistory(dayjs().subtract(30, "day").startOf("day").toISOString())
   );
 
   console;
@@ -85,14 +83,16 @@ const Home: React.FC<{}> = () => {
       dayjs(row.date)
     );
 
-    const toAdd = expectedDates.map((dateToCheck) => {
-      if (!existingDates.includes(dateToCheck)) {
-        return {
-          date: dateToCheck.toISOString(),
-          consumed: 0,
-        };
-      }
-    });
+    const toAdd = expectedDates
+      .map((dateToCheck) => {
+        if (!existingDates.includes(dateToCheck)) {
+          return {
+            date: dateToCheck.toISOString(),
+            consumed: 0,
+          };
+        }
+      })
+      .filter((d) => !!d) as DailyUsageDatum[];
     return [
       ...creditHistoryResult.data.map((d) => ({
         consumed: d.consumed!,
