@@ -1,0 +1,25 @@
+name: Database Tests with PgTAP
+
+on:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  pgtap:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      # TODO: can remove this and use make instead
+      - name: Setup node env 🏗
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.13.0
+          cache: "npm"
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Start stack
+        run: npm start
+      - name: Run tests
+        run: npm run test:sb

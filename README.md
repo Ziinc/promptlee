@@ -11,8 +11,11 @@ An AI assistant in the browser.
 ## Developer
 
 ```bash
-# To develop editor
+# To develop
+npm start
 npm run dev
+npm test
+npm run test:sb
 
 # To develop the extension
 npm run build:firefox -- --watch
@@ -20,6 +23,9 @@ npm run serve:firefox
 
 # save sb studio changes locally
 supabase db diff -f my_migration_file
+
+# update generated db types
+npm run types
 ```
 
 Admin functions

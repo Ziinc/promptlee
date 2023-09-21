@@ -158,13 +158,30 @@ export interface Database {
     Views: {
       credit_history: {
         Row: {
+          added: number | null
           balance: number | null
+          consumed: number | null
           created_at: string | null
           free: boolean | null
-          total_credit: number | null
-          total_debit: number | null
           user_id: string | null
           value: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prompt_run_credits_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      daily_credit_history: {
+        Row: {
+          added: number | null
+          balance: number | null
+          consumed: number | null
+          date: string | null
+          user_id: string | null
         }
         Relationships: [
           {

@@ -6,8 +6,6 @@ import { useAppState } from "../App";
 
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
-import SvgIcon from "@mui/material/SvgIcon";
-import { ReactComponent as Icon } from "common/static/branding/icon-only.svg";
 
 const Navbar = () => {
   const app = useAppState();
@@ -20,9 +18,7 @@ const Navbar = () => {
         alignItems="center"
         sx={{}}
       >
-        <SvgIcon sx={{ fontSize: 40 }}>
-          <Icon width={24} height={24} />
-        </SvgIcon>
+          <img style={{width: "46px"}} src={"/branding/icon-only.svg"}/>
         <Stack
           direction="row"
           alignItems="center"

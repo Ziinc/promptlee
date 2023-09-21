@@ -1,7 +1,52 @@
-import { PaletteMode } from "@mui/material";
+import { PaletteMode, ThemeOptions } from "@mui/material";
 import { createTheme } from "@mui/material/styles";
 import merge from "lodash/merge";
-const common = {
+const common: ThemeOptions = {
+  spacing: 2,
+  components: {
+    MuiButton: {
+      defaultProps: {
+        size: "small",
+      },
+    },
+    MuiToggleButton: {
+      defaultProps: {
+        size: "small",
+      },
+    },
+    MuiFilledInput: {
+      defaultProps: {
+        margin: "dense",
+        size: "small",
+      },
+    },
+    MuiFormControl: {
+      defaultProps: {
+        margin: "dense",
+      },
+    },
+    MuiFormHelperText: {
+      defaultProps: {
+        margin: "dense",
+      },
+    },
+    MuiIconButton: {
+      defaultProps: {
+        size: "small",
+      },
+    },
+    MuiInputBase: {
+      defaultProps: {
+        margin: "dense",
+      },
+    },
+    MuiInputLabel: {
+      defaultProps: {
+        margin: "dense",
+      },
+    },
+  },
+
   typography: {
     button: {
       textTransform: "none" as const,
@@ -14,10 +59,10 @@ const light = merge(
     palette: {
       mode: "light" as PaletteMode,
       primary: {
-        main: "#0f172a",
+        main: "#364FC7",
       },
       secondary: {
-        main: "#64748b",
+        main: "#6782a9",
       },
       success: {
         main: "#89d247",
@@ -43,10 +88,10 @@ const dark = merge(
     palette: {
       mode: "dark" as PaletteMode,
       primary: {
-        main: "#7c3aed",
+        main: "#7685d9",
       },
       secondary: {
-        main: "#cbd5e1",
+        main: "#bcc8da",
       },
       success: {
         main: "#89d247",

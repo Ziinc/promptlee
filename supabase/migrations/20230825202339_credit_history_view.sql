@@ -22,54 +22,73 @@ alter table "public"."prompt_run_credits" add constraint "prompt_run_credits_flo
 
 alter table "public"."prompt_run_credits" validate constraint "prompt_run_credits_flow_id_fkey";
 
-create or replace view "public"."credit_balance" as  SELECT t.user_id,
+create or replace view "public"."credit_balance" as  
+SELECT 
+    t.user_id,
     sum(t.value) AS balance
-   FROM prompt_run_credits t
-  GROUP BY t.user_id;
+FROM prompt_run_credits t
+GROUP BY t.user_id;
 
 
-create or replace view "public"."prompt_run_counts" as  SELECT date_trunc('day'::text, t.created_at) AS date,
+create or replace view "public"."prompt_run_counts" as  
+SELECT 
+    date_trunc('day'::text, t.created_at) AS date,
     t.user_id,
     count(t.id) AS count
-   FROM prompt_run_credits t
-  WHERE (t.value < 0)
-  GROUP BY (date_trunc('day'::text, t.created_at)), t.user_id;
+FROM prompt_run_credits t
+WHERE (t.value < 0)
+GROUP BY (date_trunc('day'::text, t.created_at)), t.user_id;
 
 
 
 drop view if exists "public"."credit_balance";
 
-create or replace view "public"."credit_history" as  SELECT t.created_at,
+create or replace view "public"."credit_history" as  
+SELECT 
+    t.created_at,
     t.value,
     t.free,
     t.user_id,
-    (sum(t.value) FILTER (WHERE (t.value > 0)) OVER (ORDER BY t.rn))::integer AS added,
-    abs(COALESCE(sum(t.value) FILTER (WHERE (t.value < 0)) OVER (ORDER BY t.rn), 0))::integer AS consumed,
-    (sum(t.value) OVER (ORDER BY t.rn))::integer AS balance
-   FROM ( SELECT c.id,
-            c.created_at,
-            c.user_id,
-            c.value,
-            c.free,
-            c.flow_id,
-            row_number() OVER (ORDER BY c.created_at) AS rn
-           FROM prompt_run_credits c) t
-  ORDER BY t.rn DESC;
+    (case when value > 0 then value else 0 end)::bigint  AS added,
+    (case when value < 0 then abs(value) else 0 end)::bigint  AS consumed,
+    (sum(t.value) OVER (partition by t.user_id ORDER BY t.rn))::bigint AS balance
+FROM ( 
+    SELECT 
+        c.id,
+        c.created_at,
+        c.user_id,
+        c.value,
+        c.free,
+        c.flow_id,
+        row_number() OVER (partition by c.user_id ORDER BY c.created_at) AS rn
+    FROM prompt_run_credits c) t
+ORDER BY t.rn DESC;
+
+ALTER VIEW  "public"."credit_history" SET (security_invoker = on);
+
 
 create or replace view "public"."daily_credit_history" as 
 select 
     t.date,
-    t.added,
-    t.consumed,
-    t.balance,
+    t.added::bigint,
+    t.consumed::bigint,
+    t.balance::bigint,
     t.user_id
- from (
-     SELECT c.*,
+from (
+    SELECT 
+        c.value,
+        c.user_id,
+        c.balance,
         date_trunc('day', c.created_at) as date,
-        row_number() OVER (partition by date_trunc('day', c.created_at)  ORDER BY c.created_at desc) AS rn
-           FROM credit_history c
- ) t
- where t.rn = 1;
+        sum(c.added) OVER (partition by c.user_id, date_trunc('day', c.created_at)) AS added,
+        sum(c.consumed) OVER (partition by c.user_id, date_trunc('day', c.created_at)) AS consumed,
+        row_number() OVER (partition by c.user_id,date_trunc('day', c.created_at)  ORDER BY c.created_at desc) AS rn
+    FROM credit_history c
+) t
+where t.rn = 1;
+
+ALTER VIEW  "public"."daily_credit_history" SET (security_invoker = on);
+
 
 create policy "Enable insert for credit consumption for authenticated"
 on "public"."prompt_run_credits"
