@@ -60,10 +60,9 @@ jobs:
 
       - name: Publish
         uses: cloudflare/pages-action@1
-        working-directory: docs
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: promptlee-docs
-          directory: ./dist
+          directory: ./docs/dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
