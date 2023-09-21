@@ -7,7 +7,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "start": "supabase start --exclude imgproxy,logflare,vector,pgbouncer,inbucket,storage-api,realtime", 
+    "start": "supabase start --exclude imgproxy,logflare,vector,pgbouncer,inbucket,storage-api,realtime",
     "stop": "supabase stop",
     "build": "npm run build:chrome",
     "build:firefox": "tsc && TARGET_BROWSER=firefox vite build",
@@ -23,6 +23,7 @@
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
+    "@fontsource/noto-sans": "^5.0.12",
     "@monaco-editor/react": "^4.5.1",
     "@mui/material": "^5.14.4",
     "@supabase/supabase-js": "^2.22.0",
