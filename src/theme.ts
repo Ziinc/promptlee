@@ -1,7 +1,29 @@
 import { PaletteMode, ThemeOptions } from "@mui/material";
 import { createTheme } from "@mui/material/styles";
 import merge from "lodash/merge";
+const fontFamily = [
+  "'Noto Sans'",
+  "Roboto",
+  "Helvetica",
+  "Arial",
+  "sans-serif",
+].join(", ");
+
+console.log('fontFamily', fontFamily)
 const common: ThemeOptions = {
+  typography: {
+    fontFamily,
+
+    fontWeightLight: 300,
+    fontWeightRegular: 400,
+    fontWeightMedium: 600,
+    fontWeightBold: 700,
+
+    button: {
+      textTransform: "none" as const,
+    },
+  },
+
   spacing: 2,
   components: {
     MuiButton: {
@@ -44,12 +66,6 @@ const common: ThemeOptions = {
       defaultProps: {
         margin: "dense",
       },
-    },
-  },
-
-  typography: {
-    button: {
-      textTransform: "none" as const,
     },
   },
 };

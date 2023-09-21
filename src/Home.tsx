@@ -105,8 +105,6 @@ const Home: React.FC<{}> = () => {
   return (
     <Container>
       <Navbar />
-      <p>Promptlee is a ChatGPT prompt manager</p>
-
       <Box>
         <Typography variant="body1">Last 30 days</Typography>
         {creditHistoryResult?.data && <UsageChart data={usageChartData} />}
