@@ -143,7 +143,7 @@ const Home: React.FC<{}> = () => {
                       <TableBody>
                         {creditHistoryResult?.data &&
                           creditHistoryResult?.data.map((row) => (
-                            <TableRow key={row.date}>
+                            <TableRow key={`${row.date}-${row.balance}`}>
                               <TableCell component="th" scope="row">
                                 {dayjs(row.date).format("D MMMM")}
                               </TableCell>

@@ -29,15 +29,16 @@ test("fetch and display credit balance", async () => {
     }],
   });
   render(<App />);
+  await screen.findByText(/Last 30 days/);
   await screen.findByText(/94 credits remaining/);
-  const history = await screen.findByText(/View usage/);
+  const history = await screen.findByText(/View history/);
   expect(getCreditBalance).toBeCalledTimes(1);
   // view history
   await userEvent.click(history);
+  await screen.findByText(/30 Day Credit History/);
   await screen.findByText(/Consumed/);
   await screen.findByText(/Added/);
   await screen.findByText(/Balance/);
-  await screen.findByText(/Last 30 Days/);
   await screen.findByText(/554/);
   await screen.findByText(/333/);
 
