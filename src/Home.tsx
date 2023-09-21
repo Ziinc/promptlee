@@ -204,12 +204,13 @@ const Home: React.FC<{}> = () => {
               {selectedPrompt.prompt_text}
             </Typography>
 
-
-            {runResult && <Stack direction="column" gap={5}>
-              <Divider variant="middle"  />
-              <Typography variant="subtitle2">Results</Typography>
-              <PromptResult result={runResult} />
-              </Stack>}
+            {runResult && (
+              <Stack direction="column" gap={5}>
+                <Divider variant="middle" />
+                <Typography variant="subtitle2">Results</Typography>
+                <PromptResult result={runResult} />
+              </Stack>
+            )}
           </Grid>
           <Grid xs={4}>
             <Card sx={{ pb: 8, px: 2 }} variant="outlined">
