@@ -20,15 +20,16 @@ test("can execute text input default flows", async () => {
     },
   });
   render(<App />);
-  const summarize = await screen.findByText(/Summarize Text/, {
+  await screen.findByText(/Built-in flows/);
+
+  await screen.findByText(/Summarize the following text/);
+  const summarize = await screen.findByText(/Summarize/, {
     selector: "ul  *",
   });
   await userEvent.click(summarize);
   const input = await screen.findByLabelText("@text");
   const runBtn = await screen.findByText("Run flow");
   await userEvent.type(input, "Once upon a time, there was some text");
-  // display interpolated params in the prompt
-  await screen.findByText(/Once upon a time, there was some text/)
 
   await userEvent.click(runBtn);
   expect(getPromptOutput).toBeCalled();

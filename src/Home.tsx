@@ -6,17 +6,17 @@ import { Container } from "@mui/system";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
+import ListSubheader from "@mui/material/ListSubheader";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Skeleton from "@mui/material/Skeleton";
 import Button from "@mui/material/Button";
 import Modal from "@mui/material/Modal";
-import ToggleButton from "@mui/material/ToggleButton";
 
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
-import CardHeader from "@mui/material/CardHeader";
+import Divider from "@mui/material/Divider";
 
 import Stack from "@mui/material/Stack";
 
@@ -40,6 +40,8 @@ import { getCreditBalance, listCreditHistory } from "./api/credits";
 import UsageChart, { DailyUsageDatum } from "./interfaces/UsageChart";
 import dayjs from "dayjs";
 
+import Grid from "@mui/material/Unstable_Grid2";
+
 const Home: React.FC<{}> = () => {
   const { data: creditBalanceResult } = useSWR(
     "credit_balance",
@@ -59,10 +61,6 @@ const Home: React.FC<{}> = () => {
   const selectedPrompt = DEFAULT_PROMPTS[selected];
   const parsedParameters = extractParametersFromText(
     selectedPrompt.prompt_text
-  );
-  const resolvedPromptText = resolveTextParams(
-    selectedPrompt.prompt_text,
-    testParams
   );
 
   const handleRunFlow = async () => {
@@ -106,7 +104,7 @@ const Home: React.FC<{}> = () => {
     <Container>
       <Navbar />
       <Box>
-        <Typography variant="body1">Last 30 days</Typography>
+        <Typography variant="subtitle2">Last 30 days</Typography>
         {creditHistoryResult?.data && <UsageChart data={usageChartData} />}
         {creditBalanceResult?.data ? (
           <Stack
@@ -173,42 +171,82 @@ const Home: React.FC<{}> = () => {
         )}
       </Box>
 
-      <List>
-        {DEFAULT_PROMPTS.map((prompt, idx) => (
-          <ListItem disablePadding key={prompt.title}>
-            <ListItemButton onClick={() => setSelected(idx)}>
-              <ListItemText primary={prompt.title} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
+      <Grid container spacing={8}>
+        <Grid xs={2}>
+          <List
+            subheader={
+              <ListSubheader sx={{ pl: 0 }} component="span">
+                Built-in flows
+              </ListSubheader>
+            }
+          >
+            {DEFAULT_PROMPTS.map((prompt, idx) => (
+              <ListItem disablePadding key={prompt.title}>
+                <ListItemButton
+                  onClick={() => setSelected(idx)}
+                  selected={prompt.title == selectedPrompt.title}
+                >
+                  <ListItemText
+                    primary={prompt.title}
+                    primaryTypographyProps={{ variant: "body2" }}
+                  />
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+        </Grid>
+        <Grid xs={10} container spacing={2}>
+          <Grid xs={12}>
+            <Typography variant="h4">{selectedPrompt.title}</Typography>
+          </Grid>
+          <Grid xs={8}>
+            <Typography variant="subtitle1" gutterBottom>
+              {selectedPrompt.prompt_text}
+            </Typography>
 
-      <Box>
-        <h3>{selectedPrompt.title}</h3>
-        <Typography variant="body1" gutterBottom>
-          {resolvedPromptText}
-        </Typography>
-        {parsedParameters.map((param) => (
-          <TextField
-            key={param}
-            label={"@" + param}
-            multiline
-            maxRows={2}
-            variant="filled"
-            onChange={(e) => {
-              setTestParams((prev) => ({
-                ...prev,
-                [param]: e.target.value,
-              }));
-            }}
-          />
-        ))}
-        <Button variant="contained" onClick={handleRunFlow}>
-          Run flow
-        </Button>
 
-        {runResult && <PromptResult result={runResult} />}
-      </Box>
+            {runResult && <Stack direction="column" gap={5}>
+              <Divider variant="middle"  />
+              <Typography variant="subtitle2">Results</Typography>
+              <PromptResult result={runResult} />
+              </Stack>}
+          </Grid>
+          <Grid xs={4}>
+            <Card sx={{ pb: 8, px: 2 }} variant="outlined">
+              <CardContent>
+                {parsedParameters.map((param) => (
+                  <TextField
+                    key={param}
+                    label={"@" + param}
+                    multiline
+                    maxRows={2}
+                    variant="filled"
+                    size="small"
+                    sx={{ width: "100%" }}
+                    onChange={(e) => {
+                      setTestParams((prev) => ({
+                        ...prev,
+                        [param]: e.target.value,
+                      }));
+                    }}
+                  />
+                ))}
+              </CardContent>
+              <CardActions>
+                <Stack direction="row" gap={2} sx={{ ml: "auto" }}>
+                  <Button
+                    sx={{ width: "100%" }}
+                    variant="contained"
+                    onClick={handleRunFlow}
+                  >
+                    Run flow
+                  </Button>
+                </Stack>
+              </CardActions>
+            </Card>
+          </Grid>
+        </Grid>
+      </Grid>
     </Container>
   );
 };
