@@ -17,8 +17,8 @@ export default defineConfig({
     react(),
     webExtension({
       manifest: {
-        name: "PromptPro",
-        description: "A ChatGPT prompt manager",
+        name: "Promptlee",
+        description: "Your Browser AI Assistant",
         version: "1.0.0",
         author: "ziinc",
         manifest_version: 3,

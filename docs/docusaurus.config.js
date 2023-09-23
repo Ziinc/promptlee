@@ -5,14 +5,14 @@ const lightCodeTheme = require("prism-react-renderer/themes/github");
 const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 //@ts-ignore
 const isProd = process.env.NODE_ENV === "production";
-const appUrl = isProd ? "https://promptpro.tznc.net" : "http://localhost:5173";
+const appUrl = isProd ? "https://promptlee.tznc.net" : "http://localhost:5173";
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: "Promptlee",
-  tagline: "Your fully customizable AI assistant",
+  tagline: "Your Browser AI Assistant",
   favicon: "/favicon.ico",
-  url: "https://promptlee.tznc.net",
+  url: "https://docs.promptlee.tznc.net",
   baseUrl: "/",
 
   customFields: {
@@ -159,12 +159,12 @@ const config = {
               },
               {
                 label: "GitHub",
-                href: "https://github.com/Ziinc/promptpro",
+                href: "https://github.com/Ziinc/promptlee",
               },
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} PromptPro`,
+        copyright: `Copyright © ${new Date().getFullYear()} Promptlee`,
       },
       prism: {
         theme: lightCodeTheme,
