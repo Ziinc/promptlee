@@ -9,7 +9,6 @@ import ListItemText from "@mui/material/ListItemText";
 import ListSubheader from "@mui/material/ListSubheader";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
-import Skeleton from "@mui/material/Skeleton";
 import Button from "@mui/material/Button";
 import Modal from "@mui/material/Modal";
 
@@ -17,6 +16,9 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
 import Divider from "@mui/material/Divider";
+import CardHeader from "@mui/material/CardHeader";
+import LoadingButton from "@mui/lab/LoadingButton";
+import Skeleton from "@mui/material/Skeleton";
 
 import Stack from "@mui/material/Stack";
 
@@ -48,6 +50,7 @@ const Home: React.FC<{}> = () => {
     getCreditBalance
   );
   const [showHistory, setShowHistory] = useState(false);
+  const [isRunLoading, setIsRunLoading] = useState(false);
 
   const { data: creditHistoryResult } = useSWR("credit_history", async () =>
     listCreditHistory(dayjs().subtract(30, "day").startOf("day").toISOString())
@@ -64,13 +67,16 @@ const Home: React.FC<{}> = () => {
   );
 
   const handleRunFlow = async () => {
+    setIsRunLoading(true);
     const inputText = resolveTextParams(selectedPrompt.prompt_text, testParams);
     const { data, error } = await getPromptOutput(inputText);
     if (error) {
       console.error(error);
       return;
     }
+
     setRunResult(data);
+    setIsRunLoading(false);
   };
 
   const usageChartData: DailyUsageDatum[] = useMemo(() => {
@@ -167,7 +173,12 @@ const Home: React.FC<{}> = () => {
             </Modal>
           </Stack>
         ) : (
-          <Skeleton variant="rectangular" width={100} height={50} />
+          <Skeleton
+            variant="rectangular"
+            width={"100%"}
+            animation="wave"
+            height={150}
+          />
         )}
       </Box>
 
@@ -199,24 +210,55 @@ const Home: React.FC<{}> = () => {
           <Grid xs={12}>
             <Typography variant="h4">{selectedPrompt.title}</Typography>
           </Grid>
-          <Grid xs={8}>
+          <Grid xs={8} flexDirection="column" container gap={5}>
             <Typography variant="subtitle1" gutterBottom>
               {selectedPrompt.prompt_text}
             </Typography>
 
-            {runResult && (
-              <Stack direction="column" gap={5}>
+            {!isRunLoading && runResult && (
+              <>
                 <Divider variant="middle" />
                 <Typography variant="subtitle2">Results</Typography>
                 <PromptResult result={runResult} />
-              </Stack>
+              </>
+            )}
+            {false && (
+              <>
+                <Divider variant="middle" />
+                <Skeleton
+                  variant="rounded"
+                  animation="wave"
+                  width={80}
+                  height={20}
+                />
+                <Skeleton
+                  variant="rounded"
+                  animation="wave"
+                  width={"80%"}
+                  height={20}
+                />
+                <Skeleton
+                  variant="rounded"
+                  animation="wave"
+                  width={"100%"}
+                  height={20}
+                />
+                <Skeleton
+                  variant="rounded"
+                  animation="wave"
+                  width={"80%"}
+                  height={20}
+                />
+              </>
             )}
           </Grid>
           <Grid xs={4}>
             <Card sx={{ pb: 8, px: 2 }} variant="outlined">
+              <CardHeader title="Parameters" />
               <CardContent>
                 {parsedParameters.map((param) => (
                   <TextField
+                    disabled={isRunLoading}
                     key={param}
                     label={"@" + param}
                     multiline
@@ -235,13 +277,14 @@ const Home: React.FC<{}> = () => {
               </CardContent>
               <CardActions>
                 <Stack direction="row" gap={2} sx={{ ml: "auto" }}>
-                  <Button
+                  <LoadingButton
                     sx={{ width: "100%" }}
                     variant="contained"
                     onClick={handleRunFlow}
+                    loading={isRunLoading}
                   >
                     Run flow
-                  </Button>
+                  </LoadingButton>
                 </Stack>
               </CardActions>
             </Card>
