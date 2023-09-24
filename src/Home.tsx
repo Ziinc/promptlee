@@ -82,9 +82,11 @@ const Home: React.FC<{}> = () => {
   const usageChartData: DailyUsageDatum[] = useMemo(() => {
     if (!creditHistoryResult?.data) return [] as DailyUsageDatum[];
     const now = dayjs().startOf("day");
-    const expectedDates = nArray(30).map((n) => now.subtract(n, "day"));
+    const expectedDates = nArray(30).map((n) =>
+      now.startOf("day").subtract(n, "day")
+    );
     const existingDates = creditHistoryResult.data.map((row) =>
-      dayjs(row.date)
+      dayjs(row.date).startOf("day")
     );
 
     const toAdd = expectedDates
