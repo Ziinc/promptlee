@@ -12,6 +12,7 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Modal from "@mui/material/Modal";
 
+import Fade from "@mui/material/Fade";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
@@ -44,6 +45,8 @@ import dayjs from "dayjs";
 
 import Grid from "@mui/material/Unstable_Grid2";
 
+import { TransitionGroup } from "react-transition-group";
+import Collapse from "@mui/material/Collapse";
 const Home: React.FC<{}> = () => {
   const { data: creditBalanceResult } = useSWR(
     "credit_balance",
@@ -68,6 +71,7 @@ const Home: React.FC<{}> = () => {
 
   const handleRunFlow = async () => {
     setIsRunLoading(true);
+    setRunResult(null);
     const inputText = resolveTextParams(selectedPrompt.prompt_text, testParams);
     const { data, error } = await getPromptOutput(inputText);
     if (error) {
@@ -217,42 +221,54 @@ const Home: React.FC<{}> = () => {
               {selectedPrompt.prompt_text}
             </Typography>
 
-            {!isRunLoading && runResult && (
-              <>
-                <Divider variant="middle" />
-                <Typography variant="subtitle2">Results</Typography>
-                <PromptResult result={runResult} />
-              </>
-            )}
-            {isRunLoading && (
-              <>
-                <Divider variant="middle" />
-                <Skeleton
-                  variant="rounded"
-                  animation="wave"
-                  width={80}
-                  height={20}
-                />
-                <Skeleton
-                  variant="rounded"
-                  animation="wave"
-                  width={"70%"}
-                  height={20}
-                />
-                <Skeleton
-                  variant="rounded"
-                  animation="wave"
-                  width={"90%"}
-                  height={20}
-                />
-                <Skeleton
-                  variant="rounded"
-                  animation="wave"
-                  width={"80%"}
-                  height={20}
-                />
-              </>
-            )}
+            <TransitionGroup>
+              {!isRunLoading && runResult && (
+                <Collapse
+                  style={{ transitionDelay: runResult ? "0ms" : "1500ms" }}
+                  timeout={runResult ? "auto" : 0}
+                >
+                  <Stack direction="column" gap={5}>
+                    <Divider variant="middle" />
+                    <Typography variant="subtitle2">Results</Typography>
+                    {runResult && <PromptResult result={runResult} />}
+                  </Stack>
+                </Collapse>
+              )}
+              {isRunLoading && (
+                <Fade
+                  style={{ transitionDelay: runResult ? "1500ms" : "0ms" }}
+                  timeout={runResult ? 0 : undefined}
+                >
+                  <Stack direction="column" gap={5}>
+                    <Divider variant="middle" />
+                    <Skeleton
+                      variant="rounded"
+                      animation="wave"
+                      width={80}
+                      height={20}
+                    />
+                    <Skeleton
+                      variant="rounded"
+                      animation="wave"
+                      width={"70%"}
+                      height={20}
+                    />
+                    <Skeleton
+                      variant="rounded"
+                      animation="wave"
+                      width={"90%"}
+                      height={20}
+                    />
+                    <Skeleton
+                      variant="rounded"
+                      animation="wave"
+                      width={"80%"}
+                      height={20}
+                    />
+                  </Stack>
+                </Fade>
+              )}
+            </TransitionGroup>
           </Grid>
           <Grid xs={4}>
             <Card sx={{ pb: 8, px: 2 }} variant="outlined">
