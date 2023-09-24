@@ -224,7 +224,7 @@ const Home: React.FC<{}> = () => {
                 <PromptResult result={runResult} />
               </>
             )}
-            {false && (
+            {isRunLoading && (
               <>
                 <Divider variant="middle" />
                 <Skeleton
@@ -236,13 +236,13 @@ const Home: React.FC<{}> = () => {
                 <Skeleton
                   variant="rounded"
                   animation="wave"
-                  width={"80%"}
+                  width={"70%"}
                   height={20}
                 />
                 <Skeleton
                   variant="rounded"
                   animation="wave"
-                  width={"100%"}
+                  width={"90%"}
                   height={20}
                 />
                 <Skeleton
