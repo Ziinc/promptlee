@@ -8,66 +8,70 @@ import autoprefixer from "autoprefixer";
 import path from "node:path";
 // https://vitejs.dev/config/
 import webExtension from "@samrum/vite-plugin-web-extension";
-
+console.log(process.env.TARGET_BROWSER)
 export default defineConfig({
   build: {
     outDir: "./dist",
   },
   plugins: [
     react(),
-    webExtension({
-      manifest: {
-        name: "Promptlee",
-        description: "Your Browser AI Assistant",
-        version: "1.0.0",
-        author: "ziinc",
-        manifest_version: 3,
-        action: {
-          // default_icon: {
-          //   16: "icons/16.png",
-          //   19: "icons/19.png",
-          //   32: "icons/32.png",
-          //   38: "icons/38.png",
-          // },
-          default_popup: "src/extension/popup.html",
-        },
-        background:
-          process.env.TARGET_BROWSER === "firefox"
-            ? //@ts-expect-error
-              { scripts: ["src/extension/worker.ts"] }
-            : {
-                service_worker: "src/extension/worker.ts",
+    ...(process.env.TARGET_BROWSER
+      ? [
+          webExtension({
+            manifest: {
+              name: "Promptlee",
+              description: "Your Browser AI Assistant",
+              version: "1.0.0",
+              author: "ziinc",
+              manifest_version: 3,
+              action: {
+                // default_icon: {
+                //   16: "icons/16.png",
+                //   19: "icons/19.png",
+                //   32: "icons/32.png",
+                //   38: "icons/38.png",
+                // },
+                default_popup: "src/extension/popup.html",
               },
-        host_permissions: ["*://*/*"],
-        content_scripts: [
-          {
-            js: ["src/extension/content.tsx"],
-            matches: ["*://*/*"],
-          },
-        ],
-        externally_connectable: {
-          matches: ["*://*/*"],
-        },
+              background:
+                process.env.TARGET_BROWSER === "firefox"
+                  ? //@ts-expect-error
+                    { scripts: ["src/extension/worker.ts"] }
+                  : {
+                      service_worker: "src/extension/worker.ts",
+                    },
+              host_permissions: ["*://*/*"],
+              content_scripts: [
+                {
+                  js: ["src/extension/content.tsx"],
+                  matches: ["*://*/*"],
+                },
+              ],
+              externally_connectable: {
+                matches: ["*://*/*"],
+              },
 
-        // icons: {
-        //   16: "icons/16.png",
-        //   19: "icons/19.png",
-        //   32: "icons/32.png",
-        //   38: "icons/38.png",
-        //   48: "icons/48.png",
-        //   64: "icons/64.png",
-        //   96: "icons/96.png",
-        //   128: "icons/128.png",
-        //   256: "icons/256.png",
-        //   512: "icons/512.png",
-        // },
-        options_ui: {
-          page: "src/extension/options.html",
-          open_in_tab: true,
-        },
-        permissions: ["contextMenus", "activeTab"],
-      },
-    }),
+              // icons: {
+              //   16: "icons/16.png",
+              //   19: "icons/19.png",
+              //   32: "icons/32.png",
+              //   38: "icons/38.png",
+              //   48: "icons/48.png",
+              //   64: "icons/64.png",
+              //   96: "icons/96.png",
+              //   128: "icons/128.png",
+              //   256: "icons/256.png",
+              //   512: "icons/512.png",
+              // },
+              options_ui: {
+                page: "src/extension/options.html",
+                open_in_tab: true,
+              },
+              permissions: ["contextMenus", "activeTab"],
+            },
+          }),
+        ]
+      : []),
   ],
   // css: { postcss: { plugins: [tailwindcss, autoprefixer] } },
   // resolve: {
