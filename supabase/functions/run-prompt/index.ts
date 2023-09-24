@@ -60,11 +60,12 @@ serve(async (req) => {
   const payload = {
     user_id: user.id,
     flow_id: flow_id,
-    value: 1,
+    value: -1,
   };
-  const logResult = await supabase.from("prompt_run_counts").insert([payload]);
+  const logResult = await supabase.from("prompt_run_credits").insert([payload]);
   if (logResult.error) {
     console.error(logResult.error);
+    throw new Error(logResult.error)
   }
 
   const body = JSON.stringify({
