@@ -36,33 +36,33 @@ jobs:
           directory: ./dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
-  publish_docs:
-    runs-on: ubuntu-latest
+  # publish_docs:
+  #   runs-on: ubuntu-latest
 
-    permissions:
-      contents: read
+  #   permissions:
+  #     contents: read
       
-    steps:
-      - name: Checkout 🛎
-        uses: actions/checkout@v3
-      - name: Setup node env 🏗
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18.13.0
-          cache: "npm"
-      - name: Install
-        run: npm ci
-        working-directory: docs
+  #   steps:
+  #     - name: Checkout 🛎
+  #       uses: actions/checkout@v3
+  #     - name: Setup node env 🏗
+  #       uses: actions/setup-node@v3
+  #       with:
+  #         node-version: 18.13.0
+  #         cache: "npm"
+  #     - name: Install
+  #       run: npm ci
+  #       working-directory: docs
 
-      - name: Run build
-        run: npm run build
-        working-directory: docs
+  #     - name: Run build
+  #       run: npm run build
+  #       working-directory: docs
 
-      - name: Publish
-        uses: cloudflare/pages-action@1
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: promptlee-docs
-          directory: ./docs/dist
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Publish
+  #       uses: cloudflare/pages-action@1
+  #       with:
+  #         apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  #         accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+  #         projectName: promptlee-docs
+  #         directory: ./docs/dist
+  #         gitHubToken: ${{ secrets.GITHUB_TOKEN }}
