@@ -223,7 +223,7 @@ const Home: React.FC<{}> = () => {
       </Box>
 
       <Grid container spacing={8}>
-        <Grid xs={2}>
+        <Grid xs={2} paddingRight={12}>
           <List
             subheader={
               <ListSubheader sx={{ pl: 0 }} component="span">
@@ -249,8 +249,18 @@ const Home: React.FC<{}> = () => {
           </List>
         </Grid>
         <Grid xs={10} container spacing={2}>
-          <Grid xs={12}>
+          <Grid
+            xs={12}
+            gap={4}
+            paddingY={4}
+            container
+            direction="column"
+            alignItems="start"
+          >
             <Typography variant="h4">{selectedPrompt.title}</Typography>
+            <Stack direction="row" gap={4}>
+              <Chip label="Built-in" size="small" />
+            </Stack>
           </Grid>
           <Grid xs={8} flexDirection="column" container gap={5}>
             <Typography variant="subtitle1" gutterBottom>
