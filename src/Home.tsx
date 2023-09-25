@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 
+import Alert from "@mui/material/Alert";
+import Chip from "@mui/material/Chip";
 import Box from "@mui/material/Box";
 import List from "@mui/material/List";
 import { Container } from "@mui/system";
@@ -47,6 +49,8 @@ import Grid from "@mui/material/Unstable_Grid2";
 
 import { TransitionGroup } from "react-transition-group";
 import Collapse from "@mui/material/Collapse";
+import { Gem } from "lucide-react";
+import { SvgIcon } from "@mui/material";
 const Home: React.FC<{}> = () => {
   const { data: creditBalanceResult, mutate: refreshCreditBalance } = useSWR(
     "credit_balance",
@@ -132,6 +136,8 @@ const Home: React.FC<{}> = () => {
     });
   }, [creditHistoryResult?.data]);
 
+  const disableFlowExecution = (creditBalanceResult?.data?.balance ?? 0) <= 0;
+
   return (
     <Container>
       <Navbar />
@@ -145,9 +151,17 @@ const Home: React.FC<{}> = () => {
             justifyContent="flex-end"
             gap={4}
           >
-            <Typography variant="body2">
-              {creditBalanceResult?.data.balance} credits remaining
-            </Typography>
+            <Chip
+              icon={
+                <SvgIcon sx={{ pl: 2, pt: 2 }}>
+                  <Gem size={18} strokeWidth={1.7} />
+                </SvgIcon>
+              }
+              onClick={() => console.log("Add credits flow")}
+              color={disableFlowExecution ? "error" : "primary"}
+              variant={disableFlowExecution ? "filled" : "outlined"}
+              label={`${creditBalanceResult?.data.balance} credits`}
+            />
             <Button onClick={() => setShowHistory(true)}>View history</Button>
             <Modal
               open={showHistory}
@@ -293,6 +307,21 @@ const Home: React.FC<{}> = () => {
           <Grid xs={4}>
             <Card sx={{ pb: 8, px: 2 }} variant="outlined">
               <CardHeader title="Parameters" />
+              {disableFlowExecution && (
+                <Alert
+                  severity="error"
+                  action={
+                    <Button
+                      onClick={() => console.log("Add credits flow")}
+                      color="inherit"
+                    >
+                      Add
+                    </Button>
+                  }
+                >
+                  No credits remaining.
+                </Alert>
+              )}
               <CardContent>
                 {parsedParameters.map((param) => (
                   <TextField
@@ -316,6 +345,7 @@ const Home: React.FC<{}> = () => {
               <CardActions>
                 <Stack direction="row" gap={2} sx={{ ml: "auto" }}>
                   <LoadingButton
+                    disabled={disableFlowExecution}
                     sx={{ width: "100%" }}
                     variant="contained"
                     onClick={handleRunFlow}
