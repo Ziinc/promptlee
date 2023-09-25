@@ -63,7 +63,6 @@ const Home: React.FC<{}> = () => {
       )
   );
 
-  console;
   const [selected, setSelected] = useState(0);
   const [testParams, setTestParams] = useState({});
   const [runResult, setRunResult] =
@@ -109,12 +108,12 @@ const Home: React.FC<{}> = () => {
       now.startOf("day").subtract(n, "day")
     );
     const existingDates = creditHistoryResult.data.map((row) =>
-      dayjs(row.date).startOf("day")
+      dayjs(row.date).startOf("day").toISOString()
     );
 
     const toAdd = expectedDates
       .map((dateToCheck) => {
-        if (!existingDates.includes(dateToCheck)) {
+        if (!existingDates.includes(dateToCheck.toISOString())) {
           return {
             date: dateToCheck.toISOString(),
             consumed: 0,
@@ -128,7 +127,9 @@ const Home: React.FC<{}> = () => {
         date: dayjs(d.date!).toISOString(),
       })),
       ...toAdd,
-    ];
+    ].sort((a, b) => {
+      return dayjs(b.date).diff(dayjs(a.date));
+    });
   }, [creditHistoryResult?.data]);
 
   return (
