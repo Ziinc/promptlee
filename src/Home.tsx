@@ -234,6 +234,8 @@ const Home: React.FC<{}> = () => {
             {DEFAULT_PROMPTS.map((prompt, idx) => (
               <ListItem disablePadding key={prompt.title}>
                 <ListItemButton
+                  dense
+                  sx={{ borderRadius: 18 }}
                   onClick={() => setSelected(idx)}
                   selected={prompt.title == selectedPrompt.title}
                 >
