@@ -48,15 +48,19 @@ import Grid from "@mui/material/Unstable_Grid2";
 import { TransitionGroup } from "react-transition-group";
 import Collapse from "@mui/material/Collapse";
 const Home: React.FC<{}> = () => {
-  const { data: creditBalanceResult } = useSWR(
+  const { data: creditBalanceResult, mutate: refreshCreditBalance } = useSWR(
     "credit_balance",
     getCreditBalance
   );
   const [showHistory, setShowHistory] = useState(false);
   const [isRunLoading, setIsRunLoading] = useState(false);
 
-  const { data: creditHistoryResult } = useSWR("credit_history", async () =>
-    listCreditHistory(dayjs().subtract(30, "day").startOf("day").toISOString())
+  const { data: creditHistoryResult, mutate: refreshCreditHistory } = useSWR(
+    "credit_history",
+    async () =>
+      listCreditHistory(
+        dayjs().subtract(30, "day").startOf("day").toISOString()
+      )
   );
 
   console;
@@ -77,6 +81,21 @@ const Home: React.FC<{}> = () => {
     if (error) {
       console.error(error);
       return;
+    }
+    refreshCreditHistory();
+    if (
+      creditBalanceResult?.data &&
+      creditBalanceResult?.data.consumed &&
+      creditBalanceResult?.data.balance
+    ) {
+      refreshCreditBalance({
+        ...creditBalanceResult,
+        data: {
+          ...creditBalanceResult.data,
+          consumed: creditBalanceResult.data.consumed + 1,
+          balance: creditBalanceResult.data.balance - 1,
+        },
+      });
     }
 
     setRunResult(data);
