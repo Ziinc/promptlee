@@ -121,9 +121,6 @@ export const listTerminalOutputNodesFlow = (flowVersion: FlowVersion) => {
   return terminalNodes;
 };
 
-
-
-
 export const countWorkflowOutputs = (workflow: Workflow): number => {
   return listTerminalOutputNodes(workflow).length;
 };

@@ -13,6 +13,8 @@ import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Modal from "@mui/material/Modal";
+import MenuItem from "@mui/material/MenuItem";
+import Menu from "@mui/material/Menu";
 
 import Fade from "@mui/material/Fade";
 import Card from "@mui/material/Card";
@@ -33,6 +35,8 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 
+import ListItemIcon from "@mui/material/ListItemIcon";
+
 import { DEFAULT_PROMPTS } from "./constants";
 import Navbar from "./interfaces/Navbar";
 import { extractParametersFromText, nArray, resolveTextParams } from "./utils";
@@ -49,14 +53,37 @@ import Grid from "@mui/material/Unstable_Grid2";
 
 import { TransitionGroup } from "react-transition-group";
 import Collapse from "@mui/material/Collapse";
-import { Gem } from "lucide-react";
+import { Gem, SignalHigh, SignalLow, SignalMedium } from "lucide-react";
 import { SvgIcon } from "@mui/material";
+
+const CREDITS_PRICING = [
+  {
+    label: "100 Credits for $5",
+    costPerCredit: "$0.05",
+    link: "https://buy.stripe.com/9AQeVH3Z88Dl58c001",
+    icon: <SignalLow />,
+  },
+  {
+    label: "1,000 Credits for $10",
+    costPerCredit: "$0.001",
+    link: "https://buy.stripe.com/cN26pbeDMf1JfMQ004",
+    icon: <SignalMedium />,
+  },
+  {
+    label: "10,000 Credits for $50",
+    costPerCredit: "$0.005",
+    link: "https://buy.stripe.com/fZefZL1R05r93047sv",
+    icon: <SignalHigh />,
+  },
+];
 const Home: React.FC<{}> = () => {
+  const [creditsEl, setCreditsEl] = useState<null | HTMLElement>(null);
   const { data: creditBalanceResult, mutate: refreshCreditBalance } = useSWR(
     "credit_balance",
     getCreditBalance
   );
   const [showHistory, setShowHistory] = useState(false);
+  const [showPricing, setShowPricing] = useState(false);
   const [isRunLoading, setIsRunLoading] = useState(false);
 
   const { data: creditHistoryResult, mutate: refreshCreditHistory } = useSWR(
@@ -136,7 +163,13 @@ const Home: React.FC<{}> = () => {
     });
   }, [creditHistoryResult?.data]);
 
-  const disableFlowExecution = (creditBalanceResult?.data?.balance ?? 0) <= 0;
+  const handleClosePricing = () => {
+    setShowPricing(false);
+    setCreditsEl(null);
+  };
+  const disableFlowExecution =
+    creditBalanceResult?.data?.balance === 0 ||
+    (creditBalanceResult?.data?.balance ?? 0) <= 0;
 
   return (
     <Container>
@@ -157,11 +190,53 @@ const Home: React.FC<{}> = () => {
                   <Gem size={18} strokeWidth={1.7} />
                 </SvgIcon>
               }
-              onClick={() => console.log("Add credits flow")}
+              onClick={(e) => {
+                setCreditsEl(e.currentTarget);
+                setShowPricing(true);
+              }}
               color={disableFlowExecution ? "error" : "primary"}
               variant={disableFlowExecution ? "filled" : "outlined"}
               label={`${creditBalanceResult?.data.balance} credits`}
             />
+
+            <Menu
+              anchorEl={creditsEl}
+              open={showPricing}
+              onClose={() => setShowPricing(false)}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "right",
+              }}
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+            >
+              {CREDITS_PRICING.map((price, index) => (
+                <MenuItem
+                  key={price.label}
+                  onClick={() => {
+                    handleClosePricing();
+                    window!.open(price.link, "_blank")!.focus();
+                  }}
+                  divider={index !== CREDITS_PRICING.length - 1}
+                >
+                  <ListItemIcon>
+                    <SvgIcon>{price.icon}</SvgIcon>
+                  </ListItemIcon>
+                  <ListItemText>
+                    <Stack direction="column">
+                      <Typography variant="subtitle2">{price.label}</Typography>
+
+                      <Typography color="secondary" variant="body2">
+                        {price.costPerCredit} per credit
+                      </Typography>
+                    </Stack>
+                  </ListItemText>
+                </MenuItem>
+              ))}
+            </Menu>
+
             <Button onClick={() => setShowHistory(true)}>View history</Button>
             <Modal
               open={showHistory}
@@ -324,10 +399,14 @@ const Home: React.FC<{}> = () => {
                   severity="error"
                   action={
                     <Button
-                      onClick={() => console.log("Add credits flow")}
+                      variant="contained"
+                      onClick={(e) => {
+                        setCreditsEl(e.currentTarget);
+                        setShowPricing(true);
+                      }}
                       color="inherit"
                     >
-                      Add
+                      Buy more
                     </Button>
                   }
                 >

@@ -8,7 +8,6 @@ import autoprefixer from "autoprefixer";
 import path from "node:path";
 // https://vitejs.dev/config/
 import webExtension from "@samrum/vite-plugin-web-extension";
-console.log(process.env.TARGET_BROWSER)
 export default defineConfig({
   build: {
     outDir: "./dist",
