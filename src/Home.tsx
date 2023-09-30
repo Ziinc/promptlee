@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 
+import Alert from "@mui/material/Alert";
+import Chip from "@mui/material/Chip";
 import Box from "@mui/material/Box";
 import List from "@mui/material/List";
 import { Container } from "@mui/system";
@@ -9,14 +11,17 @@ import ListItemText from "@mui/material/ListItemText";
 import ListSubheader from "@mui/material/ListSubheader";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
-import Skeleton from "@mui/material/Skeleton";
 import Button from "@mui/material/Button";
 import Modal from "@mui/material/Modal";
 
+import Fade from "@mui/material/Fade";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
 import Divider from "@mui/material/Divider";
+import CardHeader from "@mui/material/CardHeader";
+import LoadingButton from "@mui/lab/LoadingButton";
+import Skeleton from "@mui/material/Skeleton";
 
 import Stack from "@mui/material/Stack";
 
@@ -42,18 +47,26 @@ import dayjs from "dayjs";
 
 import Grid from "@mui/material/Unstable_Grid2";
 
+import { TransitionGroup } from "react-transition-group";
+import Collapse from "@mui/material/Collapse";
+import { Gem } from "lucide-react";
+import { SvgIcon } from "@mui/material";
 const Home: React.FC<{}> = () => {
-  const { data: creditBalanceResult } = useSWR(
+  const { data: creditBalanceResult, mutate: refreshCreditBalance } = useSWR(
     "credit_balance",
     getCreditBalance
   );
   const [showHistory, setShowHistory] = useState(false);
+  const [isRunLoading, setIsRunLoading] = useState(false);
 
-  const { data: creditHistoryResult } = useSWR("credit_history", async () =>
-    listCreditHistory(dayjs().subtract(30, "day").startOf("day").toISOString())
+  const { data: creditHistoryResult, mutate: refreshCreditHistory } = useSWR(
+    "credit_history",
+    async () =>
+      listCreditHistory(
+        dayjs().subtract(30, "day").startOf("day").toISOString()
+      )
   );
 
-  console;
   const [selected, setSelected] = useState(0);
   const [testParams, setTestParams] = useState({});
   const [runResult, setRunResult] =
@@ -64,26 +77,47 @@ const Home: React.FC<{}> = () => {
   );
 
   const handleRunFlow = async () => {
+    setIsRunLoading(true);
+    setRunResult(null);
     const inputText = resolveTextParams(selectedPrompt.prompt_text, testParams);
     const { data, error } = await getPromptOutput(inputText);
     if (error) {
       console.error(error);
       return;
     }
+    refreshCreditHistory();
+    if (
+      creditBalanceResult?.data &&
+      creditBalanceResult?.data.consumed &&
+      creditBalanceResult?.data.balance
+    ) {
+      refreshCreditBalance({
+        ...creditBalanceResult,
+        data: {
+          ...creditBalanceResult.data,
+          consumed: creditBalanceResult.data.consumed + 1,
+          balance: creditBalanceResult.data.balance - 1,
+        },
+      });
+    }
+
     setRunResult(data);
+    setIsRunLoading(false);
   };
 
   const usageChartData: DailyUsageDatum[] = useMemo(() => {
     if (!creditHistoryResult?.data) return [] as DailyUsageDatum[];
     const now = dayjs().startOf("day");
-    const expectedDates = nArray(30).map((n) => now.subtract(n, "day"));
+    const expectedDates = nArray(30).map((n) =>
+      now.startOf("day").subtract(n, "day")
+    );
     const existingDates = creditHistoryResult.data.map((row) =>
-      dayjs(row.date)
+      dayjs(row.date).startOf("day").toISOString()
     );
 
     const toAdd = expectedDates
       .map((dateToCheck) => {
-        if (!existingDates.includes(dateToCheck)) {
+        if (!existingDates.includes(dateToCheck.toISOString())) {
           return {
             date: dateToCheck.toISOString(),
             consumed: 0,
@@ -97,8 +131,12 @@ const Home: React.FC<{}> = () => {
         date: dayjs(d.date!).toISOString(),
       })),
       ...toAdd,
-    ];
+    ].sort((a, b) => {
+      return dayjs(b.date).diff(dayjs(a.date));
+    });
   }, [creditHistoryResult?.data]);
+
+  const disableFlowExecution = (creditBalanceResult?.data?.balance ?? 0) <= 0;
 
   return (
     <Container>
@@ -113,9 +151,17 @@ const Home: React.FC<{}> = () => {
             justifyContent="flex-end"
             gap={4}
           >
-            <Typography variant="body2">
-              {creditBalanceResult?.data.balance} credits remaining
-            </Typography>
+            <Chip
+              icon={
+                <SvgIcon sx={{ pl: 2, pt: 2 }}>
+                  <Gem size={18} strokeWidth={1.7} />
+                </SvgIcon>
+              }
+              onClick={() => console.log("Add credits flow")}
+              color={disableFlowExecution ? "error" : "primary"}
+              variant={disableFlowExecution ? "filled" : "outlined"}
+              label={`${creditBalanceResult?.data.balance} credits`}
+            />
             <Button onClick={() => setShowHistory(true)}>View history</Button>
             <Modal
               open={showHistory}
@@ -167,12 +213,17 @@ const Home: React.FC<{}> = () => {
             </Modal>
           </Stack>
         ) : (
-          <Skeleton variant="rectangular" width={100} height={50} />
+          <Skeleton
+            variant="rectangular"
+            width={"100%"}
+            animation="wave"
+            height={150}
+          />
         )}
       </Box>
 
       <Grid container spacing={8}>
-        <Grid xs={2}>
+        <Grid xs={2} paddingRight={12}>
           <List
             subheader={
               <ListSubheader sx={{ pl: 0 }} component="span">
@@ -183,6 +234,8 @@ const Home: React.FC<{}> = () => {
             {DEFAULT_PROMPTS.map((prompt, idx) => (
               <ListItem disablePadding key={prompt.title}>
                 <ListItemButton
+                  dense
+                  sx={{ borderRadius: 18 }}
                   onClick={() => setSelected(idx)}
                   selected={prompt.title == selectedPrompt.title}
                 >
@@ -196,27 +249,95 @@ const Home: React.FC<{}> = () => {
           </List>
         </Grid>
         <Grid xs={10} container spacing={2}>
-          <Grid xs={12}>
+          <Grid
+            xs={12}
+            gap={4}
+            paddingY={4}
+            container
+            direction="column"
+            alignItems="start"
+          >
             <Typography variant="h4">{selectedPrompt.title}</Typography>
+            <Stack direction="row" gap={4}>
+              <Chip label="Built-in" size="small" />
+            </Stack>
           </Grid>
-          <Grid xs={8}>
+          <Grid xs={8} flexDirection="column" container gap={5}>
             <Typography variant="subtitle1" gutterBottom>
               {selectedPrompt.prompt_text}
             </Typography>
 
-            {runResult && (
-              <Stack direction="column" gap={5}>
-                <Divider variant="middle" />
-                <Typography variant="subtitle2">Results</Typography>
-                <PromptResult result={runResult} />
-              </Stack>
-            )}
+            <TransitionGroup>
+              {!isRunLoading && runResult && (
+                <Collapse
+                  style={{ transitionDelay: runResult ? "0ms" : "1500ms" }}
+                  timeout={runResult ? "auto" : 0}
+                >
+                  <Stack direction="column" gap={5}>
+                    <Divider variant="middle" />
+                    <Typography variant="subtitle2">Results</Typography>
+                    {runResult && <PromptResult result={runResult} />}
+                  </Stack>
+                </Collapse>
+              )}
+              {isRunLoading && (
+                <Fade
+                  style={{ transitionDelay: runResult ? "1500ms" : "0ms" }}
+                  timeout={runResult ? 0 : undefined}
+                >
+                  <Stack direction="column" gap={5}>
+                    <Divider variant="middle" />
+                    <Skeleton
+                      variant="rounded"
+                      animation="wave"
+                      width={80}
+                      height={20}
+                    />
+                    <Skeleton
+                      variant="rounded"
+                      animation="wave"
+                      width={"70%"}
+                      height={20}
+                    />
+                    <Skeleton
+                      variant="rounded"
+                      animation="wave"
+                      width={"90%"}
+                      height={20}
+                    />
+                    <Skeleton
+                      variant="rounded"
+                      animation="wave"
+                      width={"80%"}
+                      height={20}
+                    />
+                  </Stack>
+                </Fade>
+              )}
+            </TransitionGroup>
           </Grid>
           <Grid xs={4}>
             <Card sx={{ pb: 8, px: 2 }} variant="outlined">
+              <CardHeader title="Parameters" />
+              {disableFlowExecution && (
+                <Alert
+                  severity="error"
+                  action={
+                    <Button
+                      onClick={() => console.log("Add credits flow")}
+                      color="inherit"
+                    >
+                      Add
+                    </Button>
+                  }
+                >
+                  No credits remaining.
+                </Alert>
+              )}
               <CardContent>
                 {parsedParameters.map((param) => (
                   <TextField
+                    disabled={isRunLoading}
                     key={param}
                     label={"@" + param}
                     multiline
@@ -235,13 +356,15 @@ const Home: React.FC<{}> = () => {
               </CardContent>
               <CardActions>
                 <Stack direction="row" gap={2} sx={{ ml: "auto" }}>
-                  <Button
+                  <LoadingButton
+                    disabled={disableFlowExecution}
                     sx={{ width: "100%" }}
                     variant="contained"
                     onClick={handleRunFlow}
+                    loading={isRunLoading}
                   >
                     Run flow
-                  </Button>
+                  </LoadingButton>
                 </Stack>
               </CardActions>
             </Card>
