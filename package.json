@@ -9,7 +9,7 @@
     "dev": "vite",
     "start": "supabase start --exclude imgproxy,logflare,vector,pgbouncer,inbucket,storage-api,realtime",
     "stop": "supabase stop",
-    "build": "npm run build:chrome",
+    "build": "vite build",
     "build:firefox": "tsc && TARGET_BROWSER=firefox vite build",
     "build:chrome": "tsc && TARGET_BROWSER=chrome vite build",
     "preview": "vite preview",
