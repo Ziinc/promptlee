@@ -69,13 +69,8 @@ const CREDITS_PRICING = [
     link: "https://buy.stripe.com/cN26pbeDMf1JfMQ004",
     icon: <SignalMedium />,
   },
-  {
-    label: "10,000 Credits for $50",
-    costPerCredit: "$0.005",
-    link: "https://buy.stripe.com/fZefZL1R05r93047sv",
-    icon: <SignalHigh />,
-  },
 ];
+
 const Home: React.FC<{}> = () => {
   const [creditsEl, setCreditsEl] = useState<null | HTMLElement>(null);
   const { data: creditBalanceResult, mutate: refreshCreditBalance } = useSWR(
