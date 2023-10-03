@@ -53,25 +53,31 @@ import Grid from "@mui/material/Unstable_Grid2";
 
 import { TransitionGroup } from "react-transition-group";
 import Collapse from "@mui/material/Collapse";
-import { Gem, SignalHigh, SignalLow, SignalMedium } from "lucide-react";
+import { Gem, SignalLow, SignalMedium } from "lucide-react";
 import { SvgIcon } from "@mui/material";
+import { useAppState } from "./App";
 
 const CREDITS_PRICING = [
   {
     label: "100 Credits for $5",
     costPerCredit: "$0.05",
-    link: "https://buy.stripe.com/9AQeVH3Z88Dl58c001",
+    link: import.meta.env.PROD
+      ? "https://buy.stripe.com/9AQeVH3Z88Dl58c001"
+      : "https://buy.stripe.com/test_28o14a6ekaE45KEaEE",
     icon: <SignalLow />,
   },
   {
     label: "1,000 Credits for $10",
     costPerCredit: "$0.001",
-    link: "https://buy.stripe.com/cN26pbeDMf1JfMQ004",
+    link: import.meta.env.PROD
+      ? "https://buy.stripe.com/cN26pbeDMf1JfMQ004"
+      : "https://buy.stripe.com/test_4gwcMSfOU13u7SMfYZ",
     icon: <SignalMedium />,
   },
 ];
 
 const Home: React.FC<{}> = () => {
+  const app = useAppState();
   const [creditsEl, setCreditsEl] = useState<null | HTMLElement>(null);
   const { data: creditBalanceResult, mutate: refreshCreditBalance } = useSWR(
     "credit_balance",
@@ -212,7 +218,17 @@ const Home: React.FC<{}> = () => {
                   key={price.label}
                   onClick={() => {
                     handleClosePricing();
-                    window!.open(price.link, "_blank")!.focus();
+                    window!
+                      .open(
+                        price.link +
+                          `?prefilled_email=${encodeURIComponent(
+                            app.user?.email || ""
+                          )}&client_reference_id=${encodeURIComponent(
+                            app.user?.id || ""
+                          )}`,
+                        "_blank"
+                      )!
+                      .focus();
                   }}
                   divider={index !== CREDITS_PRICING.length - 1}
                 >
