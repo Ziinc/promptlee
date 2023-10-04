@@ -63,7 +63,6 @@ serve(async (request) => {
       value: creditsToAdd,
       free: false,
     };
-    console.log("payload", payload);
     const logResult = await supabase
       .from("prompt_run_credits")
       .insert([payload]);
