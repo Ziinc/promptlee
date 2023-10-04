@@ -26,6 +26,12 @@ supabase db diff -f my_migration_file
 
 # update generated db types
 npm run types
+
+
+# deployments
+supabase functions deploy run-prompt --project-ref <project-ref> 
+supabase functions deploy stripe-webhook --project-ref <project-ref>
+supabase db push
 ```
 
 Admin functions
