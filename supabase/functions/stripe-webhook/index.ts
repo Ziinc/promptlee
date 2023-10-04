@@ -33,7 +33,7 @@ serve(async (request) => {
 
   const supabase = createClient(
     // Supabase API URL - env var exported by default.
-    Deno.env.get("SB_URL"),
+    Deno.env.get("SUPABASE_URL"),
     // Supabase API ANON KEY - env var exported by default.
     Deno.env.get("SB_SERVICE_ROLE_KEY"),
     {
@@ -62,14 +62,13 @@ serve(async (request) => {
       user_id: userId,
       value: creditsToAdd,
       free: false,
-      flow_id: null,
     };
     console.log("payload", payload);
     const logResult = await supabase
       .from("prompt_run_credits")
       .insert([payload]);
     if (logResult.error) {
-      console.error("Error inserting prompt run credits ", logResult.error);
+      console.error("Error inserting prompt run credits ", logResult.error.message);
     }
     return new Response(JSON.stringify({ ok: true }), { status: 200 });
   }
