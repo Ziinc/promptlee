@@ -60,7 +60,7 @@ const AuthWall = () => {
             <img style={{ width: 80 }} src="/branding/icon-only.png" />
             <DialogTitle>Sign into Promptlee</DialogTitle>
             <DialogContentText>
-              All new users receive <strong>100 free credits</strong>.
+              All new users receive <strong>50 free credits</strong>.
             </DialogContentText>
           </Stack>
           <Stack direction="column" spacing={1} sx={{ mt: 3 }}>
