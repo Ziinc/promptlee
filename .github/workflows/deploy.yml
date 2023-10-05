@@ -27,10 +27,13 @@ jobs:
 
       - name: Create env file
         run: |
-          echo "${{ secrets.PROD_ENV_FILE }}" > .env.prod
+          echo "${{ secrets.PROD_ENV_FILE }}" > .env.production
 
       - name: Run build
         run: npm run build
+      - name: Remove env file
+        run: |
+          rm .env.production
 
       - name: Publish
         uses: cloudflare/pages-action@1
