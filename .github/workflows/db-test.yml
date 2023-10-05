@@ -1,4 +1,4 @@
-name: Database Tests with PgTAP
+name: Database Checks
 
 on:
   workflow_dispatch:
@@ -23,3 +23,5 @@ jobs:
         run: npm start
       - name: Run tests
         run: npm run test:sb
+      - name: Run db lint
+        run: npm run lint:sb
