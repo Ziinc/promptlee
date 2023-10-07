@@ -5,6 +5,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.32.0";
 
+import LogflareJs from "https://esm.sh/logflare-js@0.1.0";
+
+const analytics = new LogflareJs({
+  apiKey: Deno.env.get("LOGFLARE_API_KEY"),
+  sourceToken: Deno.env.get("ENV") === "dev" ?  "8dd6e129-c2dc-4872-9e34-b7ff7edca01f" : "84854427-e7cf-4484-ba04-9984e10e4668",
+});
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST",
@@ -65,7 +72,7 @@ serve(async (req) => {
   const logResult = await supabase.from("prompt_run_credits").insert([payload]);
   if (logResult.error) {
     console.error(logResult.error);
-    throw new Error(logResult.error)
+    throw new Error(logResult.error);
   }
 
   const body = JSON.stringify({
@@ -89,6 +96,17 @@ serve(async (req) => {
   const openAiResponse = await fetch(openAiRequest).then((res) => res.json());
 
   // console.log("openai response", openAiResponse);
+
+  await analytics.sendEvent({
+    message: "prompt run successful",
+    user_id: user.id,
+    inputs: {
+      prompt,
+    },
+    output: {
+      openai_response_str: JSON.stringify(openAiResponse),
+    },
+  });
 
   return new Response(JSON.stringify(openAiResponse), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
