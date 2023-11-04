@@ -34,3 +34,24 @@ export const chatResponseFixture = (
     created: new Date().getUTCMilliseconds(),
   };
 };
+
+interface LogEventAttrs {
+  flow_id?: string
+  builtin_id?: string
+}
+export const logEventFixture = (attrs:LogEventAttrs={}, prompt_input: string, response: string, params: Object ={}) => {
+  const id = crypto.randomUUID()
+  return {
+    id,
+    ...attrs,
+    timestamp:   new Date().getUTCMilliseconds() * 1000,
+    event_message: "prompt run successful",
+    inputs: [{
+      prompt: prompt_input,
+      params_str: JSON.stringify(params)
+    }],
+    output: [{
+      openai_response_str: JSON.stringify(chatResponseFixture(response))
+    }]
+  };
+} 

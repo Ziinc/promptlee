@@ -5,12 +5,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.32.0";
 
-import LogflareJs from "https://esm.sh/logflare-js@0.1.0";
+const API_KEY = Deno.env.get("LOGFLARE_API_KEY")
+const ENV = Deno.env.get("ENV")
 
-const analytics = new LogflareJs({
-  apiKey: Deno.env.get("LOGFLARE_API_KEY"),
-  sourceToken: Deno.env.get("ENV") === "dev" ?  "8dd6e129-c2dc-4872-9e34-b7ff7edca01f" : "84854427-e7cf-4484-ba04-9984e10e4668",
-});
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -35,8 +32,8 @@ serve(async (req) => {
       }
     );
   }
-  const { prompt, flow_id, params, builtin_id } = await req.json();
-  console.log(flow_id, builtin_id)
+  const { flow_id, builtin_id } = await req.json();
+
   const supabase = createClient(
     // Supabase API URL - env var exported by default.
     Deno.env.get("SUPABASE_URL"),
@@ -47,6 +44,8 @@ serve(async (req) => {
       global: { headers: { Authorization: req.headers.get("Authorization")! } },
     }
   );
+
+  
   // Now we can get the session or user object
   const { data } = await supabase.auth.getUser();
   const user = data.user;
@@ -61,56 +60,27 @@ serve(async (req) => {
       }
     );
   }
-
-  // log the prompt run
-  const payload = {
-    user_id: user.id,
-    flow_id: flow_id,
-    value: -1,
-  };
-  const logResult = await supabase.from("prompt_run_credits").insert([payload]);
-  if (logResult.error) {
-    console.error(logResult.error);
-    throw new Error(logResult.error);
-  }
-
-  const body = JSON.stringify({
-    model: "gpt-3.5-turbo",
-    messages: [{ role: "user", content: prompt }],
-  });
-
-  const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-
-  const openAiRequest = new Request(
-    "https://api.openai.com/v1/chat/completions",
-    {
-      method: "POST",
-      body,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
-      },
-    }
-  );
-  const openAiResponse = await fetch(openAiRequest).then((res) => res.json());
-
-  // console.log("openai response", openAiResponse);
-
-  await analytics.sendEvent({
-    message: "prompt run successful",
+  const queryParams = new URLSearchParams({
     user_id: user.id,
     builtin_id,
-    flow_id,
-    inputs: {
-      prompt,
-      params_str: JSON.stringify(params),
-    },
-    output: {
-      openai_response_str: JSON.stringify(openAiResponse),
-    },
-  });
+    flow_id
+  }).toString()
+  const url = `https://api.logflare.app/api/endpoints/query/run_logs.${ENV}?${queryParams}`
+  const request = new Request(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "X-API-KEY": API_KEY
+    }
+  })
+  const {result, error} = await fetch(request).then(r=> r.json())
 
-  return new Response(JSON.stringify(openAiResponse), {
+  if (error){
+    return new Response(String(error), {
+    headers: { ...corsHeaders, "Content-Type": "text/plain" },
+    status: 500})
+  }
+  return new Response(JSON.stringify(result), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
     status: 200,
   });
