@@ -10,7 +10,7 @@ interface Attrs {
 }
 export const getPromptOutput = async (attrs: Attrs) => {
   return await supabase.functions.invoke<CreateChatCompletionResponse>(
-    "run-prompt?test=test",
+    "run-prompt",
     {
       method: "POST",
       body: attrs,

@@ -18,8 +18,8 @@ interface Props {
   flowId?: string;
 }
 const Logs = ({ show, builtinId, flowId }: Props) => {
-  const { data: logsResult, mutate: refresh } = useSWR<LogEvent[]>(
-    "run_logs",
+  const { data: logsResult, mutate: refresh } = useSWR(
+    `run_logs_${builtinId || flowId}`,
     async () => await listRunLogs({ builtin_id: builtinId, flow_id: flowId }),
     {
       revalidateOnMount: true,
@@ -64,7 +64,7 @@ const Logs = ({ show, builtinId, flowId }: Props) => {
   );
 };
 
-const LogTimestamp = ({ log }) => {
+const LogTimestamp = ({ log }: {log: LogEvent}) => {
   return (
     <Typography variant="subtitle2">
       {dayjs.utc(log.timestamp).local().format("MMM D, YYYY h:mm A")}
@@ -72,7 +72,7 @@ const LogTimestamp = ({ log }) => {
   );
 };
 
-const LogParams = ({ log }) => {
+const LogParams = ({ log }: {log: LogEvent}) => {
   const params = JSON.parse(log.inputs?.[0].params_str);
   return (
     <Typography
@@ -86,10 +86,10 @@ const LogParams = ({ log }) => {
     </Typography>
   );
 };
-const LogInput = ({ log }) => (
+const LogInput = ({ log }: {log: LogEvent}) => (
   <Typography variant="body2">{log.inputs?.[0].prompt}</Typography>
 );
-const LogOutput = ({ log }) => {
+const LogOutput = ({ log }: {log: LogEvent}) => {
   const content = JSON.parse(log.output?.[0].openai_response_str).choices[0]
     .message.content;
   return <Typography variant="body2">{content}</Typography>;
