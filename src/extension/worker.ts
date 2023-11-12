@@ -27,9 +27,13 @@ DEFAULT_PROMPTS.forEach((prompt) => {
     };
 
     const resolved = resolveTextParams(prompt.prompt_text, params);
-    const {data, error} = await getPromptOutput(resolved)
-    if (error){
-      console.error(error)
+    const { data, error } = await getPromptOutput({
+      prompt: resolved,
+      params,
+      builtin_id: prompt.builtin_id,
+    });
+    if (error) {
+      console.error(error);
     }
     browser.tabs.sendMessage(tab?.id!, { runResult: data });
   });

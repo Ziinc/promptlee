@@ -2,12 +2,18 @@ import { CreateChatCompletionResponse } from "openai";
 import { supabase } from "../utils";
 
 
-export const getPromptOutput = async (prompt: string) => {
+interface Attrs {
+  prompt: string
+  params: Object
+  builtin_id?: string
+  flow_id?: string
+}
+export const getPromptOutput = async (attrs: Attrs) => {
   return await supabase.functions.invoke<CreateChatCompletionResponse>(
     "run-prompt",
     {
       method: "POST",
-      body: { prompt },
+      body: attrs,
     }
   );
 };

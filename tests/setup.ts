@@ -8,6 +8,7 @@ vi.mock("../src/api/flows");
 vi.mock("../src/api/auth");
 vi.mock("../src/api/chat");
 vi.mock("../src/api/credits");
+vi.mock("../src/api/logs");
 
 Object.defineProperty(window, "matchMedia", {
   writable: true,

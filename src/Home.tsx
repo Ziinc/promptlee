@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 
 import Alert from "@mui/material/Alert";
 import Chip from "@mui/material/Chip";
@@ -56,6 +56,7 @@ import Collapse from "@mui/material/Collapse";
 import { Gem, SignalLow, SignalMedium } from "lucide-react";
 import { SvgIcon } from "@mui/material";
 import { useAppState } from "./App";
+import Logs from "./Logs";
 
 const CREDITS_PRICING = [
   {
@@ -84,6 +85,7 @@ const Home: React.FC<{}> = () => {
     getCreditBalance
   );
   const [showHistory, setShowHistory] = useState(false);
+  const [showLogs, setShowLogs] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
   const [isRunLoading, setIsRunLoading] = useState(false);
 
@@ -108,7 +110,7 @@ const Home: React.FC<{}> = () => {
     setIsRunLoading(true);
     setRunResult(null);
     const inputText = resolveTextParams(selectedPrompt.prompt_text, testParams);
-    const { data, error } = await getPromptOutput(inputText);
+    const { data, error } = await getPromptOutput({prompt: inputText, params: testParams, builtin_id: selectedPrompt.builtin_id});
     if (error) {
       console.error(error);
       return;
@@ -346,6 +348,26 @@ const Home: React.FC<{}> = () => {
             <Typography variant="h4">{selectedPrompt.title}</Typography>
             <Stack direction="row" gap={4}>
               <Chip label="Built-in" size="small" />
+            
+              <Button onClick={() => setShowLogs(true)}>View logs</Button>
+            <Modal open={showLogs} onClose={() => setShowLogs(!showLogs)}>
+              <Card
+                sx={{ maxWidth: "90vw", mx: "auto", mt: "10vh", py: 2, px: 12 }}
+              >
+                <CardContent>
+                  <Logs show={showLogs} builtinId={selectedPrompt.builtin_id} />
+                </CardContent>
+                <CardActions>
+                  <Button
+                    onClick={() => setShowLogs(false)}
+                    color="secondary"
+                    sx={{ ml: "auto" }}
+                  >
+                    Close
+                  </Button>
+                </CardActions>
+              </Card>
+            </Modal>
             </Stack>
           </Grid>
           <Grid xs={8} flexDirection="column" container gap={5}>
