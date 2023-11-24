@@ -31,7 +31,7 @@ export default defineConfig({
                 //   32: "icons/32.png",
                 //   38: "icons/38.png",
                 // },
-                default_popup: "src/extension/popup.html",
+                default_popup: "src/extension/popup/popup.html",
               },
               background:
                 process.env.TARGET_BROWSER === "firefox"
