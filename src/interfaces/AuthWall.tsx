@@ -13,6 +13,7 @@ import Stack from "@mui/material/Stack";
 const AuthWall = () => {
   const [authCheck, setAuthCheck] = useState(false);
   const [signedOut, setSignedOut] = useState(false);
+  const [signedInThroughExt, setSignedInThroughExt] = useState(false);
   const app = useAppState();
 
   async function getSupabaseSession() {
@@ -31,6 +32,13 @@ const AuthWall = () => {
       if (event == "SIGNED_OUT") {
         setSignedOut(true);
       }
+
+      const urlParams = new URLSearchParams(window.location.search);
+      if (event == "SIGNED_IN" && urlParams.get("sign_in_method") === "ext") {
+        // notify user that they are logged in
+        setSignedInThroughExt(true);
+      }
+
       if (session) {
         app.mergeAppState({ session, user: session.user ?? null });
       } else {
@@ -44,6 +52,12 @@ const AuthWall = () => {
 
   return (
     <>
+      <Snackbar
+        open={signedInThroughExt}
+        autoHideDuration={3000}
+        onClose={() => setSignedInThroughExt(false)}
+        message="Signed into extension successfully!"
+      />
       <Snackbar
         open={signedOut}
         autoHideDuration={3000}
@@ -75,7 +89,7 @@ const AuthWall = () => {
             <Button
               variant="outlined"
               color="secondary"
-              onClick={signInWithGoogle}
+              onClick={() => signInWithGoogle()}
               startIcon={<GoogleIcon width={16} />}
             >
               Sign in with Google

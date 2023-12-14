@@ -1,5 +1,6 @@
 import { GoTrueClient } from "@supabase/gotrue-js";
 import { supabase as client } from "../utils";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 export const signOut = () => {
   client.auth.signOut();
@@ -26,10 +27,14 @@ export const onAuthStateChange = (
   return data;
 };
 
-export async function signInWithGoogle() {
-  const { data, error } = await client.auth.signInWithOAuth({
+export async function signInWithGoogle(
+  options: Parameters<
+    SupabaseClient["auth"]["signInWithOAuth"]
+  >[0]["options"] = {}
+) {
+  return await client.auth.signInWithOAuth({
     provider: "google",
-    
+    options: options,
   });
 }
 
