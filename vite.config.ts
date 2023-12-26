@@ -73,7 +73,6 @@ export default defineConfig({
         ]
       : []),
   ],
-  // css: { postcss: { plugins: [tailwindcss, autoprefixer] } },
   // resolve: {
   //   alias: {
   //     react: path.resolve("./node_modules/react"),
