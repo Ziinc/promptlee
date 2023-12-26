@@ -1,28 +1,45 @@
-import { beforeEach, test, vi, expect, Mock } from "vitest";
+import { beforeEach, test, vi, Mock, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import Popup from "../../src/extension/popup/Popup";
-// import { getLifetimePromptRunCount, listFlows } from "../src/api/flows";
-// import {
-//   getSession,
-//   onAuthStateChange,
-//   signInWithGoogle,
-// } from "../../src/api/auth";
-// import useResponsiveObserver from "antd/es/_util/responsiveObserver";
+import {
+  getCurrentUser,
+  openGoogleSignInTab,
+} from "../../src/extension/common";
+import { User } from "@supabase/gotrue-js";
+import userEvent from "@testing-library/user-event";
+import { signInWithGoogle } from "../../src/api/auth";
 
 beforeEach(() => {
   vi.clearAllMocks();
-  // (listFlows as Mock).mockReturnValue({ data: [] });
-  // (getLifetimePromptRunCount as Mock).mockReturnValue({ data: { count: 0 } });
-//   (onAuthStateChange as Mock).mockReturnValue({
-//     subscription: { unsubscribe: () => null },
-//   });
 });
-
 test("can navigate to app", async () => {
-
   render(<Popup />);
-   await screen.findByTitle("Go to the Promptlee app");
-
+  await screen.findByTitle("Go to the Promptlee app");
+  await screen.findByText("App");
 });
 
+test("prompted to sign in", async () => {
+  (signInWithGoogle as Mock).mockResolvedValue({
+    data: { url: "some-url" },
+    error: null,
+  });
+  (getCurrentUser as Mock).mockResolvedValue(null);
+  render(<Popup />);
+  const btn = await screen.findByText("Sign in");
+  await userEvent.click(btn);
+  expect(signInWithGoogle).toBeCalledTimes(1);
+  expect(openGoogleSignInTab).toBeCalledTimes(1);
+});
+
+test("display user email", async () => {
+  (getCurrentUser as Mock).mockResolvedValue({
+    user: {
+      id: "some-uuid",
+      email: "some-other@example.com",
+    } as User,
+    accessToken: "some-token",
+  });
+  render(<Popup />);
+  expect(getCurrentUser).toBeCalled();
+  await screen.findByText(/some\-other@example\.com/);
+});

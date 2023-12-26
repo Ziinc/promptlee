@@ -7,11 +7,15 @@ import { darkTheme, lightTheme } from "./../../theme";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { signInWithGoogle } from "../../api/auth";
-import browser from "webextension-polyfill";
 import { User } from "@supabase/supabase-js";
 import { Stack } from "@mui/material";
+import {
+  getCurrentUser,
+  onSignInComplete,
+  openGoogleSignInTab,
+} from "../common";
 
-export function Popup() {
+const Popup = () => {
   const muiTheme = useMemo(
     () => (isSystemDarkMode() ? darkTheme : lightTheme),
     []
@@ -19,25 +23,17 @@ export function Popup() {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
-      if (request.action !== "signInComplete") return;
-      handleUser();
-    });
+    onSignInComplete(handleUser);
     handleUser();
   }, []);
 
   const handleUser = async () => {
-    const user = await getUser();
-    setUser(user);
-  };
-  const getUser = async () => {
-    const response = await browser.runtime.sendMessage({
-      action: "getUser",
-    });
-    if (!response?.user) {
-      return;
+    const response = await getCurrentUser();
+    if (response?.user) {
+      setUser(response.user);
+    } else {
+      setUser(null);
     }
-    return response?.user;
   };
 
   const handleSignIn = async () => {
@@ -47,18 +43,13 @@ export function Popup() {
         sign_in_method: "ext",
       },
     });
-    console.log({ data });
     if (error) {
       console.error("sign in error", error);
     }
-    console.log("Sending user to Google Auth page", data.url);
-
-    // tell background service worker to create a new tab with that url
-    await browser.runtime.sendMessage({
-      action: "signInWithGoogle",
-      payload: { url: data.url }, // url is something like: https://[project_id].supabase.co/auth/v1/authorize?provider=google
-    });
-    window.close();
+    if (data.url) {
+      await openGoogleSignInTab(data.url);
+      window.close();
+    }
   };
 
   return (
@@ -90,5 +81,5 @@ export function Popup() {
       </ThemeProvider>
     </main>
   );
-}
+};
 export default Popup;

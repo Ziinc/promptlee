@@ -9,6 +9,7 @@ vi.mock("../src/api/auth");
 vi.mock("../src/api/chat");
 vi.mock("../src/api/credits");
 vi.mock("../src/api/logs");
+vi.mock("../src/extension/common");
 
 Object.defineProperty(window, "matchMedia", {
   writable: true,
@@ -31,6 +32,7 @@ global.ResizeObserver = vi.fn().mockImplementation(() => ({
 }));
 // @ts-ignore
 global.navigator.clipboard = vi.fn()
+global.window.close = vi.fn()
 global.navigator.clipboard.writeText = vi.fn().mockResolvedValue(null)
 
 window.open = vi.fn();

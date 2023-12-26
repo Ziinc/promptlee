@@ -5,7 +5,7 @@ export const getSession = vi
   .fn()
   .mockResolvedValue({ session: { user: { id: "123" } } });
 export const checkAuthed = vi.fn();
-export const signInWithGoogle = vi.fn();
+export const signInWithGoogle = vi.fn().mockResolvedValue({ data: null });
 export const onAuthStateChange = vi.fn().mockReturnValue({
   subscription: { unsubscribe: () => null },
 });
