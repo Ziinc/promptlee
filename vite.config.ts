@@ -67,7 +67,7 @@ export default defineConfig({
                 page: "src/extension/options.html",
                 open_in_tab: true,
               },
-              permissions: ["contextMenus", "activeTab"],
+              permissions: ["contextMenus", "activeTab", "storage", "tabs"],
             },
           }),
         ]

@@ -1,7 +1,12 @@
-import browser from "webextension-polyfill";
+import browser, { Tabs } from "webextension-polyfill";
 import { getPromptOutput } from "../api/chat";
 import { DEFAULT_PROMPTS } from "../constants";
 import { resolveTextParams } from "../utils";
+import { storageKeys } from "./common";
+import "./worker/auth"
+
+// browser.storage.local.set({"test": "ok"})
+
 
 browser.runtime.onInstalled.addListener(() => {
   console.log("Extension installed");
@@ -38,3 +43,4 @@ DEFAULT_PROMPTS.forEach((prompt) => {
     browser.tabs.sendMessage(tab?.id!, { runResult: data });
   });
 });
+

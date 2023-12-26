@@ -3,13 +3,14 @@ import ReactDOM from "react-dom/client";
 import browser from "webextension-polyfill";
 import "./content.css";
 import { ThemeProvider, css } from "@mui/material/styles";
-import { isSystemDarkMode } from "../utils";
+import { isSystemDarkMode, supabase } from "../utils";
 import { darkTheme, lightTheme } from "../theme";
 import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
 import Widget from "./widget/Widget";
 
 import Fade from "@mui/material/Fade";
+import { getCurrentUser } from "./common";
 
 function App() {
   const [result, setResult] = useState(null);
@@ -17,8 +18,19 @@ function App() {
     browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
       setResult(request.runResult);
     });
+
+    getCurrentUser().then((resp) => {
+      if (resp) {
+        console.log("user id:", resp.user.id);
+      } else {
+        console.log("user is not found");
+      }
+    });
+
+
   }, []);
 
+  
   const theme = isSystemDarkMode() ? darkTheme : lightTheme;
 
   if (!result) return <div></div>;
@@ -28,9 +40,7 @@ function App() {
         {/* <CssBaseline /> */}
         <ThemeProvider theme={theme}>
           {/* <Fade in={!!result}> */}
-            {result && (
-              <Widget result={result} onClose={() => setResult(null)} />
-            )}
+          {result && <Widget result={result} onClose={() => setResult(null)} />}
           {/* </Fade> */}
         </ThemeProvider>
       </div>
