@@ -1,18 +1,45 @@
 import browser, { Tabs } from "webextension-polyfill";
 import { getCurrentUser, storageKeys } from "../common";
+import { hidePromptsInContextMenu, showPromptsInContextMenu } from "../worker";
 
 browser.runtime.onMessage.addListener((message, sender, sendResponse: any) => {
   if (message.action !== "signInWithGoogle") return;
   // remove any old listener if exists
-  browser.tabs.onUpdated.removeListener(setTokens);
-  const url = message.payload.url;
+  handleSignIn(message.payload.url);
+});
 
+browser.runtime.onMessage.addListener((message, sender, sendResponse: any) => {
+  if (message.action !== "signOut") return;
+  // remove any old listener if exists
+  handleSignOut();
+});
+
+export const handleSignIn = async (url: string) => {
+  browser.tabs.onUpdated.removeListener(setTokens);
   // create new tab with that url
-  browser.tabs.create({ url: url, active: true }).then((_tab) => {
+  await browser.tabs.create({ url: url, active: true }).then((_tab) => {
     // add listener to that url and watch for access_token and refresh_token query string params
     browser.tabs.onUpdated.addListener(setTokens);
   });
-});
+};
+
+export const handleSignOut = async () => {
+  await browser.storage.local.set({
+    [storageKeys.gauthAccessToken]: undefined,
+    [storageKeys.gauthRefreshToken]: undefined,
+  });
+
+  // hide context menu items
+  await browser.contextMenus.update("sign-out", { contexts: ["launcher"] });
+  // show context menus
+  await browser.contextMenus.update("sign-in", { contexts: ["all"] });
+  hidePromptsInContextMenu();
+
+  await browser.tabs.create({
+    url: `${import.meta.env.VITE_APP_URL}/sign-out`,
+    active: true,
+  });
+};
 
 browser.runtime.onMessage.addListener(
   async (message, sender, sendResponse: any) => {
@@ -61,7 +88,13 @@ export const setTokens = async (
           [storageKeys.gauthAccessToken]: accessToken,
           [storageKeys.gauthRefreshToken]: refreshToken,
         });
-        browser.tabs.sendMessage(tabId, { action: "signInComplete" });
+        // browser.tabs.sendMessage(tabId, { action: "signInComplete" });
+
+        // hide context menu items
+        browser.contextMenus.update("sign-in", { contexts: ["launcher"] });
+        // show context menus
+        browser.contextMenus.update("sign-out", { contexts: ["all"] });
+        showPromptsInContextMenu();
 
         // remove tab listener as tokens are set
         browser.tabs.onUpdated.removeListener(setTokens);

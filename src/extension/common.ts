@@ -21,6 +21,19 @@ export const onSignInComplete = async (cb: () => Promise<void>) => {
   });
 };
 
+export const getGauthSessionTokens = async () => {
+  const gauthAccessToken = (
+    await browser.storage.local.get(storageKeys.gauthAccessToken)
+  )[storageKeys.gauthAccessToken];
+  const gauthRefreshToken = (
+    await browser.storage.local.get(storageKeys.gauthRefreshToken)
+  )[storageKeys.gauthRefreshToken];
+  return {
+    gauthAccessToken,
+    gauthRefreshToken,
+  };
+};
+
 export async function getCurrentUser(): Promise<null | {
   user: User;
   accessToken: string;

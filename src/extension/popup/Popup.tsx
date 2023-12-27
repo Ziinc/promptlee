@@ -14,6 +14,7 @@ import {
   onSignInComplete,
   openGoogleSignInTab,
 } from "../common";
+import { handleSignOut } from "../worker/auth";
 
 const Popup = () => {
   const muiTheme = useMemo(
@@ -74,7 +75,12 @@ const Popup = () => {
             {!user ? (
               <Button onClick={handleSignIn}>Sign in</Button>
             ) : (
-              <Typography fontSize={"0.8rem"}>{user.email}</Typography>
+              <>
+                <Typography fontSize={"0.8rem"}>{user.email}</Typography>
+                <Button onClick={handleSignOut} title="Go to the Promptlee app">
+                  Sign out
+                </Button>
+              </>
             )}
           </Stack>
         </Paper>

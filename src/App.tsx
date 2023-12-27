@@ -9,6 +9,7 @@ import { darkTheme, lightTheme } from "./theme";
 import CssBaseline from "@mui/material/CssBaseline";
 import Paper from "@mui/material/Paper";
 import { AppState, AppContextValue } from "./types";
+import SignOut from "./SignOut";
 export const DEFAULT_STATE = {
   darkMode: isSystemDarkMode(),
   user: null,
@@ -73,6 +74,7 @@ export const AuthedApp = () => {
           minHeight: "100vh",
         }}
       >
+        <Route path="/sign-out" component={SignOut} />
         <Route path="/" component={Home} />
       </Paper>
     </main>
