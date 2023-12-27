@@ -62,6 +62,34 @@ export const hidePromptsInContextMenu = () => {
 };
 
 const signedIn = await isSignedIn();
+
+browser.contextMenus.onClicked.addListener(async (info, tab) => {
+  console.log(`clicked ${info.menuItemId}`);
+  // handle sign in
+  if (info.menuItemId === "sign-in") {
+    const { data, error } = await signInWithGoogle({
+      skipBrowserRedirect: true,
+      queryParams: {
+        sign_in_method: "ext",
+      },
+    });
+    if (!data.url) {
+      return;
+    }
+    await handleSignIn(data.url);
+
+    // handle sign in
+    return;
+  } else if (info.menuItemId === "app-home") {
+    // nav to app
+    await browser.tabs.create({ url: import.meta.env.VITE_APP_URL, active: true });
+    return;
+  } else if (info.menuItemId === "sign-out") {
+    await handleSignOut();
+    return;
+  }
+});
+
 DEFAULT_PROMPTS.forEach((prompt) => {
   browser.contextMenus.create({
     id: prompt.title,
@@ -70,31 +98,6 @@ DEFAULT_PROMPTS.forEach((prompt) => {
   });
 
   browser.contextMenus.onClicked.addListener(async (info, tab) => {
-    console.log(`clicked ${info.menuItemId}`);
-    // handle sign in
-    if (info.menuItemId === "sign-in") {
-      const { data, error } = await signInWithGoogle({
-        skipBrowserRedirect: true,
-        queryParams: {
-          sign_in_method: "ext",
-        },
-      });
-      if (!data.url) {
-        return;
-      }
-      await handleSignIn(data.url);
-
-      // handle sign in
-      return;
-    } else if (info.menuItemId === "app-home") {
-      // nav to app
-      browser.tabs.create({ url: import.meta.env.VITE_APP_URL, active: true });
-      return;
-    } else if (info.menuItemId === "sign-out") {
-      await handleSignOut();
-      return;
-    }
-
     if (info.menuItemId != prompt.title) {
       return;
     }

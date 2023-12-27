@@ -33,6 +33,7 @@ export const getGauthSessionTokens = async () => {
     gauthRefreshToken,
   };
 };
+
 export async function getCurrentUser(): Promise<null | {
   user: User;
   accessToken: string;

@@ -3,7 +3,7 @@ import { supabase as client } from "../utils";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 export const signOut = () => {
-  client.auth.signOut();
+  return client.auth.signOut();
 };
 
 export const getUserId = async () => {

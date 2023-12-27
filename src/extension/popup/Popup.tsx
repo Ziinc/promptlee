@@ -14,6 +14,7 @@ import {
   onSignInComplete,
   openGoogleSignInTab,
 } from "../common";
+import { handleSignOut } from "../worker/auth";
 
 const Popup = () => {
   const muiTheme = useMemo(
@@ -50,12 +51,6 @@ const Popup = () => {
       await openGoogleSignInTab(data.url);
       window.close();
     }
-  };
-
-  const handleSignOut = async () => {
-    await browser.runtime.sendMessage({
-      action: "signOut",
-    });
   };
 
   return (

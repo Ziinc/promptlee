@@ -17,25 +17,25 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse: any) => {
 export const handleSignIn = async (url: string) => {
   browser.tabs.onUpdated.removeListener(setTokens);
   // create new tab with that url
-  browser.tabs.create({ url: url, active: true }).then((_tab) => {
+  await browser.tabs.create({ url: url, active: true }).then((_tab) => {
     // add listener to that url and watch for access_token and refresh_token query string params
     browser.tabs.onUpdated.addListener(setTokens);
   });
 };
 
 export const handleSignOut = async () => {
-  browser.storage.local.set({
+  await browser.storage.local.set({
     [storageKeys.gauthAccessToken]: undefined,
     [storageKeys.gauthRefreshToken]: undefined,
   });
 
   // hide context menu items
-  browser.contextMenus.update("sign-out", { contexts: ["launcher"] });
+  await browser.contextMenus.update("sign-out", { contexts: ["launcher"] });
   // show context menus
-  browser.contextMenus.update("sign-in", { contexts: ["all"] });
+  await browser.contextMenus.update("sign-in", { contexts: ["all"] });
   hidePromptsInContextMenu();
 
-  browser.tabs.create({
+  await browser.tabs.create({
     url: `${import.meta.env.VITE_APP_URL}/sign-out`,
     active: true,
   });
